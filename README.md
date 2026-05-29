@@ -11,11 +11,11 @@ BONDA applies STRIDE-per-element analysis, on-chain verification, and custom sev
 | Protocol | Threats | Scoring | Verification |
 |----------|---------|---------|--------------|
 | [EigenDA](eigenda/) | 17 | BVSS 1.1 | 16 verified + 1 partial |
-| [Celestia](celestia/) | 17 | Severity labels | 16 verified + 1 partial |
+| [Celestia](celestia/) | 19 | Severity labels | 18 verified + 1 partial |
 | [Avail](avail/) | 14 | BVSS 1.1 | 12 verified + 2 unverified |
 | [Ethereum / PeerDAS](ethereum/) | 11 | BVSS 1.1 | 9 verified + 2 partial |
 
-**Total: 59 threats** across protocol, bridge, rollup, and chain scopes.
+**Total: 61 threats** across protocol, bridge, rollup, and chain scopes.
 
 ---
 

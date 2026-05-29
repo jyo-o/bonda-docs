@@ -51,6 +51,8 @@
 * [CEL-D17: TxCache Key Mismatch — Validator OOM](celestia/threats/cel-d17.md)
 * [CEL-D03: blacklistedHashes Unbounded Memory Growth](celestia/threats/cel-d03.md)
 * [CEL-D06: EnableBlackListing Default Disabled](celestia/threats/cel-d06.md)
+* [CEL-D11: pendingSeenTracker Unbounded Memory Growth](celestia/threats/cel-d11.md)
+* [CEL-P01: Double Sign Flat 2% Slashing](celestia/threats/cel-p01.md)
 * [Attack Chains](celestia/attack-chains.md)
 
 ## Avail
