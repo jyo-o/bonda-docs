@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="12">
+  <defs>
+    <marker id="arrow-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#555"/>
+    </marker>
+    <marker id="arrow-red-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#e03131"/>
+    </marker>
+    <marker id="arrow-purple-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#7048e8"/>
+    </marker>
+    <marker id="arrow-orange-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#e67700"/>
+    </marker>
+  </defs>
+
+  <rect width="820" height="520" fill="#fafafa" rx="6"/>
+
+  <!-- Title -->
+  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">EigenDA Architecture</text>
+  <text x="410" y="44" text-anchor="middle" font-size="10" fill="#888">Trust Boundaries &amp; Data Flow</text>
+
+  <!-- TB-D: Disperser Infra (dashed boundary) -->
+  <rect x="215" y="75" width="360" height="280" rx="8" fill="none" stroke="#e03131" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.6"/>
+  <text x="225" y="92" font-size="9" fill="#e03131" font-weight="600">TB-D: Disperser Infra</text>
+
+  <!-- TB3: Off-chain / On-chain boundary -->
+  <line x1="30" y1="385" x2="790" y2="385" stroke="#7048e8" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.6"/>
+  <text x="40" y="400" font-size="9" fill="#7048e8" font-weight="600">TB3: Off-chain ↔ On-chain</text>
+
+  <!-- TB0: Proxy Entry -->
+  <line x1="155" y1="70" x2="155" y2="360" stroke="#999" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
+  <text x="130" y="68" font-size="8" fill="#999" text-anchor="middle">TB0</text>
+
+  <!-- TB1: Disperser Entry -->
+  <line x1="218" y1="70" x2="218" y2="360" stroke="#e03131" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
+  <text x="218" y="68" font-size="8" fill="#e03131" text-anchor="middle">TB1</text>
+
+  <!-- TB2: Disperser ↔ Operator -->
+  <line x1="570" y1="70" x2="570" y2="360" stroke="#e67700" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
+  <text x="570" y="68" font-size="8" fill="#e67700" text-anchor="middle">TB2</text>
+
+  <!-- External Entity: Rollup -->
+  <rect x="30" y="140" width="110" height="55" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="85" y="163" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Rollup</text>
+  <text x="85" y="177" text-anchor="middle" font-size="9" fill="#666">Batcher / Validator</text>
+
+  <!-- Process: Proxy -->
+  <rect x="165" y="120" width="50" height="90" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="190" y="160" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P1</text>
+  <text x="190" y="173" text-anchor="middle" font-size="8" fill="#666">Proxy</text>
+  <text x="190" y="200" text-anchor="middle" font-size="7" fill="#c00">⚠ No auth</text>
+
+  <!-- Process: Disperser API -->
+  <rect x="230" y="110" width="95" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="277" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P2</text>
+  <text x="277" y="152" text-anchor="middle" font-size="9" fill="#666">Disperser</text>
+  <text x="277" y="165" text-anchor="middle" font-size="9" fill="#666">API</text>
+
+  <!-- Process: Controller -->
+  <rect x="230" y="210" width="95" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="277" y="238" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P3</text>
+  <text x="277" y="252" text-anchor="middle" font-size="9" fill="#666">Controller</text>
+  <text x="277" y="265" text-anchor="middle" font-size="8" fill="#888">Dispatch + Sigs</text>
+
+  <!-- Process: Encoder -->
+  <rect x="365" y="110" width="95" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="412" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P4</text>
+  <text x="412" y="152" text-anchor="middle" font-size="9" fill="#666">Encoder</text>
+  <text x="412" y="165" text-anchor="middle" font-size="8" fill="#888">KZG + Chunks</text>
+
+  <!-- Datastore: S3 Blob Store -->
+  <path d="M370,230 Q370,220 412,220 Q455,220 455,230 L455,255 Q455,265 412,265 Q370,265 370,255 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+  <path d="M370,230 Q370,240 412,240 Q455,240 455,230" fill="none" stroke="#d6b656" stroke-width="1"/>
+  <text x="412" y="253" text-anchor="middle" font-size="8" fill="#666">S3 / Blob</text>
+
+  <!-- Process: Relay -->
+  <rect x="480" y="210" width="80" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="520" y="238" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P6</text>
+  <text x="520" y="252" text-anchor="middle" font-size="9" fill="#666">Relay</text>
+  <text x="520" y="265" text-anchor="middle" font-size="7" fill="#c00">⚠ SPOF</text>
+
+  <!-- Process: DA Node (Operators) -->
+  <rect x="600" y="130" width="120" height="80" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="660" y="158" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P5</text>
+  <text x="660" y="172" text-anchor="middle" font-size="9" fill="#666">DA Operators</text>
+  <text x="660" y="186" text-anchor="middle" font-size="8" fill="#888">BLS Sign + Store</text>
+
+  <!-- Datastore: Node Store -->
+  <path d="M620,240 Q620,230 660,230 Q700,230 700,240 L700,260 Q700,270 660,270 Q620,270 620,260 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+  <path d="M620,240 Q620,250 660,250 Q700,250 700,240" fill="none" stroke="#d6b656" stroke-width="1"/>
+  <text x="660" y="263" text-anchor="middle" font-size="8" fill="#666">Node KV</text>
+
+  <!-- Datastore: MetadataStore -->
+  <path d="M240,300 Q240,290 305,290 Q370,290 370,300 L370,320 Q370,330 305,330 Q240,330 240,320 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+  <path d="M240,300 Q240,310 305,310 Q370,310 370,300" fill="none" stroke="#d6b656" stroke-width="1"/>
+  <text x="305" y="323" text-anchor="middle" font-size="8" fill="#666">DynamoDB / Meta</text>
+
+  <!-- On-chain: CertVerifier -->
+  <rect x="330" y="415" width="130" height="60" rx="6" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
+  <text x="395" y="440" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P8</text>
+  <text x="395" y="454" text-anchor="middle" font-size="9" fill="#666">CertVerifier</text>
+  <text x="395" y="466" text-anchor="middle" font-size="8" fill="#2f9e44">checkDACert</text>
+
+  <!-- On-chain: Registries -->
+  <rect x="520" y="415" width="120" height="60" rx="6" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
+  <text x="580" y="440" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P9</text>
+  <text x="580" y="454" text-anchor="middle" font-size="9" fill="#666">Registries</text>
+  <text x="580" y="466" text-anchor="middle" font-size="8" fill="#888">Stake / Quorum</text>
+
+  <!-- External Entity: Ethereum L1 -->
+  <rect x="260" y="415" width="50" height="60" rx="4" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
+  <text x="285" y="443" text-anchor="middle" font-size="9" font-weight="600" fill="#333">EE2</text>
+  <text x="285" y="456" text-anchor="middle" font-size="8" fill="#666">Eth</text>
+  <text x="285" y="467" text-anchor="middle" font-size="8" fill="#666">L1</text>
+
+  <!-- External Entity: Governance -->
+  <rect x="680" y="415" width="115" height="60" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+  <text x="737" y="440" text-anchor="middle" font-size="10" font-weight="600" fill="#333">EE3</text>
+  <text x="737" y="454" text-anchor="middle" font-size="9" fill="#666">Governance</text>
+  <text x="737" y="466" text-anchor="middle" font-size="7" fill="#c00">3-of-4 Multisig</text>
+
+  <!-- Data Flow Arrows -->
+  <!-- Rollup → Proxy -->
+  <line x1="140" y1="165" x2="163" y2="165" stroke="#555" stroke-width="1.5" marker-end="url(#arrow-e)"/>
+  <text x="150" y="159" text-anchor="middle" font-size="7" fill="#555">Payload</text>
+
+  <!-- Proxy → Disperser API (TB1 crossing) -->
+  <line x1="215" y1="145" x2="228" y2="145" stroke="#e03131" stroke-width="2" marker-end="url(#arrow-red-e)"/>
+
+  <!-- Disperser API → Controller -->
+  <line x1="277" y1="180" x2="277" y2="208" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-e)"/>
+
+  <!-- Controller → Encoder -->
+  <line x1="325" y1="235" x2="363" y2="155" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-e)"/>
+
+  <!-- Encoder ↔ S3 -->
+  <line x1="412" y1="180" x2="412" y2="218" stroke="#555" stroke-width="1" marker-end="url(#arrow-e)"/>
+
+  <!-- S3 → Relay -->
+  <line x1="455" y1="245" x2="478" y2="245" stroke="#555" stroke-width="1" marker-end="url(#arrow-e)"/>
+
+  <!-- Controller → DA Operators (TB2 crossing) -->
+  <line x1="325" y1="240" x2="598" y2="175" stroke="#e67700" stroke-width="2" marker-end="url(#arrow-orange-e)"/>
+  <text x="450" y="195" text-anchor="middle" font-size="7" fill="#e67700">StoreChunks</text>
+
+  <!-- DA Operators → Controller (BLS sig) -->
+  <line x1="600" y1="195" x2="327" y2="260" stroke="#e67700" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-orange-e)"/>
+  <text x="470" y="240" text-anchor="middle" font-size="7" fill="#e67700">BLS Signature</text>
+
+  <!-- DA Operators → Node Store -->
+  <line x1="660" y1="210" x2="660" y2="228" stroke="#555" stroke-width="1" marker-end="url(#arrow-e)"/>
+
+  <!-- Relay ↔ DA Operators (V2 pull) -->
+  <line x1="560" y1="230" x2="598" y2="190" stroke="#e67700" stroke-width="1.5" marker-end="url(#arrow-orange-e)"/>
+  <text x="590" y="220" text-anchor="middle" font-size="7" fill="#e67700">V2 Pull</text>
+
+  <!-- Proxy → CertVerifier (TB3 crossing) -->
+  <line x1="190" y1="210" x2="335" y2="430" stroke="#7048e8" stroke-width="1.5" marker-end="url(#arrow-purple-e)"/>
+  <text x="240" y="335" text-anchor="middle" font-size="7" fill="#7048e8">checkDACert</text>
+
+  <!-- Registries → Controller -->
+  <line x1="560" y1="415" x2="310" y2="280" stroke="#7048e8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-purple-e)"/>
+  <text x="460" y="345" text-anchor="middle" font-size="7" fill="#7048e8">OperatorState</text>
+
+  <!-- Governance → Registries -->
+  <line x1="680" y1="445" x2="642" y2="445" stroke="#b85450" stroke-width="1.2" marker-end="url(#arrow-e)"/>
+
+  <!-- Return to Rollup -->
+  <line x1="165" y1="195" x2="140" y2="175" stroke="#2f9e44" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-e)"/>
+  <text x="130" y="195" text-anchor="middle" font-size="7" fill="#2f9e44">DACert</text>
+
+  <!-- Legend -->
+  <rect x="30" y="488" width="760" height="24" rx="4" fill="#f0f0f0" stroke="none"/>
+  <circle cx="50" cy="500" r="4" fill="#d5e8d4" stroke="#82b366"/>
+  <text x="60" y="504" font-size="8" fill="#555">Process</text>
+  <circle cx="120" cy="500" r="4" fill="#dae8fc" stroke="#6c8ebf"/>
+  <text x="130" y="504" font-size="8" fill="#555">External</text>
+  <circle cx="195" cy="500" r="4" fill="#fff2cc" stroke="#d6b656"/>
+  <text x="205" y="504" font-size="8" fill="#555">Data Store</text>
+  <circle cx="280" cy="500" r="4" fill="#e1d5e7" stroke="#9673a6"/>
+  <text x="290" y="504" font-size="8" fill="#555">On-chain</text>
+  <line x1="350" y1="500" x2="370" y2="500" stroke="#e03131" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="377" y="504" font-size="8" fill="#555">Trust Boundary</text>
+  <line x1="450" y1="500" x2="470" y2="500" stroke="#e67700" stroke-width="2"/>
+  <text x="477" y="504" font-size="8" fill="#e67700">TB2: KZG+BLS</text>
+  <line x1="545" y1="500" x2="565" y2="500" stroke="#7048e8" stroke-width="1.5"/>
+  <text x="572" y="504" font-size="8" fill="#7048e8">TB3: On-chain</text>
+  <circle cx="640" cy="500" r="4" fill="#f8cecc" stroke="#b85450"/>
+  <text x="650" y="504" font-size="8" fill="#555">Governance</text>
+</svg>

@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 500" width="820" height="500" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="12">
+  <defs>
+    <marker id="arrow-eth" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#555"/>
+    </marker>
+    <marker id="arrow-red-eth" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#e03131"/>
+    </marker>
+    <marker id="arrow-blue-eth" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0066CC"/>
+    </marker>
+    <marker id="arrow-orange-eth" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#e67700"/>
+    </marker>
+    <marker id="arrow-purple-eth" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#7048e8"/>
+    </marker>
+  </defs>
+
+  <rect width="820" height="500" fill="#fafafa" rx="6"/>
+
+  <!-- Title -->
+  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">Ethereum DA / PeerDAS Architecture</text>
+  <text x="410" y="44" text-anchor="middle" font-size="10" fill="#888">Fulu Fork — Blobpool → Engine API → CL Block Builder → PeerDAS → KZG</text>
+
+  <!-- Trust Boundaries -->
+  <!-- TB-1: User ↔ EL -->
+  <rect x="95" y="75" width="145" height="240" rx="8" fill="none" stroke="#e03131" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+  <text x="105" y="92" font-size="8" fill="#e03131" font-weight="600">TB-1: User ↔ EL</text>
+
+  <!-- TB-2: EL ↔ CL -->
+  <rect x="250" y="75" width="145" height="240" rx="8" fill="none" stroke="#0066CC" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+  <text x="260" y="92" font-size="8" fill="#0066CC" font-weight="600">TB-2: EL ↔ CL (JWT)</text>
+
+  <!-- TB-3: CL ↔ Peers -->
+  <rect x="405" y="175" width="165" height="145" rx="8" fill="none" stroke="#e67700" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+  <text x="415" y="192" font-size="8" fill="#e67700" font-weight="600">TB-3: CL ↔ Peers</text>
+
+  <!-- TB-4: CL ↔ Crypto -->
+  <rect x="405" y="75" width="165" height="95" rx="8" fill="none" stroke="#7048e8" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+  <text x="415" y="92" font-size="8" fill="#7048e8" font-weight="600">TB-4: CL ↔ Crypto</text>
+
+  <!-- TB-5: Cross-Client -->
+  <rect x="580" y="75" width="215" height="245" rx="8" fill="none" stroke="#999" stroke-width="1.2" stroke-dasharray="6,3" opacity="0.4"/>
+  <text x="590" y="92" font-size="8" fill="#999" font-weight="600">TB-5: Cross-Client (LH ↔ Prysm)</text>
+
+  <!-- External Entity: User/L2 Rollup -->
+  <rect x="30" y="130" width="60" height="110" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="60" y="175" text-anchor="middle" font-size="10" font-weight="600" fill="#333">User</text>
+  <text x="60" y="190" text-anchor="middle" font-size="8" fill="#666">/ L2</text>
+  <text x="60" y="222" text-anchor="middle" font-size="7" fill="#888">Type-3</text>
+  <text x="60" y="232" text-anchor="middle" font-size="7" fill="#888">Blob TX</text>
+
+  <!-- Process: Blobpool -->
+  <rect x="110" y="120" width="115" height="85" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="167" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#333">P1: Blobpool</text>
+  <text x="167" y="165" text-anchor="middle" font-size="9" fill="#666">Validation</text>
+  <text x="167" y="180" text-anchor="middle" font-size="8" fill="#888">maxTx=16</text>
+  <text x="167" y="193" text-anchor="middle" font-size="8" fill="#888">EIP-7918 fee floor</text>
+
+  <!-- Datastore: Billy DB -->
+  <path d="M120,240 Q120,230 167,230 Q215,230 215,240 L215,268 Q215,278 167,278 Q120,278 120,268 Z" fill="#f5f5f5" stroke="#666" stroke-width="1.2"/>
+  <path d="M120,240 Q120,250 167,250 Q215,250 215,240" fill="none" stroke="#666" stroke-width="1"/>
+  <text x="167" y="268" text-anchor="middle" font-size="8" fill="#666">Billy DB (blobs)</text>
+
+  <!-- Process: Engine API -->
+  <rect x="265" y="120" width="115" height="85" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="322" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#333">P2: Engine</text>
+  <text x="322" y="165" text-anchor="middle" font-size="9" fill="#666">API (JWT)</text>
+  <text x="322" y="180" text-anchor="middle" font-size="8" fill="#888">getBlobsV2/V3</text>
+  <text x="322" y="193" text-anchor="middle" font-size="8" fill="#888">Cell proofs (Fulu)</text>
+
+  <!-- Process: CL Block Builder -->
+  <rect x="265" y="230" width="115" height="75" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="322" y="258" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P3: CL Block</text>
+  <text x="322" y="273" text-anchor="middle" font-size="9" fill="#666">Builder</text>
+  <text x="322" y="288" text-anchor="middle" font-size="8" fill="#888">Data columns</text>
+
+  <!-- Process: KZG Library -->
+  <rect x="420" y="100" width="135" height="65" rx="6" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="487" y="125" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P4: KZG Library</text>
+  <text x="487" y="140" text-anchor="middle" font-size="9" fill="#666">c-kzg-4844 (FFI)</text>
+  <text x="487" y="153" text-anchor="middle" font-size="8" fill="#2f9e44">Trusted setup</text>
+
+  <!-- Process: PeerDAS Gossip -->
+  <rect x="420" y="210" width="135" height="95" rx="6" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+  <text x="487" y="238" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P5: PeerDAS</text>
+  <text x="487" y="253" text-anchor="middle" font-size="9" fill="#666">Gossip Network</text>
+  <text x="487" y="268" text-anchor="middle" font-size="8" fill="#888">Custody columns</text>
+  <text x="487" y="283" text-anchor="middle" font-size="8" fill="#888">Data column sidecars</text>
+  <text x="487" y="296" text-anchor="middle" font-size="7" fill="#c00">⚠ Node ID grinding</text>
+
+  <!-- Process: DA Checker -->
+  <rect x="600" y="100" width="175" height="70" rx="6" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
+  <text x="687" y="125" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P6: DA Checker</text>
+  <text x="687" y="140" text-anchor="middle" font-size="9" fill="#666">Availability verification</text>
+  <text x="687" y="155" text-anchor="middle" font-size="8" fill="#888">DA vote → Beacon Chain</text>
+
+  <!-- Process: Reconstruction -->
+  <rect x="600" y="210" width="175" height="95" rx="6" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
+  <text x="687" y="238" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P7: Reconstruction</text>
+  <text x="687" y="255" text-anchor="middle" font-size="9" fill="#666">recover_cells_kzg_proofs</text>
+  <text x="687" y="272" text-anchor="middle" font-size="7" fill="#c00">⚠ LH: full column discard</text>
+  <text x="687" y="286" text-anchor="middle" font-size="7" fill="#c00">⚠ Prysm: no re-verify</text>
+  <text x="687" y="299" text-anchor="middle" font-size="7" fill="#e67700">Cross-client divergence</text>
+
+  <!-- External: Beacon Chain -->
+  <rect x="720" y="340" width="80" height="55" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="760" y="363" text-anchor="middle" font-size="10" font-weight="600" fill="#333">Beacon</text>
+  <text x="760" y="378" text-anchor="middle" font-size="9" fill="#666">Chain</text>
+
+  <!-- Data Flow Arrows -->
+  <!-- User → Blobpool -->
+  <line x1="90" y1="180" x2="108" y2="170" stroke="#e03131" stroke-width="2" marker-end="url(#arrow-red-eth)"/>
+  <text x="98" y="163" text-anchor="middle" font-size="7" fill="#e03131">Blob TX</text>
+
+  <!-- Blobpool → Billy DB -->
+  <line x1="167" y1="205" x2="167" y2="228" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-eth)"/>
+  <text x="183" y="219" text-anchor="start" font-size="7" fill="#555">Store</text>
+
+  <!-- Blobpool → Engine API -->
+  <line x1="225" y1="155" x2="263" y2="155" stroke="#555" stroke-width="1.5" marker-end="url(#arrow-eth)"/>
+  <text x="244" y="148" text-anchor="middle" font-size="7" fill="#555">Valid</text>
+
+  <!-- Engine API → CL Block Builder -->
+  <line x1="322" y1="205" x2="322" y2="228" stroke="#0066CC" stroke-width="2" marker-end="url(#arrow-blue-eth)"/>
+  <text x="340" y="218" text-anchor="start" font-size="7" fill="#0066CC">getBlobs</text>
+
+  <!-- CL Block Builder → KZG -->
+  <line x1="380" y1="250" x2="418" y2="140" stroke="#7048e8" stroke-width="2" marker-end="url(#arrow-purple-eth)"/>
+  <text x="390" y="195" text-anchor="start" font-size="7" fill="#7048e8">commit/proof</text>
+
+  <!-- CL Block Builder → PeerDAS -->
+  <line x1="380" y1="270" x2="418" y2="255" stroke="#e67700" stroke-width="2" marker-end="url(#arrow-orange-eth)"/>
+  <text x="400" y="275" text-anchor="middle" font-size="7" fill="#e67700">columns</text>
+
+  <!-- PeerDAS → DA Checker -->
+  <line x1="555" y1="240" x2="598" y2="150" stroke="#e67700" stroke-width="2" marker-end="url(#arrow-orange-eth)"/>
+  <text x="585" y="195" text-anchor="middle" font-size="7" fill="#e67700">Verified columns</text>
+
+  <!-- DA Checker → Reconstruction -->
+  <line x1="687" y1="170" x2="687" y2="208" stroke="#555" stroke-width="1.5" marker-end="url(#arrow-eth)"/>
+  <text x="702" y="192" text-anchor="start" font-size="7" fill="#555">Reconstruct</text>
+
+  <!-- Reconstruction → KZG -->
+  <line x1="600" y1="260" x2="557" y2="145" stroke="#7048e8" stroke-width="1.5" marker-end="url(#arrow-purple-eth)"/>
+  <text x="570" y="205" text-anchor="end" font-size="7" fill="#7048e8">verify_cell_kzg</text>
+
+  <!-- DA Checker → Beacon Chain -->
+  <line x1="740" y1="170" x2="760" y2="338" stroke="#555" stroke-width="1.5" marker-end="url(#arrow-eth)"/>
+  <text x="768" y="260" text-anchor="start" font-size="7" fill="#555">DA vote</text>
+
+  <!-- Flow summary at bottom -->
+  <rect x="50" y="400" width="720" height="40" rx="6" fill="#f8f8f8" stroke="#ddd" stroke-width="1"/>
+  <text x="410" y="418" text-anchor="middle" font-size="10" fill="#555">Write Path: User → Blobpool → Engine API → CL Builder → PeerDAS → DA Checker → Beacon</text>
+  <text x="410" y="432" text-anchor="middle" font-size="10" fill="#555">Recovery: DA Checker → Reconstruction → KZG verify → DA Confirmed</text>
+
+  <!-- Legend -->
+  <rect x="30" y="468" width="760" height="24" rx="4" fill="#f0f0f0" stroke="none"/>
+  <line x1="50" y1="480" x2="70" y2="480" stroke="#e03131" stroke-width="2"/>
+  <text x="77" y="484" font-size="8" fill="#555">TB-1: Untrusted Input</text>
+  <line x1="175" y1="480" x2="195" y2="480" stroke="#0066CC" stroke-width="2"/>
+  <text x="202" y="484" font-size="8" fill="#555">TB-2: EL↔CL JWT</text>
+  <line x1="290" y1="480" x2="310" y2="480" stroke="#e67700" stroke-width="2"/>
+  <text x="317" y="484" font-size="8" fill="#555">TB-3: P2P Gossip</text>
+  <line x1="400" y1="480" x2="420" y2="480" stroke="#7048e8" stroke-width="2"/>
+  <text x="427" y="484" font-size="8" fill="#555">TB-4: Crypto FFI</text>
+  <line x1="500" y1="480" x2="520" y2="480" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="527" y="484" font-size="8" fill="#555">TB-5: Cross-Client</text>
+  <circle cx="615" cy="480" r="4" fill="#d5e8d4" stroke="#82b366"/>
+  <text x="625" y="484" font-size="8" fill="#555">EL/CL Process</text>
+  <circle cx="710" cy="480" r="4" fill="#e1d5e7" stroke="#9673a6"/>
+  <text x="720" y="484" font-size="8" fill="#555">DA Verification</text>
+</svg>
