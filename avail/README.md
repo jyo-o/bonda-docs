@@ -6,7 +6,7 @@ The threat analysis focuses heavily on the bridge infrastructure (VectorX, SP1Ve
 
 ## Architecture
 
-![Avail Architecture](../assets/avail-architecture.svg)
+![Avail Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/avail-architecture.svg)
 
 ## Threat Summary
 

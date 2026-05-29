@@ -6,7 +6,7 @@ Note: After the shwap protocol transition, Bad Encoding Fraud Proofs (BEFPs) wer
 
 ## Architecture
 
-![Celestia Architecture](../assets/celestia-architecture.svg)
+![Celestia Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/celestia-architecture.svg)
 
 ## Threat Summary
 

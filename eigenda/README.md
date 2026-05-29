@@ -6,7 +6,7 @@ EigenDA does not implement Data Availability Sampling (DAS). Clients rely entire
 
 ## Architecture
 
-![EigenDA Architecture](../assets/eigenda-architecture.svg)
+![EigenDA Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/eigenda-architecture.svg)
 
 ## Threat Summary
 

@@ -6,7 +6,7 @@ Ethereum DA is unique in its multi-client architecture: multiple independent con
 
 ## Architecture
 
-![Ethereum DA Architecture](../assets/ethereum-architecture.svg)
+![Ethereum DA Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/ethereum-architecture.svg)
 
 ## Threat Summary
 
