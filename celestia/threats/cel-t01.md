@@ -1,55 +1,47 @@
-# CEL-T01: DAS-only Safety Model — Stale Documentation Misrepresents Security Guarantees
+# CEL-T01: Stale Documentation Misrepresents the DAS-only Security Model
 
-{% hint style="info" %}
-**Severity**: High · **STRIDE**: T (Tampering) · **Scope**: protocol · **Status**: verified
+{% hint style="warning" %}
+**Severity**: High · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Overview
 
-Since the shwap protocol transition, BEFP (Bad Encoding Fraud Proof) never functioned, and it was removed as dead code in PR #4934 on 2026-04-14 (+16/-2398 lines). The current light node security model relies solely on DAS with 16 samples, verifying only availability without any data correctness verification. Technically, if a >=2/3 cartel finalizes a bad-encoded block, light nodes cannot detect it -- but this scenario requires breaking BFT assumptions and is unrealistic. The real threat lies elsewhere: official documentation (fraud_proofs.md, CIP-019) still describes 'BEFP + 1-of-N honest full node' as the security model. Rollup builders trusting this documentation may design systems that depend on Celestia DA without their own correctness verification. The documentation claiming stronger security guarantees than reality constitutes a Spoofing threat that poisons downstream security assumptions.
+Since the transition to the shwap protocol, Bad Encoding Fraud Proofs (BEFPs) never functioned. On 2026-04-14, PR #4934 formally removed BEFP code as dead code, deleting 2,398 lines and adding only 16. The current light node security model relies exclusively on DAS with 16 random samples, which verifies data availability only. There is no mechanism for light nodes to verify data correctness (encoding validity).
 
-## Core Invariants Affected
+Technically, if a cartel controlling two-thirds or more of voting power finalizes a block with invalid encoding, light nodes cannot detect it. However, this scenario requires breaking BFT assumptions and is considered unrealistic. The real threat is not the DAS-only model itself but the fact that official documentation still describes a stronger model.
 
-`data_recoverability`
-
-Not a direct DA invariant violation but a Spoofing threat. Documentation claims stronger security guarantees than reality, poisoning rollup builders' security design assumptions. The 2/3 cartel scenario requires breaking BFT assumptions and is unrealistic; the practical harm path is stale docs leading to rollup mis-design leading to runtime vulnerabilities.
+The fraud_proofs.md specification and CIP-019 continue to state that BEFPs are part of the security model, claiming "BEFPs enforce DAS" and that the security model remains unchanged. Rollup builders who consult this documentation may design systems that rely on Celestia for data correctness verification, assuming fraud proofs will catch invalid encodings. Since those proofs no longer exist, such designs would have a blind spot in their security model. The documentation effectively spoofs a stronger security guarantee than what the protocol actually provides.
 
 ## Prerequisites
 
-None. The current state of un-updated documentation is itself the threat. Rollup builders referencing fraud_proofs.md or CIP-019 may design with incorrect security assumptions.
+- None required. The un-updated documentation is itself the ongoing threat.
+- Any rollup builder referencing fraud_proofs.md or CIP-019 may adopt incorrect security assumptions.
 
 ## Attack Scenario
 
-**Condition**: Official documentation states a security model (DAS+BEFP) different from the actual model (DAS-only)
-
-**Example**: PR #4934: 'fraud proofs were never produced or validated post-shwap'. Issue #4930: 'straight-forward removal of dead code'. Reviewer @walldiss: 'Goodbye BEFPs'. go-fraud archive request (go-fraud#143). Meanwhile fraud_proofs.md still states 'BEFPs enforce DAS'.
+1. A rollup builder reads Celestia's fraud_proofs.md specification, which states that BEFPs enforce DAS and that one honest full node is sufficient to detect bad encodings.
+2. Based on this documentation, the builder designs the rollup's DA verification to rely on Celestia light nodes without implementing independent correctness checks.
+3. The rollup launches, trusting that BEFP protection exists.
+4. In reality, BEFPs were removed in PR #4934 and never functioned after the shwap transition.
+5. The rollup has no mechanism to detect invalid encodings, creating a gap in its security model.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | High |
-| Likelihood | Immediate (documentation misrepresentation is currently active and referenceable by rollup builders) |
-| Scope | protocol |
-| Target | Process, Dataflow |
-| Core Invariants | data_recoverability |
+Downstream security model contamination affecting any rollup builder who relies on stale documentation. The documentation-reality gap is currently active and referenceable. While the BFT-break scenario is unrealistic, the practical harm path is stale documentation leading to rollup mis-design leading to undetected encoding errors at runtime.
 
-## Code References
+## Evidence
 
-- [PR #4934: MERGED 2026-04-14, commit 89198d23, +16/-2398](https://github.com/celestiaorg/celestia-node/pull/4934)
-- [Issue #4930: 'fraud proofs are not functional post-shwap'](https://github.com/celestiaorg/celestia-node/issues/4930)
-- [`celestia-node/share/availability/light/options.go:10 (DefaultSampleAmount=16)`](https://github.com/celestiaorg/celestia-node/blob/main/share/availability/light/options.go#L10)
-- [`celestia-core/light/verifier.go:14-16 (DefaultTrustLevel=Fraction{1,3})`](https://github.com/celestiaorg/celestia-core/blob/main/light/verifier.go#L14-L16)
-- [`celestia-node/nodebuilder/share/module.go:134-144 (shrexsub no-op stub for light nodes)`](https://github.com/celestiaorg/celestia-node/blob/main/nodebuilder/share/module.go#L134-L144)
-- [Doc: `celestia-app/specs/src/fraud_proofs.md:5-13 (stale: 'BEFPs enforce DAS')`](https://github.com/celestiaorg/celestia-app/blob/main/specs/src/fraud_proofs.md#L5-L13)
-- [Doc: `CIPs/cips/cip-019.md ('Does not change the security model')`](https://github.com/celestiaorg/CIPs/blob/main/cips/cip-019.md)
+### Source Code
 
-## Verification & Evidence
-
-**Status**: verified
-
-PR #4934 body, merge date, and diff confirmed. Issue #4930 confirmed. Documentation (fraud_proofs.md, CIP-019) confirmed as un-updated. BEFP removal itself is not a security change (already non-functional), but documentation not reflecting reality is the core threat.
+- PR celestia-node#4934 (merged 2026-04-14, commit 89198d23, +16/-2398 lines): removed BEFP dead code
+- Issue celestia-node#4930: "fraud proofs are not functional post-shwap"
+- `celestia-node/share/availability/light/options.go:10` -- DefaultSampleAmount=16
+- `celestia-core/light/verifier.go:14-16` -- DefaultTrustLevel=Fraction{1,3}
+- `celestia-node/nodebuilder/share/module.go:134-144` -- shrexsub no-op stub for light nodes
+- `celestia-app/specs/src/fraud_proofs.md:5-13` -- still states "BEFPs enforce DAS" (stale)
+- `CIPs/cips/cip-019.md` -- claims "Does not change the security model" (stale)
+- go-fraud#143 requested archiving the go-fraud repository
 
 ## Mitigations
 
-Recommendations: (1) Update fraud_proofs.md to document BEFP removal and current DAS-only model, (2) Correct CIP-019's 'security model unchanged' claim, (3) Document in light node docs that DAS guarantees availability only, not correctness, (4) Add self-verification recommendation to rollup integration guide.
+Recommended fixes include updating fraud_proofs.md to document the BEFP removal and describe the current DAS-only model, correcting CIP-019's claim that the security model is unchanged, documenting clearly in light node guides that DAS guarantees availability only and not correctness, and adding a recommendation for independent correctness verification in the rollup integration guide.

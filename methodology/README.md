@@ -50,13 +50,19 @@ See: [Verification Approach](verification.md)
 
 ## Scope
 
-BONDA's threat model covers 59 threats across four DA protocols:
+BONDA's threat model covers 61 threats across four DA protocols:
 
 | Protocol | Threats | Scope Areas |
 |----------|---------|-------------|
 | EigenDA | 17 | Disperser, Relay, Operator, governance |
-| Celestia | 17 | Consensus, DAS, Blobstream bridge |
+| Celestia | 19 | Consensus, DAS, Blobstream bridge |
 | Avail | 14 | VectorX bridge, validator set, governance |
 | Ethereum / PeerDAS | 11 | Multi-client PeerDAS, KZG, custody groups |
 
 Each threat is classified by scope: **protocol** (core DA mechanism), **bridge** (L1-L2 communication), **rollup** (rollup-operator-facing surface), or **chain** (base layer consensus).
+
+---
+
+## Reference
+
+New to blockchain security or DA infrastructure? See the [Terminology](terminology.md) page for definitions of key terms used throughout this documentation.

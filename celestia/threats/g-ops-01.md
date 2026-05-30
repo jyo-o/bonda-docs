@@ -1,49 +1,49 @@
-# G-OPS-01: Multi-surface Information Asymmetry — Structural Pattern (docs/spec/blog vs. code)
+# G-OPS-01: Structural Documentation Drift Between Code and Public Surfaces
 
-{% hint style="info" %}
-**Severity**: High · **STRIDE**: T (Tampering) · **Scope**: protocol · **Status**: verified
+{% hint style="warning" %}
+**Severity**: High · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Overview
 
-Multiple user-facing surfaces including official specs, docs, blog, and CIPs have been stale for 5+ weeks, promising BEFP, 1-of-N honest full node, and 25% slashing threshold. The discrepancy is not accidental but a structural pattern: parameter/safety-model change PRs are not accompanied by docs PRs. This can cause L2 builder finality mis-design and academic citation errors.
+Multiple user-facing documentation surfaces including official specifications, developer docs, blog posts, and CIPs have been stale for more than five weeks. These surfaces continue to promise security properties and parameters that no longer match the actual codebase, including BEFP-based fraud proofs, a 1-of-N honest full node assumption, and a 25% slashing threshold.
 
-## Core Invariants Affected
+This is not an isolated oversight but a structural pattern: when parameter changes or safety model modifications are merged via pull requests, accompanying documentation updates are not required. There is no CI gate or process enforcement that links code changes to documentation changes. As a result, the gap between documented guarantees and actual behavior grows silently with every safety-relevant code change.
 
-Documentation/process transparency gap. Can cause L2 builder mis-design.
+The practical consequence is that L2 builders and academic researchers who rely on these public surfaces may design systems or publish analyses based on incorrect assumptions. For example, a rollup builder reading the slashing documentation would believe that 25% of 5,000 blocks must be missed before penalties apply, when the actual mainnet parameter is 0.1% of 10,000 blocks. Such discrepancies can lead to fundamentally flawed security designs in downstream systems.
 
 ## Prerequisites
 
-Not a code exploit. L2 builders/researchers trust stale surfaces and design incorrectly.
+- No code exploit is involved
+- The threat materializes when L2 builders, researchers, or auditors trust stale documentation and design or evaluate systems based on incorrect assumptions
 
 ## Attack Scenario
 
-**Condition**: Safety model/parameter change PRs merge without accompanying docs + users trust stale surfaces
-
-**Example**: Stale surfaces: fraud_proofs.md ('BEFPs enforce DAS'), docs slashing ('25% of 5,000 blocks', actual is 0.1%/10,000), CIP-019 ('Does not change the security model').
+1. A safety-relevant PR is merged in celestia-app (e.g., PR #7090 changing slashing parameters "to match mainnet governance").
+2. No accompanying documentation PR is required or created.
+3. Public documentation surfaces (docs.celestia.org, specs, CIPs) continue to state the old parameters.
+4. An L2 builder reads the slashing page on docs.celestia.org, which states "25% of 5,000 blocks."
+5. The builder designs their rollup's liveness assumptions around this incorrect threshold.
+6. The actual mainnet parameter is 0.1% of 10,000 blocks, meaning the real liveness guarantee is vastly different from what was assumed.
+7. The rollup launches with flawed security assumptions derived from stale documentation.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | High |
-| Likelihood | Structural/non-exploit (social engineering surface) |
-| Scope | protocol |
-| Target | ExternalEntity |
+Downstream security design errors in L2 rollups and incorrect academic analyses. The risk is proportional to how widely the stale documentation is referenced. Specific stale surfaces include fraud_proofs.md (claims BEFPs enforce DAS), docs.celestia.org slashing page (states 25% of 5,000 blocks when actual is 0.1% of 10,000), and CIP-019 (claims the security model is unchanged).
 
-## Code References
+## Evidence
 
-- [Doc: `celestia-app/specs/src/fraud_proofs.md:5-13 (stale)`](https://github.com/celestiaorg/celestia-app/blob/main/specs/src/fraud_proofs.md#L5-L13)
-- Doc: `docs.celestia.org/operate/consensus-validators/slashing (25% of 5000 blocks, stale)`
-- [Doc: `CIPs/cips/cip-019.md ('Does not change the security model')`](https://github.com/celestiaorg/CIPs/blob/main/cips/cip-019.md)
-- [PR #7090: 'to match mainnet governance', docs PR 미동반](https://github.com/celestiaorg/celestia-app/pull/7090)
+### Source Code
 
-## Verification & Evidence
+- `celestia-app/specs/src/fraud_proofs.md:5-13` -- stale: still states "BEFPs enforce DAS"
+- `CIPs/cips/cip-019.md` -- stale: claims "Does not change the security model"
+- PR celestia-app#7090 -- merged with description "to match mainnet governance" but no accompanying documentation PR
 
-**Status**: verified
+### On-Chain / Network
 
-docs.celestia.org slashing page confirmed stale. Contradiction with mainnet measurement (0.1%/10,000) confirmed.
+- docs.celestia.org/operate/consensus-validators/slashing -- states "25% of 5,000 blocks" while mainnet measurement shows 0.1% of 10,000 blocks
+- Mainnet slashing parameters confirmed via celestia-rest.publicnode.com: min_signed_per_window=0.001, signed_blocks_window=10000
 
 ## Mitigations
 
-Recommendations: (1) Make docs PR mandatory for code PRs (block CI without docs PR), (2) Add deprecation banner to all stale surfaces, (3) Quarterly stale audit.
+Recommended fixes include making documentation PRs mandatory for code PRs that change safety-relevant parameters or models (enforced via CI), adding deprecation banners to all identified stale documentation surfaces, and conducting quarterly stale documentation audits to catch drift before it accumulates.

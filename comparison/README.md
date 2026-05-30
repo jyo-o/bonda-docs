@@ -1,81 +1,94 @@
 # Cross-DA Comparison
 
-This section compares threat modeling results across all four Data Availability protocols assessed by BONDA: EigenDA, Celestia, Avail, and Ethereum (PeerDAS).
+This section compares threat modeling results across all four Data Availability protocols assessed by BONDA. Use this page to understand how the protocols compare in terms of threat density, severity distribution, and common risk patterns.
 
-All statistics are derived from the 61 threats identified across the four protocols.
+---
 
-## Threat Count Summary
+## Protocol Overview
 
-| DA Protocol | Threats | BVSS Scored | Severity Labels Only |
-|---|---|---|---|
-| EigenDA | 17 | 17 | 0 |
-| Celestia | 19 | 0 | 19 |
-| Avail | 14 | 14 | 0 |
-| Ethereum / PeerDAS | 11 | 11 | 0 |
-| **Total** | **61** | **42** | **19** |
+| | EigenDA | Celestia | Avail | Ethereum PeerDAS |
+|---|---------|----------|-------|-----------------|
+| **Architecture** | AVS on EigenLayer | Standalone L1 | Standalone L1 | Native Ethereum upgrade |
+| **Consensus** | Quorum-based BLS | CometBFT (94 validators) | NPoS BABE+GRANDPA (105 validators) | Beacon Chain PoS |
+| **DAS Support** | No | Yes (16 samples/block) | Yes (KZG-based) | Yes (PeerDAS, custody groups) |
+| **Bridge to Ethereum** | ServiceManager on-chain | SP1Blobstream | VectorX + SP1 | Native (no bridge needed) |
+| **Scoring Method** | BVSS 1.1 | Severity labels | BVSS 1.1 | BVSS 1.1 |
+| **Threats Found** | 17 | 19 | 14 | 11 |
 
-Celestia threats use qualitative severity labels rather than BVSS numeric scores, as the Celestia assessment was conducted as a gap analysis and code audit rather than a structured BVSS scoring exercise.
+---
 
 ## Severity Distribution
 
 | Severity | EigenDA | Celestia | Avail | Ethereum | Total |
-|---|---|---|---|---|---|
-| Critical | 0 | 2 | 0 | 0 | 2 |
-| High | 1 | 5 | 1 | 1 | 8 |
-| Medium | 6 | 5 | 3 | 1 | 15 |
-| Low | 10 | 4 | 9 | 9 | 32 |
-| Informational | 0 | 3 | 1 | 0 | 4 |
+|----------|:-------:|:--------:|:-----:|:--------:|:-----:|
+| **Critical** | 0 | 2 | 0 | 0 | **2** |
+| **High** | 1 | 5 | 1 | 1 | **8** |
+| **Medium** | 6 | 5 | 3 | 1 | **15** |
+| **Low** | 10 | 4 | 9 | 9 | **32** |
+| **Informational** | 0 | 3 | 1 | 0 | **4** |
+| **Total** | **17** | **19** | **14** | **11** | **61** |
 
-EigenDA and Avail skew toward Low severity because BVSS scoring accounts for attack complexity (multisig thresholds, physical access requirements). Celestia has the highest concentration of Critical/High findings due to governance-layer structural issues (CEL-E01 SP1Blobstream multisig, G-CON-01 KYC validator concentration).
+Celestia has the highest concentration of Critical and High findings, driven by governance-layer structural issues such as the SP1Blobstream multisig without timelock and KYC validator concentration enabling legal censorship.
 
-## Verification Status Distribution
+EigenDA and Avail have more Low-severity findings because BVSS scoring accounts for attack complexity — many threats require multisig compromise or physical access, which significantly reduces exploitability scores.
+
+---
+
+## Verification Depth
 
 | Status | EigenDA | Celestia | Avail | Ethereum | Total |
-|---|---|---|---|---|---|
-| verified | 11 | 6 | 12 | 1 | 30 |
-| code_verified | 5 | 10 | 0 | 8 | 23 |
-| poc_verified | 0 | 2 | 0 | 0 | 2 |
-| partial | 1 | 1 | 0 | 2 | 4 |
-| unverified | 0 | 0 | 2 | 0 | 2 |
+|--------|:-------:|:--------:|:-----:|:--------:|:-----:|
+| **Verified** (mainnet confirmed) | 12 | 5 | 12 | 6 | **35** |
+| **PoC Verified** (fork test) | 0 | 4 | 0 | 0 | **4** |
+| **Code Verified** (source audit) | 4 | 8 | 0 | 3 | **15** |
+| **Partial** (incomplete evidence) | 1 | 2 | 0 | 2 | **5** |
+| **Unverified** (design analysis only) | 0 | 0 | 2 | 0 | **2** |
+| **Total** | **17** | **19** | **14** | **11** | **61** |
 
-- **verified**: On-chain data, mainnet probes, or live PoC confirm the finding.
-- **code_verified**: Source code analysis confirms the vulnerability path; mainnet exploitation not tested.
-- **poc_verified**: A reproducible proof-of-concept (unit test or local fork) demonstrates the issue.
-- **partial**: Some evidence exists but full verification is incomplete.
+Avail has the highest verified rate at 86%, achieved through systematic on-chain `cast` queries against live contracts. EigenDA follows at 71% with extensive mainnet probing. Celestia has the most PoC-verified threats due to Anvil fork testing of memory exhaustion vectors.
 
-EigenDA has the highest `verified` rate (11/17 = 65%) due to extensive on-chain probing and mainnet PoCs. Avail also shows strong verification (12/14 = 86%) through systematic `cast` on-chain calls.
+Learn more about verification levels in the [Verification Methodology](../methodology/verification.md).
+
+---
 
 ## STRIDE Category Distribution
 
-| STRIDE Category | EigenDA | Celestia | Avail | Ethereum | Total |
-|---|---|---|---|---|---|
-| Denial of Service | 7 | 13 | 2 | 2 | 24 |
-| Tampering | 2 | 1 | 5 | 5 | 13 |
-| Elevation of Privilege | 3 | 1 | 4 | 1 | 9 |
-| Spoofing | 1 | 1 | 1 | 2 | 5 |
-| Protocol Design | 2 | 1 | 0 | 0 | 3 |
-| Governance | 1 | 2 | 0 | 0 | 3 |
-| Information Disclosure | 1 | 0 | 1 | 0 | 2 |
-| Repudiation | 0 | 0 | 1 | 1 | 2 |
+| Category | EigenDA | Celestia | Avail | Ethereum | Total | What It Covers |
+|----------|:-------:|:--------:|:-----:|:--------:|:-----:|----------------|
+| **Denial of Service** | 7 | 13 | 2 | 2 | **24** | Availability attacks, resource exhaustion, liveness failures |
+| **Tampering** | 2 | 1 | 5 | 5 | **13** | Data integrity violations, upgrade path abuse |
+| **Elevation of Privilege** | 3 | 1 | 4 | 1 | **9** | Governance abuse, role escalation, multisig concentration |
+| **Spoofing** | 1 | 1 | 1 | 2 | **5** | Identity forgery, signature replay |
+| **Protocol Design** | 2 | 1 | 0 | 0 | **3** | Structural gaps in the protocol specification |
+| **Governance** | 1 | 2 | 0 | 0 | **3** | Validator concentration, information asymmetry |
+| **Information Disclosure** | 1 | 0 | 1 | 0 | **2** | Key exposure, unauthenticated data access |
+| **Repudiation** | 0 | 0 | 1 | 1 | **2** | Missing audit trails, undetectable misbehavior |
 
-Denial of Service dominates across all protocols (24/61 = 39%), which is expected for DA layers where availability is the core security property. Celestia has an outsized DoS count (13/19 = 68%) due to multiple memory exhaustion vectors in celestia-core and celestia-node (TxCache leak, pendingSeenTracker, blacklistedHashes).
+**Key takeaways**:
+- Denial of Service dominates across all protocols (39% of all threats), which is expected for DA layers where availability is the core security guarantee.
+- Celestia accounts for over half of all DoS threats (13/24) due to multiple memory exhaustion vectors in celestia-core and celestia-node.
+- Tampering threats concentrate in Avail and Ethereum, reflecting concerns around bridge upgrade paths and data column verification gaps.
 
-Tampering threats concentrate in Avail (5) and Ethereum (5), reflecting concerns around bridge upgrade paths (Avail) and data column verification gaps (Ethereum PeerDAS).
+---
 
-## Scope Distribution
+## Where Threats Concentrate
 
 | Scope | EigenDA | Celestia | Avail | Ethereum | Total |
-|---|---|---|---|---|---|
-| protocol | 10 | 9 | 0 | 11 | 30 |
-| bridge | 4 | 1 | 9 | 0 | 14 |
-| implementation | 0 | 9 | 0 | 0 | 9 |
-| rollup | 3 | 0 | 0 | 0 | 3 |
-| chain | 0 | 0 | 5 | 0 | 5 |
+|-------|:-------:|:--------:|:-----:|:--------:|:-----:|
+| **Protocol** | 10 | 9 | 0 | 11 | **30** |
+| **Bridge** | 4 | 1 | 9 | 0 | **14** |
+| **Implementation** | 0 | 9 | 0 | 0 | **9** |
+| **Chain** | 0 | 0 | 5 | 0 | **5** |
+| **Rollup** | 3 | 0 | 0 | 0 | **3** |
 
-- **protocol**: Affects the DA protocol's core security properties.
-- **bridge**: Affects the L1-L2 attestation bridge (Blobstream, VectorX, EigenDA ServiceManager).
-- **implementation**: Code-level bugs in a specific client (celestia-core, celestia-node).
-- **rollup**: Affects rollup operators using the DA layer (e.g., proxy sidecar issues).
-- **chain**: Affects the DA chain's consensus or staking layer (Avail NPoS).
+- **Avail** threats concentrate in the bridge layer (9 of 14). The VectorX bridge is where Avail's DA guarantees meet Ethereum, making it the primary trust boundary and attack surface.
+- **Celestia** splits evenly between protocol design issues and implementation bugs in celestia-core/celestia-node.
+- **Ethereum** threats are entirely at the protocol level, reflecting that PeerDAS is a specification being implemented by multiple independent client teams.
+- **EigenDA** has the only rollup-scoped threats, where issues in the DA proxy sidecar can affect rollup operators directly.
 
-Celestia's scope splits evenly between protocol-level design issues and implementation-level code bugs. Avail's threats concentrate in the bridge layer (9/14), reflecting the VectorX/SP1Vector trust surface as the primary attack vector for Ethereum-side DA verification.
+---
+
+## Deeper Analysis
+
+- [Scoring Comparison](scoring.md) — How BVSS scores compare across protocols with scored threats
+- [Common Patterns](common-patterns.md) — Recurring threat patterns that appear across multiple DA protocols

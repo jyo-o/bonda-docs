@@ -1,169 +1,198 @@
 # Verification Approach
 
-Every BONDA finding is backed by primary-source evidence. This page describes the verification levels, source types, evidence artifacts, and cross-reference methodology used to validate threats.
+BONDA backs every finding with primary-source evidence. This page explains the verification levels, evidence sources, and cross-reference methodology.
 
 ---
 
 ## Verification Levels
 
-Each threat is assigned a verification status indicating the depth of evidence supporting it:
+Every threat receives one of four verification levels. Higher levels include all evidence from lower levels.
 
-| Level | Label | Description |
-|-------|-------|-------------|
-| **verified** | Full verification | PoC execution on mainnet or live system with captured evidence artifacts. The threat's exploitability has been confirmed against production infrastructure. |
-| **code_verified** | Source code audit | The vulnerable code path has been traced through source code at a specific commit. Parameters, flag defaults, and control flow are confirmed, but no live exploitation was performed. |
-| **poc_verified** | PoC-specific verification | A Proof of Concept demonstrates the mechanism in a controlled environment. Used primarily in Celestia analysis where mainnet probing was not performed. |
-| **partial** | Partial evidence | Some evidence supports the finding, but defense boundaries or environmental factors prevent full confirmation. Acknowledged limitations are documented. |
-| **unverified** | Not yet verified | The threat is identified through design analysis or documentation review but lacks primary-source confirmation. |
+```mermaid
+graph TB
+    L4["<b>Level 4 — Verified</b><br/>On-chain + live probe + PoC + source code"]
+    L3["<b>Level 3 — PoC Verified</b><br/>Working exploit in controlled environment"]
+    L2["<b>Level 2 — Code Verified</b><br/>Vulnerable path traced in source code"]
+    L1["<b>Level 1 — Partial</b><br/>Some evidence, acknowledged gaps"]
+    L0["<b>Level 0 — Unverified</b><br/>Design analysis only, no primary-source confirmation"]
+
+    L4 --- L3
+    L3 --- L2
+    L2 --- L1
+    L1 --- L0
+
+    style L4 fill:#1a7f37,color:#fff,stroke:#1a7f37
+    style L3 fill:#2da44e,color:#fff,stroke:#2da44e
+    style L2 fill:#57ab5a,color:#fff,stroke:#57ab5a
+    style L1 fill:#8ddb8c,color:#1a1a1a,stroke:#8ddb8c
+    style L0 fill:#d4d4d4,color:#1a1a1a,stroke:#b0b0b0
+```
+
+### Level Definitions
+
+| Level | Label | What It Means | Example |
+|:-----:|-------|---------------|---------|
+| **4** | `verified` | The threat has been confirmed against production infrastructure. Evidence includes on-chain state, live probes, source code, and often a PoC. | Queried `hasRole()` on mainnet, confirmed unauthenticated gRPC access, traced the code path, ran a fork test. |
+| **3** | `poc_verified` | A working Proof of Concept demonstrates the attack mechanism in a controlled environment such as an Anvil mainnet fork. Live mainnet exploitation was not performed. | Forked mainnet with Anvil, executed the upgrade path, confirmed state change in the fork. |
+| **2** | `code_verified` | The vulnerable code path has been traced at a pinned commit with file paths and line numbers. No live exploitation or PoC was run. | Located the flag default in `flags.go:251`, confirmed no authentication middleware in the handler chain. |
+| **1** | `partial` | Some evidence supports the finding, but environmental factors or defense boundaries prevent full confirmation. Gaps are documented. | Documentation describes a feature, but the relevant code is in a private repository and cannot be audited. |
+| **0** | `unverified` | The threat is identified through design analysis or documentation review but lacks primary-source confirmation. These are known risk areas that could not be independently tested. | A cryptographic trusted setup assumption where the ceremony data is not publicly auditable. |
 
 ### Distribution Across Protocols
 
-| Protocol | verified | code_verified | poc_verified | partial | unverified |
-|----------|----------|---------------|--------------|---------|------------|
-| EigenDA | 12 | 4 | -- | 1 | -- |
-| Celestia | 5 | 5 | 4 | 3 | -- |
-| Avail | 12 | -- | -- | -- | 2 |
-| Ethereum | 6 | 3 | -- | 2 | -- |
+| Protocol | Verified (L4) | PoC Verified (L3) | Code Verified (L2) | Partial (L1) | Unverified (L0) |
+|----------|:-------------:|:------------------:|:-------------------:|:-------------:|:---------------:|
+| EigenDA  | 12 | -- | 4 | 1 | -- |
+| Celestia | 5  | 4  | 8 | 2 | -- |
+| Avail    | 12 | -- | -- | -- | 2 |
+| Ethereum | 6  | -- | 3 | 2 | -- |
 
 ---
 
-## Primary Source Types
+## Verification Process
 
-BONDA draws evidence from four categories of primary sources:
+Each threat follows a consistent verification flow. Not every threat reaches every stage — the process stops when evidence is sufficient or when access limitations prevent further confirmation.
 
-### 1. Source Code (Pinned Commits)
+```mermaid
+flowchart LR
+    A["<b>Identify</b><br/>Design analysis,<br/>docs review"] --> B["<b>Source Code<br/>Review</b><br/>Pinned commit,<br/>file + line"]
+    B --> C["<b>On-Chain<br/>Verify</b><br/>cast queries,<br/>RPC calls"]
+    C --> D["<b>PoC Test</b><br/>Anvil fork or<br/>live probe"]
+    D --> E["<b>Cross-<br/>Reference</b><br/>≥ 2 independent<br/>sources"]
 
-All code references are pinned to specific commits and include file paths with line numbers. This ensures findings remain traceable even as repositories evolve.
+    style A fill:#e8e8e8,color:#1a1a1a,stroke:#999
+    style B fill:#57ab5a,color:#fff,stroke:#57ab5a
+    style C fill:#2da44e,color:#fff,stroke:#2da44e
+    style D fill:#1a7f37,color:#fff,stroke:#1a7f37
+    style E fill:#0d5626,color:#fff,stroke:#0d5626
+```
 
-**What is captured:**
-- Flag default values (e.g., `cli.BoolTFlag` vs. `cli.BoolFlag` and their implications)
-- Control flow through authentication and authorization paths
-- Presence or absence of rate limiting, validation, or access control middleware
-- Commented-out code in deployment scripts (e.g., revoke operations that were disabled)
+| Stage | Action | Output |
+|-------|--------|--------|
+| **Identify** | Review protocol design docs, audit reports, and architecture. Flag potential attack surfaces. | Candidate threat with hypothesis. |
+| **Source Code Review** | Trace the relevant code path at a pinned commit. Record file paths, line numbers, flag defaults, and control flow. | Code evidence at a specific commit hash. |
+| **On-Chain Verify** | Query deployed contract state with `cast` or Substrate RPC. Confirm role assignments, parameters, and account types. | On-chain evidence at a specific block number. |
+| **PoC Test** | Run a Proof of Concept on an Anvil mainnet fork or probe live endpoints with `grpcurl`. | Reproducible test or probe transcript. |
+| **Cross-Reference** | Validate the finding against at least two independent sources. Confirm that evidence from different stages is consistent. | Final verification level assigned. |
 
-**Example reference format:**
+---
+
+## Evidence Sources
+
+BONDA uses four types of primary-source evidence. All evidence is pinned to a specific commit hash or block number so that findings can be independently reproduced.
+
+### 1. Source Code at Pinned Commits
+
+All code references point to specific commits with file paths and line numbers.
+
+| What We Look For | Example |
+|------------------|---------|
+| Flag defaults and their implications | `cli.BoolTFlag` vs. `cli.BoolFlag` in `flags.go:251` |
+| Authentication and authorization paths | Presence or absence of auth middleware in handler chains |
+| Deployment script omissions | Commented-out `revokeRole()` calls in `Guardian.s.sol` |
+| Access control configuration | Role-based access in Solidity contracts |
+
+**Reference format:**
 ```
 code:disperser/cmd/apiserver/flags/flags.go:251-256
 code:contracts/src/periphery/ejection/EigenDAEjectionManager.sol
-source:github.com/availproject/sp1-vector Guardian.s.sol
 ```
 
-### 2. On-Chain State
+### 2. On-Chain State via cast / RPC
 
-Contract state is queried directly using `cast` (from the Foundry toolkit) and Substrate RPC calls. This captures the actual deployed configuration rather than what documentation or deployment scripts claim.
+Contract state is queried directly using `cast` from the Foundry toolkit or Substrate RPC calls. This captures the actual deployed configuration, not what documentation claims.
 
-**What is captured:**
-- Role assignments (`hasRole`, `getRoleAdmin`, `isEjector`)
-- Contract ownership and multisig configurations
-- Upgrade timelock parameters
-- Staking thresholds and operator counts
-- Account types (EOA vs. contract) via `code` queries
-- Account activity via `nonce` queries
-
-**Example queries:**
-```
-cast call <contract> "hasRole(bytes32,address)" <role> <address>
-cast call <contract> "getRoleAdmin(bytes32)" <role>
-cast code <address>   # 0x = EOA, non-zero = contract
-cast nonce <address>  # Activity indicator
-```
+| Query Type | Command | What It Reveals |
+|-----------|---------|-----------------|
+| Role assignment | `cast call <contract> "hasRole(bytes32,address)" <role> <addr>` | Whether a role is actually granted |
+| Role hierarchy | `cast call <contract> "getRoleAdmin(bytes32)" <role>` | Which role controls another |
+| Account type | `cast code <address>` | EOA (`0x`) vs. contract (non-zero) |
+| Account activity | `cast nonce <address>` | Whether the account is actively used |
+| Contract parameters | `cast call <contract> "functionName()"` | Deployed thresholds, timelocks, counts |
 
 ### 3. Live Network Probes
 
-BONDA probes mainnet nodes and public endpoints to confirm whether theoretical attack surfaces are actually exposed in production.
+Mainnet nodes and public endpoints are probed to confirm whether theoretical attack surfaces are exposed in production.
 
-**What is captured:**
-- gRPC service enumeration via reflection (`grpcurl ... list`)
-- Endpoint authentication behavior (or lack thereof)
-- Response characteristics confirming unauthenticated access
-- Validator/operator behavior metrics from public APIs
-- P2P network topology observations
+| Probe Type | Tool | What It Reveals |
+|-----------|------|-----------------|
+| gRPC service enumeration | `grpcurl <host>:443 list` | Which services are publicly exposed |
+| Unauthenticated access test | `grpcurl <host>:443 <service>/<method>` | Whether endpoints require authentication |
+| Validator behavior | Public APIs | Operator counts, stake distribution, infrastructure concentration |
 
-**Example probes:**
-```
-grpcurl disperser.eigenda.xyz:443 list
-grpcurl disperser.eigenda.xyz:443 disperser.v2.Disperser/GetBlobCommitment
-```
+### 4. Anvil Mainnet Fork PoC Tests
 
-### 4. Staking and Validator Snapshots
+Proof of Concepts run on Anvil mainnet forks to demonstrate exploitability without affecting production systems.
 
-Operator set composition, stake distribution, and infrastructure concentration are captured at specific points in time.
-
-**What is captured:**
-- Active operator counts and stake percentages
-- Nakamoto coefficients (minimum entities to reach 33%/50%/67% thresholds)
-- Infrastructure provider concentration (hosting, geographic)
-- Ejection/slashing event history
-- Validator set overlap across roles
-
----
-
-## Evidence Artifacts
-
-Findings are supported by reproducible evidence artifacts:
-
-| Artifact Type | Format | Purpose |
-|---------------|--------|---------|
-| Evidence files | YAML | Structured record of verification steps, commands, outputs, and timestamps |
-| PoC scripts | Shell / Python | Reproducible proof-of-concept that demonstrates the vulnerability mechanism |
-| Cast outputs | Text | Raw output from on-chain queries with block numbers for reproducibility |
-| gRPC transcripts | Text | Request/response pairs from live endpoint probes |
-| Staking snapshots | JSON/CSV | Point-in-time operator set data with collection timestamps |
-
-Each evidence file includes the date of verification and the specific block number or commit hash, enabling independent reproduction.
+| Component | Description |
+|-----------|-------------|
+| Fork setup | `anvil --fork-url <rpc>` at a pinned block number |
+| Attack script | Shell or Python script that executes the exploit steps |
+| Verification | State queries before and after to confirm the attack succeeded |
 
 ---
 
 ## Cross-Reference Methodology
 
-Every finding must be traceable to at least two independent sources. This guards against single-source errors — a code comment claiming a feature exists does not constitute evidence if the runtime behavior contradicts it.
+Every finding must be traceable to at least two independent sources. A code comment claiming a feature exists is not evidence if on-chain state contradicts it.
 
-**Cross-reference patterns used in BONDA:**
-
-| Primary Source | Cross-Reference | What It Validates |
-|----------------|-----------------|-------------------|
+| Primary Source | Cross-Referenced Against | What It Validates |
+|----------------|--------------------------|-------------------|
 | Source code flag default | Live probe response behavior | Whether the default actually applies in production |
-| Deployment script | On-chain `hasRole` query | Whether roles were actually granted/revoked as scripted |
+| Deployment script | On-chain `hasRole` query | Whether roles were actually granted or revoked as scripted |
 | Documentation claim | Source code path audit | Whether documented security features are implemented |
-| Audit report (resolved) | Current commit code review | Whether the fix was actually applied and remains in place |
+| Audit report fix | Current commit code review | Whether the fix was applied and remains in place |
 | On-chain parameter | Source code constant | Whether the deployed value matches the intended configuration |
+
+{% hint style="warning" %}
+**Single-source findings are flagged.** If a threat can only be confirmed through one evidence type, it receives `partial` status and the limitation is documented explicitly.
+{% endhint %}
 
 ---
 
-## Example: AVL-E03 — Deployer Admin Role Verification
+## Example: AVL-E03 — Deployer Admin Role
 
-**Threat:** The deployer EOA for Avail's VectorX bridge contract retains `DEFAULT_ADMIN_ROLE`, enabling a solo upgrade path that bypasses the intended multisig governance.
+**Threat:** The deployer EOA for Avail's VectorX bridge contract retains `DEFAULT_ADMIN_ROLE`, enabling a solo upgrade path that bypasses multisig governance.
 
-**Verification steps:**
+**Verification level:** `verified` (Level 4) — four independent sources.
 
-**Step 1 — On-chain role query:**
+### Step 1 — On-chain role query
 
-Three roles were checked for two principals (deployer EOA and the intended admin) using `cast call` against the live VectorX contract:
+Three roles were checked for the deployer EOA using `cast call` against the live VectorX contract:
 
 ```
-# Deployer EOA: 0xDEd0000E32f8F40414d3ab3a830f735a3553E18e
-hasRole(DEFAULT_ADMIN_ROLE, deployer) = true    # <-- should be false
+Deployer: 0xDEd0000E32f8F40414d3ab3a830f735a3553E18e
+
+hasRole(DEFAULT_ADMIN_ROLE, deployer) = true   ← should be false
 hasRole(TIMELOCK_ROLE, deployer)      = false
 hasRole(GUARDIAN_ROLE, deployer)      = false
 ```
 
-**Step 2 — Role hierarchy confirmation:**
+### Step 2 — Role hierarchy confirmation
 
 ```
-getRoleAdmin(TIMELOCK_ROLE) = 0x00  # DEFAULT_ADMIN_ROLE
+getRoleAdmin(TIMELOCK_ROLE) = 0x00   → DEFAULT_ADMIN_ROLE
 ```
 
-This confirms that `DEFAULT_ADMIN_ROLE` is the admin of `TIMELOCK_ROLE`. The deployer can grant itself any role.
+`DEFAULT_ADMIN_ROLE` controls `TIMELOCK_ROLE`. The deployer can grant itself any role.
 
-**Step 3 — Account type verification:**
+### Step 3 — Account type verification
 
 ```
-cast code 0xDEd... = 0x       # EOA (not a multisig contract)
-cast nonce 0xDEd... = 1107    # Active account
+cast code 0xDEd... = 0x       → EOA, not a multisig
+cast nonce 0xDEd... = 1107    → actively used account
 ```
 
-**Step 4 — Source code cross-reference:**
+### Step 4 — Source code cross-reference
 
-The deployment script (`Guardian.s.sol`) in the `sp1-vector` repository was examined. The line that should revoke `DEFAULT_ADMIN_ROLE` from the deployer was found to be commented out — confirming this is not a deployment accident but a code-level omission that persists in the repository.
+The deployment script `Guardian.s.sol` in the `sp1-vector` repository was examined. The line that should revoke `DEFAULT_ADMIN_ROLE` from the deployer is commented out. This is not a deployment accident — it is a code-level omission that persists in the repository.
 
-**Result:** `verified` — The attack path (deployer calls `grantRole(TIMELOCK_ROLE, self)` then `upgradeTo(malicious)`) is confirmed viable through the combination of on-chain state, role hierarchy, account type, and source code evidence. Four independent sources corroborate the finding.
+### Result
+
+The attack path is confirmed viable:
+
+```
+deployer → grantRole(TIMELOCK_ROLE, self) → upgradeTo(malicious_impl)
+```
+
+Four independent sources corroborate the finding: on-chain role state, role hierarchy, account type, and source code review.

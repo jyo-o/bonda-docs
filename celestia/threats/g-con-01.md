@@ -1,52 +1,47 @@
-# G-CON-01: KYC Validator Concentration Enables Legal Censorship
+# G-CON-01: KYC Validator Concentration Enabling Legal Censorship
 
-{% hint style="info" %}
-**Severity**: Critical · **STRIDE**: D (Denial of Service) · **Scope**: protocol · **Status**: verified
+{% hint style="danger" %}
+**Severity**: Critical · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Overview
 
-Only 8 validators are needed to reach the 1/3 threshold, and 6 of them are KYC-regulated financial institutions under US, EU, Swiss, and Hong Kong jurisdictions. A single judicial order could execute CEL-D01-style prevote-nil censorship legally, without any malicious intent from validators. Anchorage Digital alone holds 11.08%, immediately alignable via a single US court order. max_validators=100 with 94 currently bonded effectively blocks new entrants (validator set saturation). Delegator diversification alone does not reduce the minimum number of validators needed for the 1/3 threshold.
+Celestia's validator set is highly concentrated: only 8 validators are needed to exceed the one-third voting power threshold, and 6 of these 8 are KYC-regulated financial institutions operating under US, EU, Swiss, and Hong Kong jurisdictions. This concentration means a single coordinated judicial action or sanctions designation could compel enough validators to perform censorship without any malicious intent on their part.
 
-## Core Invariants Affected
+Anchorage Digital alone controls 11.08% of voting power and, as a US-regulated entity, could be compelled to comply with a single court order. A judicial order targeting just 6-7 KYC entities would be sufficient to align one-third of voting power, enabling the same prevote-nil censorship mechanism described in CEL-D01 but executed as regulatory compliance rather than an attack.
 
-`consensus_liveness`
-
-Validator concentration + validator set saturation enables CEL-D01-style targeted denial of consensus liveness.
+The situation is compounded by validator set saturation: max_validators is set to 100 with 94 currently bonded, effectively blocking new entrants. Out of 301 total registered validators, only 94 are bonded, 192 are unbonding, and 15 are in other states. Delegator diversification does not help because redistributing stake among the same validators does not reduce the number of entities needed to reach the one-third threshold.
 
 ## Prerequisites
 
-Court order or OFAC designation targeting 6-7 KYC entities. Validators comply out of legal obligation, not malice.
+- Court order or OFAC sanctions designation targeting 6-7 KYC-regulated validator entities
+- Validators comply out of legal obligation, not malice
+- No technical exploit required
 
 ## Attack Scenario
 
-**Condition**: Judicial order or sanctions designation aligning 1/3 of KYC validators
-
-**Example**: 2026-05-24 mainnet: top-8 cumulative 35.77% (>1/3), top-28 67.02% (>2/3), Anchorage 11.08%. 94/100 bonded. Total registered 301 (bonded 94 + unbonding 192 + other 15).
+1. A government agency identifies specific transactions or namespaces on Celestia for censorship (e.g., OFAC-sanctioned addresses).
+2. The agency issues court orders or sanctions designations to 6-7 KYC-regulated validator operators across US, EU, Swiss, and Hong Kong jurisdictions.
+3. The targeted validators, comprising more than one-third of voting power, are legally compelled to comply.
+4. When blocks containing the targeted transactions are proposed, the compelled validators cast prevote-nil, preventing the block from reaching the two-thirds threshold.
+5. The censorship continues indefinitely at zero technical cost, exactly as described in CEL-D01.
+6. Because the validators are acting under legal obligation, there is no economic deterrent or community remedy.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Critical |
-| Likelihood | Conditional (court order or OFAC designation targeting 6-7 corporate entities) |
-| Scope | protocol |
-| Target | Actor, ExternalEntity |
-| Core Invariants | consensus_liveness |
+Legally enforced, indefinite transaction censorship with no technical cost and no available on-chain countermeasure. The attack leverages existing regulatory compliance obligations and cannot be addressed through slashing or social consensus mechanisms.
 
-## Code References
+## Evidence
 
-- On-chain: `cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED (top-8=35.77%, top-28=67.02%, Anchorage 11.08%, 94 bonded)`
-- On-chain: `cosmos/staking/v1beta1/params (max_validators=100)`
-- Source: api.celestia.pops.one (cross-check 일치)
-- Source: Celenium (총 301 validators)
+### On-Chain / Network
 
-## Verification & Evidence
-
-**Status**: verified
-
-Cross-source confirmed across 3 endpoints (publicnode/polkachu/pops.one). 94 bonded, top-8 35.77%, top-28 67.02% structure maintained (2026-05-24).
+- Mainnet staking (2026-05-24): top 8 validators hold 35.77% (exceeding one-third), top 28 hold 67.02% (exceeding two-thirds)
+- Anchorage Digital holds 11.08% of voting power
+- 94 out of 100 maximum validator slots are filled (validator set saturation)
+- Total registered validators: 301 (94 bonded, 192 unbonding, 15 other)
+- Cross-verified across three endpoints: publicnode, polkachu, pops.one (data consistent as of 2026-05-24)
+- Staking parameters: max_validators=100 confirmed on-chain
 
 ## Mitigations
 
-Recommendations: (1) Validator decentralization incentives (support non-KYC validators), (2) Increase MaxValidators (currently 100), (3) Resolve validator set saturation, (4) L2/user-side censorship resistance SLA evaluation.
+Recommended fixes include creating incentive programs for non-KYC validator participation, increasing MaxValidators beyond 100 to reduce set saturation, actively working to resolve validator set saturation so new independent validators can join, and providing L2 and user-side censorship resistance SLA evaluation tools.

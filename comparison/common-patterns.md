@@ -1,6 +1,10 @@
 # Common Threat Patterns Across DA Layers
 
-This page identifies structural threat patterns that recur across multiple DA protocols. These are not coincidences -- they reflect shared architectural constraints in how DA layers bridge trust to Ethereum and incentivize honest behavior.
+Six structural threat patterns recur across multiple DA protocols. These are not coincidences — they reflect shared architectural constraints in how DA layers bridge trust to Ethereum and incentivize honest behavior.
+
+{% hint style="info" %}
+Each pattern links to the specific threats that demonstrate it. Click any threat ID to see the full analysis with evidence.
+{% endhint %}
 
 ## Pattern 1: Relayer / Bridge Single Point of Failure
 

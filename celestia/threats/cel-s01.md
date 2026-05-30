@@ -1,51 +1,50 @@
-# CEL-S01: DAS Selective Disclosure — Deceiving Light Nodes via Sybil Peers
+# CEL-S01: DAS Selective Disclosure Attack via Sybil Peers
 
 {% hint style="info" %}
-**Severity**: Low · **STRIDE**: S (Spoofing) · **Scope**: protocol · **Status**: partial
+**Severity**: Low · **STRIDE**: S · **Status**: partial
 {% endhint %}
 
 ## Overview
 
-An attacker operating numerous sybil nodes to dominate a specific light node's peer set can deceive it into believing unavailable data is available. Procedure: (1) Malicious block producer withholds ~25% of EDS shares from the network, (2) Distributes withheld shares only to sybil nodes, (3) Replaces target light node's peers with sybils via DHT poisoning, (4) When the target requests DAS samples, sybils respond to all -- target falsely concludes data is available. P2P transport is non-anonymous, allowing attackers to identify requesters and provide selective responses per target. With DefaultSampleAmount=16, even without sybils the per-client deception probability is ~1%, and with 400 clients the probability of at least one being deceived is ~98.2% (Common Prefix 2022).
+A selective disclosure attack exploits Celestia's non-anonymous P2P transport to deceive specific light nodes into believing unavailable data is available. The attacker operates numerous sybil nodes to dominate a target light node's peer set, then responds to all DAS sample requests with data that was withheld from the broader network.
 
-## Core Invariants Affected
+The attack works because Celestia's P2P layer is not anonymous: an attacker can identify which node is making a sample request and provide targeted responses. A malicious block producer withholds approximately 25% of EDS shares from the network and distributes them only to sybil nodes. Through DHT poisoning, the attacker replaces the target's peers with sybils. When the target requests DAS samples, the sybils respond to all 16 samples, causing the target to falsely conclude the data is available.
 
-`data_recoverability`
-
-Target light node falsely judges unavailable data as available, neutralizing DA verification for rollups depending on that node.
+According to research by Common Prefix (2022-11-09), with 16 samples and 25% data withholding, the per-client deception probability is approximately 1%. Across 400 clients, the probability of at least one being deceived is approximately 98.2%. The defense assumption of peer blacklisting is weakened by EnableBlackListing defaulting to false (see CEL-D06).
 
 ## Prerequisites
 
-Sybil node operating costs (N servers), DHT poisoning to dominate target's peer set. EnableBlackListing defaults to false, so the same sybil can reconnect without being blocked.
+- Sybil node infrastructure (multiple servers)
+- DHT poisoning capability to dominate the target's peer set
+- Block producer collusion to withhold shares from the network
+- EnableBlackListing defaults to false, allowing the same sybil to reconnect without being blocked
 
 ## Attack Scenario
 
-**Condition**: Non-anonymous P2P transport + sybil nodes dominate target light node's peer set
-
-**Example**: Common Prefix (2022-11-09): 16 samples, 25% withheld results in ~1% per-client deception probability. With 400 clients, probability of at least one being deceived is ~98.2%.
+1. A malicious block producer creates a block but withholds approximately 25% of EDS shares from the network.
+2. The withheld shares are distributed exclusively to attacker-controlled sybil nodes.
+3. The attacker uses DHT poisoning to replace the target light node's peer set with sybil nodes.
+4. The target light node initiates DAS by requesting 16 random samples.
+5. Since the sybil nodes hold all shares (including the withheld ones), they respond successfully to every sample request.
+6. The target light node concludes the data is available, when in reality the broader network cannot reconstruct the full block.
+7. Any rollup relying on this light node's DA attestation is operating on a false assumption.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Low |
-| Likelihood | Low (sybil infrastructure cost is low but block producer collusion is required) |
-| Scope | protocol |
-| Target | Process, Dataflow, Actor |
-| Core Invariants | data_recoverability |
+Targeted light node deception causing false DA availability attestation. Rollups depending on the deceived node may accept blocks whose data is not actually recoverable by the network. The attack requires block producer collusion, which limits likelihood, but the sybil infrastructure cost is low.
 
-## Code References
+## Evidence
 
-- Research: Common Prefix 'Research analysis of the selective disclosure attack in Celestia' (2022-11-09, commonprefix.com/static/clients/celestia/celestia_report_selective_disclosure_attack.pdf)
-- [`celestia-node/share/availability/light/options.go:10 (DefaultSampleAmount=16)`](https://github.com/celestiaorg/celestia-node/blob/main/share/availability/light/options.go#L10)
-- [`celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62 (EnableBlackListing: false)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/options.go#L60-L62)
+### Source Code
 
-## Verification & Evidence
+- `celestia-node/share/availability/light/options.go:10` -- DefaultSampleAmount=16
+- `celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62` -- EnableBlackListing defaults to false
 
-**Status**: partial
+### PoC Testing
 
-Phase 3 external input cross-check. Common Prefix research paper body confirmed. k=15 to 16 recalculation correction applied. Actual sybil cluster operating cost (DHT poisoning) not verified (PARTIAL).
+- Common Prefix research report "Research analysis of the selective disclosure attack in Celestia" (2022-11-09): mathematical analysis of deception probabilities with 16 samples and 25% withholding
+- Sybil cluster operating cost via DHT poisoning was not experimentally verified (verification status is partial)
 
 ## Mitigations
 
-No defense in current code. Nym anonymous transport integration is in R&D (not deployed). Recommendations: (1) Accelerate anonymous transport adoption, (2) Enforce peer diversity, (3) Cross-verify sampling results between light nodes, (4) Change EnableBlackListing default to true.
+No defense exists in the current codebase. Nym anonymous transport integration is in the R&D stage and has not been deployed. Recommended fixes include accelerating anonymous transport adoption to prevent requestor identification, enforcing peer diversity requirements to make sybil domination harder, implementing cross-verification of sampling results between multiple light nodes, and changing EnableBlackListing to default to true.

@@ -1,60 +1,57 @@
-# CEL-D17: TxCache Key Mismatch — Blob Tx Cache Entry Permanent Leak Causing Validator OOM
+# CEL-D17: TxCache Key Mismatch Causing Permanent Memory Leak in Validators
 
-{% hint style="info" %}
-**Severity**: High · **STRIDE**: D (Denial of Service) · **Scope**: implementation · **Status**: poc_verified
+{% hint style="warning" %}
+**Severity**: High · **STRIDE**: D · **Status**: poc_verified
 {% endhint %}
 
 ## Overview
 
-celestia-app's TxCache stores entries keyed by sha256(inner SDK tx) during CheckTx, but deletes using sha256(full BlobTx wire bytes) during FinalizeBlock. Since PrepareProposal re-serializes blob tx via MarshalBlobTx(innerTx, blobs...), FinalizeBlock's req.Txs contain full BlobTx bytes that differ from inner SDK tx bytes. Therefore sha256(full) != sha256(inner), and cache deletion always fails. TxCache is based on sync.Map with no cap, TTL, or separate cleanup path, so entries accumulate indefinitely. Additionally, txCache.Set() executes before BaseApp.CheckTx() in CheckTx, so rejected transactions with valid blob structure but invalid nonce/fee/gas also persist in cache. In this case, attack cost is 0 TIA -- leakage occurs at CheckTx ingress rate without requiring block inclusion.
+celestia-app's TxCache uses different keys for storing and deleting blob transaction entries, causing entries to accumulate permanently and eventually crash validator nodes via OOM.
 
-## Core Invariants Affected
+During CheckTx, entries are stored using sha256(inner SDK tx) as the key. During FinalizeBlock, entries are deleted using sha256(full BlobTx wire bytes) as the key. Because PrepareProposal re-serializes blob transactions via MarshalBlobTx(innerTx, blobs...), the full BlobTx bytes in FinalizeBlock differ from the inner SDK tx bytes used in CheckTx. Since sha256(full BlobTx) never equals sha256(inner SDK tx), cache deletion always fails silently.
 
-`consensus_liveness`
+The TxCache is implemented as a sync.Map with no capacity limit, no TTL, and no separate cleanup mechanism. Entries accumulate irreversibly, and the only recovery is a node restart.
 
-Validator/consensus node memory exhaustion -> OOM crash -> consensus participation halt. Irreversible accumulation (no recovery except restart). Simultaneous attack on multiple validators can cause 1/3 departure -> chain liveness threat.
+The problem is worsened by the fact that txCache.Set() executes before BaseApp.CheckTx() in the CheckTx handler. This means transactions with valid blob structure but invalid nonce, fee, or gas are rejected by BaseApp but still persist in the cache. An attacker can exploit this rejected transaction path at zero cost, since no fees are charged for rejected transactions.
 
 ## Prerequisites
 
-RPC or P2P access. The rejected tx path requires no fees. The valid tx path requires only minimum gas fees.
+- RPC or P2P access to submit blob transactions to any celestia-app node
+- The rejected transaction path requires no fees (invalid nonce or zero fee is sufficient)
+- The valid transaction path requires only minimum gas fees
 
 ## Attack Scenario
 
-**Condition**: Any path that can submit blob txs to a celestia-app node (RPC or P2P)
-
-**Example**: Directly verified: future sequence blob tx -> checktx_code=32, cache entry persists. Zero-fee blob tx -> checktx_code=11, cache entry persists. Production path test: CheckTx then FinalizeBlock(wrappedTx) -> fromCache=true (cache not deleted confirmed). Per-entry measured memory: ~204 bytes. At 100 Mbps rejected tx rate: ~160 seconds per 1 GB leak.
+1. The attacker crafts blob transactions with valid blob structure but invalid signatures or zero fees.
+2. The attacker submits these transactions via RPC or P2P to a validator node.
+3. handleBlobCheckTx calls txCache.Set(btx.Tx) using sha256 of the inner SDK tx as key.
+4. BaseApp.CheckTx rejects the transaction (e.g., code=32 for future sequence, code=11 for zero fee).
+5. The cache entry persists because there is no cleanup path for rejected transactions.
+6. When valid blob transactions are finalized, FinalizeBlock attempts to delete using sha256 of the full BlobTx wire bytes, which never matches the stored key.
+7. Both rejected and finalized entries accumulate indefinitely in the sync.Map.
+8. At approximately 204 bytes per entry and 100 Mbps rejected transaction rate, memory leaks at roughly 1 GB every 160 seconds.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | High |
-| Likelihood | Immediate (rejected blob tx path: zero cost, requires only RPC/P2P access) |
-| Scope | implementation |
-| Target | Process |
-| Core Invariants | consensus_liveness |
+Validator and consensus node memory exhaustion leading to OOM crash and consensus participation halt. The accumulation is irreversible without a restart. Simultaneous attacks on multiple validators could cause one-third departure from the validator set, threatening chain liveness.
 
-## Code References
+## Evidence
 
-- [`celestia-app/app/check_tx.go:63 (txCache.Set(btx.Tx) — inner SDK tx 키)`](https://github.com/celestiaorg/celestia-app/blob/main/app/check_tx.go#L63)
-- [`celestia-app/app/app.go:589 (txCache.RemoveTransaction(tx) — full BlobTx 키)`](https://github.com/celestiaorg/celestia-app/blob/main/app/app.go#L589)
-- [`celestia-app/app/tx_cache.go:23-27 (sha256 기반 키 생성)`](https://github.com/celestiaorg/celestia-app/blob/main/app/tx_cache.go#L23-L27)
-- [`celestia-app/app/filtered_square_builder.go:193-197 (encodeBlobTxs: MarshalBlobTx 재직렬화)`](https://github.com/celestiaorg/celestia-app/blob/main/app/filtered_square_builder.go#L193-L197)
-- [`celestia-app/app/process_proposal.go:251 (Exists는 inner tx 키로 정상 조회)`](https://github.com/celestiaorg/celestia-app/blob/main/app/process_proposal.go#L251)
-- [Test: `celestia-app/x/blob/types/blob_tx_test.go:437-438 (기존 테스트가 blobTx.Tx를 FinalizeBlock에 전달 — 프로덕션 경로 미재현)`](https://github.com/celestiaorg/celestia-app/blob/main/x/blob/types/blob_tx_test.go#L437-L438)
-- [Test: `celestia-app/app/test/integration_test.go:205 (통합 테스트에서 블록 tx가 wrapped BlobTx임을 확인)`](https://github.com/celestiaorg/celestia-app/blob/main/app/test/integration_test.go#L205)
-- Commit: `celestia-app 849429e879b18f489b3a939ebe301409e0f35e09 (검증 시점 HEAD)`
+### Source Code
 
-## Verification & Evidence
+- `celestia-app/app/check_tx.go:63` -- txCache.Set(btx.Tx) stores using inner SDK tx key
+- `celestia-app/app/app.go:589` -- txCache.RemoveTransaction(tx) deletes using full BlobTx key
+- `celestia-app/app/tx_cache.go:23-27` -- sha256-based key generation
+- `celestia-app/app/filtered_square_builder.go:193-197` -- encodeBlobTxs re-serializes via MarshalBlobTx
+- `celestia-app/app/process_proposal.go:251` -- Exists correctly queries using inner tx key
 
-**Status**: poc_verified
+### PoC Testing
 
-Full code path trace + sha256 hash direct computation + production path reproduction test written and executed (PASS). Rejected tx cache persistence also execution-verified. Per-entry memory measured (~204 bytes/entry). Root cause of existing tests not reproducing production path also identified.
-
-**PoC References**:
-
-- TestTxCacheLeakProductionPath: CheckTx → FinalizeBlock(wrappedTx) → fromCache still true (PASS)
+- TestTxCacheLeakProductionPath: CheckTx followed by FinalizeBlock(wrappedTx), confirmed fromCache still returns true (cache not deleted). Test passed.
+- Rejected transaction persistence verified: future sequence blob tx (checktx_code=32) and zero-fee blob tx (checktx_code=11) both leave cache entries.
+- Per-entry memory measured at approximately 204 bytes.
+- Existing test suite identified as not reproducing the production path because tests pass blobTx.Tx directly to FinalizeBlock instead of the wrapped BlobTx.
 
 ## Mitigations
 
-No current defense. Recommendations: (1) Re-parse blob tx via UnmarshalBlobTx in FinalizeBlock and delete using inner tx key, (2) Call txCache.Set only after BaseApp.CheckTx succeeds in CheckTx, (3) Add max size cap or TTL to TxCache.
+No current defense exists. Recommended fixes include re-parsing blob transactions via UnmarshalBlobTx in FinalizeBlock to extract the inner tx key for deletion, calling txCache.Set only after BaseApp.CheckTx succeeds, and adding a maximum size cap or TTL to the TxCache.

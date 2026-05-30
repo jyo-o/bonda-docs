@@ -1,52 +1,44 @@
-# CEL-D12: GetProposal Nil Pointer Panic — Node Crash via Block Sync Timing
+# CEL-D12: Nil Pointer Panic in GetProposal During Block Sync
 
 {% hint style="info" %}
-**Severity**: Medium · **STRIDE**: D (Denial of Service) · **Scope**: implementation · **Status**: code_verified
+**Severity**: Medium · **STRIDE**: D · **Status**: code_verified
 {% endhint %}
 
 ## Overview
 
-GetProposal at celestia-core consensus/propagation/commitment_state.go:95 can trigger a nil pointer dereference panic when getAllState returns cb=nil, has=true. The stored-block branch of getAllState (line 190-196) returns (nil, cparts, bitarray, true) when the block exists in BlockStore but not in the proposal cache. The primary caller at consensus/state.go:2920 discards the first return value (_), so panic does not occur on most paths. However, the syncData path (state.go:2929) can trigger it, as confirmed in PR #3060 tests. The function contract itself is broken, creating panic risk for future callers.
+The GetProposal function in celestia-core at consensus/propagation/commitment_state.go line 95 can trigger a nil pointer dereference panic. This happens when getAllState returns cb=nil with has=true, and the caller attempts to access &cb.Proposal on the nil value.
 
-## Core Invariants Affected
+The root cause is in getAllState's stored-block branch (lines 190-196). When a block exists in BlockStore but not in the proposal cache, getAllState returns (nil, cparts, bitarray, true). The function contract is broken because it signals "found" via has=true while returning a nil compact block.
 
-`consensus_liveness`
-
-Potential for consensus node panic, but only triggers on specific sync paths. PR #3060 adds nil guard.
+The primary caller at consensus/state.go line 2920 discards the first return value using an underscore, so the panic does not occur on most code paths. However, the syncData path at state.go line 2929 does use the return value and can trigger the panic, as confirmed by tests in PR #3060. The broken function contract also creates risk for any future callers.
 
 ## Prerequisites
 
-Can occur during normal operation. Intentional trigger: malicious peer induces proposal request immediately after block store write.
+- Can occur during normal node operation at specific sync timing windows
+- Intentional trigger: a malicious peer could induce a proposal request immediately after a block store write completes but before the proposal cache is populated
 
 ## Attack Scenario
 
-**Condition**: Block exists in BlockStore but not in proposal cache during sync timing + syncData path entry
-
-**Example**: getAllState returns (nil, cparts, bitarray, true) causing &cb.Proposal to panic.
+1. A block is written to BlockStore during normal sync operations.
+2. Before the proposal cache is populated with the corresponding compact block, a syncData call is triggered.
+3. syncData calls GetProposal, which calls getAllState.
+4. getAllState finds the block in BlockStore but not in the proposal cache, returning (nil, cparts, bitarray, true).
+5. GetProposal attempts to dereference &cb.Proposal on the nil compact block, causing a panic.
+6. The consensus node crashes and must be restarted.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Medium |
-| Likelihood | Low (triggers only on specific sync timing; primary caller discards return value) |
-| Scope | implementation |
-| Target | Process |
-| Core Invariants | consensus_liveness |
+Consensus node crash via nil pointer panic. The trigger requires specific sync timing that is difficult to exploit reliably, but can occur during normal operation. A malicious peer could potentially increase the probability by manipulating block propagation timing.
 
-## Code References
+## Evidence
 
-- [`celestia-core/consensus/propagation/commitment_state.go:95 (GetProposal: &cb.Proposal nil deref)`](https://github.com/celestiaorg/celestia-core/blob/main/consensus/propagation/commitment_state.go#L95)
-- [`celestia-core/consensus/propagation/commitment_state.go:191 (getAllState stored-block branch returns cb=nil, has=true)`](https://github.com/celestiaorg/celestia-core/blob/main/consensus/propagation/commitment_state.go#L191)
-- [`celestia-core/consensus/state.go:2929 (syncData calls GetProposal)`](https://github.com/celestiaorg/celestia-core/blob/main/consensus/state.go#L2929)
-- [PR #3060: 2026-05-21 OPEN, 'guard GetProposal against nil compact block'](https://github.com/celestiaorg/celestia-core/pull/3060)
+### Source Code
 
-## Verification & Evidence
-
-**Status**: code_verified
-
-celestia-core main branch commitment_state.go code confirmed. PR #3060 existence and open status confirmed via gh api.
+- `celestia-core/consensus/propagation/commitment_state.go:95` -- GetProposal dereferences &cb.Proposal without nil check
+- `celestia-core/consensus/propagation/commitment_state.go:191` -- getAllState stored-block branch returns cb=nil with has=true
+- `celestia-core/consensus/state.go:2929` -- syncData calls GetProposal and uses the return value
+- PR celestia-core#3060 (OPEN, 2026-05-21): adds nil guard to prevent the panic
 
 ## Mitigations
 
-PR #3060 (open): adds nil guard. No defense before merge.
+PR #3060 (open) adds a nil guard to GetProposal. Until this PR is merged, there is no defense against this panic. The fix is straightforward: check for nil before dereferencing the compact block.

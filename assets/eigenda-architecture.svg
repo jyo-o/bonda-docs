@@ -1,191 +1,197 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="12">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600">
   <defs>
-    <marker id="arrow-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#555"/>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#555" stroke-width="1.2"/>
     </marker>
-    <marker id="arrow-red-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#e03131"/>
+    <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#4263eb" stroke-width="1.2"/>
     </marker>
-    <marker id="arrow-purple-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#7048e8"/>
+    <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#2f9e44" stroke-width="1.2"/>
     </marker>
-    <marker id="arrow-orange-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#e67700"/>
+    <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#e67700" stroke-width="1.2"/>
+    </marker>
+    <marker id="arr-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#7048e8" stroke-width="1.2"/>
     </marker>
   </defs>
 
-  <rect width="820" height="520" fill="#fafafa" rx="6"/>
+  <!-- Background -->
+  <rect width="900" height="600" fill="#fcfcfc" rx="8"/>
 
   <!-- Title -->
-  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">EigenDA Architecture</text>
-  <text x="410" y="44" text-anchor="middle" font-size="10" fill="#888">Trust Boundaries &amp; Data Flow</text>
+  <text x="450" y="30" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="20" font-weight="bold" fill="#1e1e1e">EigenDA Architecture</text>
+  <text x="450" y="50" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="11" fill="#888">Data Flow, Trust Boundaries &amp; Component Map</text>
 
-  <!-- TB-D: Disperser Infra (dashed boundary) -->
-  <rect x="215" y="75" width="360" height="280" rx="8" fill="none" stroke="#e03131" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.6"/>
-  <text x="225" y="92" font-size="9" fill="#e03131" font-weight="600">TB-D: Disperser Infra</text>
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- TRUST BOUNDARIES                                    -->
+  <!-- ════════════════════════════════════════════════════ -->
+
+  <!-- TB0: Proxy (no auth) -->
+  <rect x="52" y="90" width="120" height="290" rx="10" fill="none" stroke="#aaa" stroke-width="1.5" stroke-dasharray="8,5" opacity="0.6"/>
+  <text x="112" y="107" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="10" fill="#888">TB0: No Auth</text>
+
+  <!-- TB1: Disperser entry (ECDSA + commitment verification) -->
+  <rect x="185" y="90" width="290" height="290" rx="10" fill="none" stroke="#4263eb" stroke-width="1.5" stroke-dasharray="8,5" opacity="0.5"/>
+  <text x="330" y="107" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="10" fill="#4263eb">TB1: ECDSA + Commitment Verification</text>
+
+  <!-- TB2: Disperser ↔ DA Nodes (KZG + BLS) -->
+  <rect x="488" y="90" width="200" height="290" rx="10" fill="none" stroke="#e67700" stroke-width="1.5" stroke-dasharray="8,5" opacity="0.5"/>
+  <text x="588" y="107" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="10" fill="#e67700">TB2: KZG + BLS</text>
 
   <!-- TB3: Off-chain / On-chain boundary -->
-  <line x1="30" y1="385" x2="790" y2="385" stroke="#7048e8" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.6"/>
-  <text x="40" y="400" font-size="9" fill="#7048e8" font-weight="600">TB3: Off-chain ↔ On-chain</text>
+  <line x1="30" y1="415" x2="870" y2="415" stroke="#7048e8" stroke-width="1.8" stroke-dasharray="10,5" opacity="0.5"/>
+  <text x="780" y="410" text-anchor="end" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="10" fill="#7048e8">TB3: Off-chain / On-chain</text>
 
-  <!-- TB0: Proxy Entry -->
-  <line x1="155" y1="70" x2="155" y2="360" stroke="#999" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
-  <text x="130" y="68" font-size="8" fill="#999" text-anchor="middle">TB0</text>
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- OFF-CHAIN COMPONENTS                                -->
+  <!-- ════════════════════════════════════════════════════ -->
 
-  <!-- TB1: Disperser Entry -->
-  <line x1="218" y1="70" x2="218" y2="360" stroke="#e03131" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
-  <text x="218" y="68" font-size="8" fill="#e03131" text-anchor="middle">TB1</text>
+  <!-- Proxy -->
+  <rect x="68" y="175" width="90" height="55" rx="10" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1.5"/>
+  <text x="113" y="198" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#495057">Proxy</text>
+  <text x="113" y="218" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#868e96">Entry point</text>
 
-  <!-- TB2: Disperser ↔ Operator -->
-  <line x1="570" y1="70" x2="570" y2="360" stroke="#e67700" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
-  <text x="570" y="68" font-size="8" fill="#e67700" text-anchor="middle">TB2</text>
+  <!-- Disperser API -->
+  <rect x="200" y="140" width="120" height="58" rx="10" fill="#dbe4ff" stroke="#4263eb" stroke-width="1.5"/>
+  <text x="260" y="166" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#364fc7">Disperser API</text>
+  <text x="260" y="184" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#5c7cfa">Routing + Validation</text>
 
-  <!-- External Entity: Rollup -->
-  <rect x="30" y="140" width="110" height="55" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
-  <text x="85" y="163" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Rollup</text>
-  <text x="85" y="177" text-anchor="middle" font-size="9" fill="#666">Batcher / Validator</text>
+  <!-- Controller -->
+  <rect x="200" y="240" width="120" height="58" rx="10" fill="#dbe4ff" stroke="#4263eb" stroke-width="1.5"/>
+  <text x="260" y="266" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#364fc7">Controller</text>
+  <text x="260" y="284" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#5c7cfa">Encode, Pay, Sigs</text>
 
-  <!-- Process: Proxy -->
-  <rect x="165" y="120" width="50" height="90" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="190" y="160" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P1</text>
-  <text x="190" y="173" text-anchor="middle" font-size="8" fill="#666">Proxy</text>
-  <text x="190" y="200" text-anchor="middle" font-size="7" fill="#c00">⚠ No auth</text>
+  <!-- Encoder -->
+  <rect x="355" y="175" width="105" height="55" rx="10" fill="#dbe4ff" stroke="#4263eb" stroke-width="1.5"/>
+  <text x="407" y="198" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#364fc7">Encoder</text>
+  <text x="407" y="216" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#5c7cfa">KZG + Chunking</text>
 
-  <!-- Process: Disperser API -->
-  <rect x="230" y="110" width="95" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="277" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P2</text>
-  <text x="277" y="152" text-anchor="middle" font-size="9" fill="#666">Disperser</text>
-  <text x="277" y="165" text-anchor="middle" font-size="9" fill="#666">API</text>
+  <!-- DA Nodes -->
+  <rect x="505" y="150" width="165" height="70" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="1.5"/>
+  <text x="587" y="178" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="14" font-weight="bold" fill="#2b8a3e">DA Nodes</text>
+  <text x="587" y="198" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#51cf66">Chunk Storage + BLS Sigs</text>
+  <text x="587" y="212" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#868e96">N operators</text>
 
-  <!-- Process: Controller -->
-  <rect x="230" y="210" width="95" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="277" y="238" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P3</text>
-  <text x="277" y="252" text-anchor="middle" font-size="9" fill="#666">Controller</text>
-  <text x="277" y="265" text-anchor="middle" font-size="8" fill="#888">Dispatch + Sigs</text>
+  <!-- Relay -->
+  <rect x="510" y="265" width="130" height="55" rx="10" fill="#fff4e6" stroke="#e67700" stroke-width="1.5"/>
+  <text x="575" y="288" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#e67700">Relay</text>
+  <text x="575" y="308" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#d9480f">SPOF - single instance</text>
 
-  <!-- Process: Encoder -->
-  <rect x="365" y="110" width="95" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="412" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P4</text>
-  <text x="412" y="152" text-anchor="middle" font-size="9" fill="#666">Encoder</text>
-  <text x="412" y="165" text-anchor="middle" font-size="8" fill="#888">KZG + Chunks</text>
+  <!-- Rollup (external caller) -->
+  <rect x="730" y="165" width="110" height="55" rx="10" fill="#f8f9fa" stroke="#ced4da" stroke-width="1.5"/>
+  <text x="785" y="188" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#495057">Rollup</text>
+  <text x="785" y="206" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#868e96">Consumer</text>
 
-  <!-- Datastore: S3 Blob Store -->
-  <path d="M370,230 Q370,220 412,220 Q455,220 455,230 L455,255 Q455,265 412,265 Q370,265 370,255 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
-  <path d="M370,230 Q370,240 412,240 Q455,240 455,230" fill="none" stroke="#d6b656" stroke-width="1"/>
-  <text x="412" y="253" text-anchor="middle" font-size="8" fill="#666">S3 / Blob</text>
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- ON-CHAIN COMPONENTS                                 -->
+  <!-- ════════════════════════════════════════════════════ -->
 
-  <!-- Process: Relay -->
-  <rect x="480" y="210" width="80" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="520" y="238" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P6</text>
-  <text x="520" y="252" text-anchor="middle" font-size="9" fill="#666">Relay</text>
-  <text x="520" y="265" text-anchor="middle" font-size="7" fill="#c00">⚠ SPOF</text>
+  <!-- Ethereum L1 base -->
+  <rect x="100" y="450" width="700" height="110" rx="12" fill="#f3f0ff" stroke="#9775fa" stroke-width="1" opacity="0.35"/>
+  <text x="450" y="550" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="12" fill="#7048e8" opacity="0.7">Ethereum L1</text>
 
-  <!-- Process: DA Node (Operators) -->
-  <rect x="600" y="130" width="120" height="80" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="660" y="158" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P5</text>
-  <text x="660" y="172" text-anchor="middle" font-size="9" fill="#666">DA Operators</text>
-  <text x="660" y="186" text-anchor="middle" font-size="8" fill="#888">BLS Sign + Store</text>
+  <!-- CertVerifier -->
+  <rect x="200" y="465" width="155" height="55" rx="10" fill="#e5dbff" stroke="#7048e8" stroke-width="1.5"/>
+  <text x="277" y="489" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#5f3dc4">CertVerifier</text>
+  <text x="277" y="508" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#7950f2">On-chain cert check</text>
 
-  <!-- Datastore: Node Store -->
-  <path d="M620,240 Q620,230 660,230 Q700,230 700,240 L700,260 Q700,270 660,270 Q620,270 620,260 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
-  <path d="M620,240 Q620,250 660,250 Q700,250 700,240" fill="none" stroke="#d6b656" stroke-width="1"/>
-  <text x="660" y="263" text-anchor="middle" font-size="8" fill="#666">Node KV</text>
+  <!-- Registries -->
+  <rect x="530" y="465" width="155" height="55" rx="10" fill="#e5dbff" stroke="#7048e8" stroke-width="1.5"/>
+  <text x="607" y="489" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="13" font-weight="bold" fill="#5f3dc4">Registries</text>
+  <text x="607" y="508" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#7950f2">Operator Reg + Governance</text>
 
-  <!-- Datastore: MetadataStore -->
-  <path d="M240,300 Q240,290 305,290 Q370,290 370,300 L370,320 Q370,330 305,330 Q240,330 240,320 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
-  <path d="M240,300 Q240,310 305,310 Q370,310 370,300" fill="none" stroke="#d6b656" stroke-width="1"/>
-  <text x="305" y="323" text-anchor="middle" font-size="8" fill="#666">DynamoDB / Meta</text>
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- WRITE PATH ARROWS (solid blue)                      -->
+  <!-- ════════════════════════════════════════════════════ -->
 
-  <!-- On-chain: CertVerifier -->
-  <rect x="330" y="415" width="130" height="60" rx="6" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
-  <text x="395" y="440" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P8</text>
-  <text x="395" y="454" text-anchor="middle" font-size="9" fill="#666">CertVerifier</text>
-  <text x="395" y="466" text-anchor="middle" font-size="8" fill="#2f9e44">checkDACert</text>
-
-  <!-- On-chain: Registries -->
-  <rect x="520" y="415" width="120" height="60" rx="6" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
-  <text x="580" y="440" text-anchor="middle" font-size="10" font-weight="600" fill="#333">P9</text>
-  <text x="580" y="454" text-anchor="middle" font-size="9" fill="#666">Registries</text>
-  <text x="580" y="466" text-anchor="middle" font-size="8" fill="#888">Stake / Quorum</text>
-
-  <!-- External Entity: Ethereum L1 -->
-  <rect x="260" y="415" width="50" height="60" rx="4" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
-  <text x="285" y="443" text-anchor="middle" font-size="9" font-weight="600" fill="#333">EE2</text>
-  <text x="285" y="456" text-anchor="middle" font-size="8" fill="#666">Eth</text>
-  <text x="285" y="467" text-anchor="middle" font-size="8" fill="#666">L1</text>
-
-  <!-- External Entity: Governance -->
-  <rect x="680" y="415" width="115" height="60" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
-  <text x="737" y="440" text-anchor="middle" font-size="10" font-weight="600" fill="#333">EE3</text>
-  <text x="737" y="454" text-anchor="middle" font-size="9" fill="#666">Governance</text>
-  <text x="737" y="466" text-anchor="middle" font-size="7" fill="#c00">3-of-4 Multisig</text>
-
-  <!-- Data Flow Arrows -->
-  <!-- Rollup → Proxy -->
-  <line x1="140" y1="165" x2="163" y2="165" stroke="#555" stroke-width="1.5" marker-end="url(#arrow-e)"/>
-  <text x="150" y="159" text-anchor="middle" font-size="7" fill="#555">Payload</text>
-
-  <!-- Proxy → Disperser API (TB1 crossing) -->
-  <line x1="215" y1="145" x2="228" y2="145" stroke="#e03131" stroke-width="2" marker-end="url(#arrow-red-e)"/>
+  <!-- Proxy → Disperser API -->
+  <path d="M158,195 C175,185 185,172 198,170" fill="none" stroke="#4263eb" stroke-width="1.8" marker-end="url(#arr-blue)"/>
+  <text x="175" y="175" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#4263eb">blob</text>
 
   <!-- Disperser API → Controller -->
-  <line x1="277" y1="180" x2="277" y2="208" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-e)"/>
+  <line x1="260" y1="198" x2="260" y2="238" stroke="#4263eb" stroke-width="1.5" marker-end="url(#arr-blue)"/>
 
   <!-- Controller → Encoder -->
-  <line x1="325" y1="235" x2="363" y2="155" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-e)"/>
+  <path d="M320,256 C340,245 350,220 355,210" fill="none" stroke="#4263eb" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <text x="348" y="240" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#4263eb">encode</text>
 
-  <!-- Encoder ↔ S3 -->
-  <line x1="412" y1="180" x2="412" y2="218" stroke="#555" stroke-width="1" marker-end="url(#arrow-e)"/>
+  <!-- Encoder → DA Nodes -->
+  <path d="M460,195 C475,190 490,188 503,187" fill="none" stroke="#4263eb" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <text x="482" y="183" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#4263eb">chunks</text>
 
-  <!-- S3 → Relay -->
-  <line x1="455" y1="245" x2="478" y2="245" stroke="#555" stroke-width="1" marker-end="url(#arrow-e)"/>
+  <!-- DA Nodes → Controller (BLS sigs return) -->
+  <path d="M505,205 C430,240 360,270 322,270" fill="none" stroke="#2f9e44" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#arr-green)"/>
+  <text x="420" y="252" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#2f9e44">BLS sigs</text>
 
-  <!-- Controller → DA Operators (TB2 crossing) -->
-  <line x1="325" y1="240" x2="598" y2="175" stroke="#e67700" stroke-width="2" marker-end="url(#arrow-orange-e)"/>
-  <text x="450" y="195" text-anchor="middle" font-size="7" fill="#e67700">StoreChunks</text>
+  <!-- Controller → CertVerifier (on-chain submission) -->
+  <path d="M260,298 C260,370 270,430 270,463" fill="none" stroke="#7048e8" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <text x="248" y="390" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#7048e8">DACert</text>
 
-  <!-- DA Operators → Controller (BLS sig) -->
-  <line x1="600" y1="195" x2="327" y2="260" stroke="#e67700" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-orange-e)"/>
-  <text x="470" y="240" text-anchor="middle" font-size="7" fill="#e67700">BLS Signature</text>
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- READ PATH ARROWS (orange)                           -->
+  <!-- ════════════════════════════════════════════════════ -->
 
-  <!-- DA Operators → Node Store -->
-  <line x1="660" y1="210" x2="660" y2="228" stroke="#555" stroke-width="1" marker-end="url(#arrow-e)"/>
+  <!-- Rollup → Relay (read request) -->
+  <path d="M730,200 C680,230 660,260 642,280" fill="none" stroke="#e67700" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <text x="700" y="250" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#e67700">retrieve</text>
 
-  <!-- Relay ↔ DA Operators (V2 pull) -->
-  <line x1="560" y1="230" x2="598" y2="190" stroke="#e67700" stroke-width="1.5" marker-end="url(#arrow-orange-e)"/>
-  <text x="590" y="220" text-anchor="middle" font-size="7" fill="#e67700">V2 Pull</text>
+  <!-- Relay → DA Nodes (fetch chunks) -->
+  <path d="M575,265 C575,245 580,230 585,222" fill="none" stroke="#e67700" stroke-width="1.3" marker-end="url(#arr-orange)"/>
+  <text x="600" y="248" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#e67700">pull</text>
 
-  <!-- Proxy → CertVerifier (TB3 crossing) -->
-  <line x1="190" y1="210" x2="335" y2="430" stroke="#7048e8" stroke-width="1.5" marker-end="url(#arrow-purple-e)"/>
-  <text x="240" y="335" text-anchor="middle" font-size="7" fill="#7048e8">checkDACert</text>
+  <!-- Proxy → Relay (alternative read) -->
+  <path d="M148,230 C180,310 400,295 508,290" fill="none" stroke="#e67700" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+  <text x="330" y="305" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#e67700">alt read</text>
 
-  <!-- Registries → Controller -->
-  <line x1="560" y1="415" x2="310" y2="280" stroke="#7048e8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-purple-e)"/>
-  <text x="460" y="345" text-anchor="middle" font-size="7" fill="#7048e8">OperatorState</text>
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- ON-CHAIN ARROWS                                     -->
+  <!-- ════════════════════════════════════════════════════ -->
 
-  <!-- Governance → Registries -->
-  <line x1="680" y1="445" x2="642" y2="445" stroke="#b85450" stroke-width="1.2" marker-end="url(#arrow-e)"/>
+  <!-- Registries → DA Nodes (operator state) -->
+  <path d="M607,465 C607,400 595,350 590,322" fill="none" stroke="#7048e8" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arr-purple)"/>
+  <text x="620" y="390" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#7048e8">operator state</text>
 
-  <!-- Return to Rollup -->
-  <line x1="165" y1="195" x2="140" y2="175" stroke="#2f9e44" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-e)"/>
-  <text x="130" y="195" text-anchor="middle" font-size="7" fill="#2f9e44">DACert</text>
+  <!-- CertVerifier ↔ Registries (verification) -->
+  <line x1="355" y1="490" x2="528" y2="490" stroke="#7048e8" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="442" y="484" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#7048e8">quorum check</text>
 
-  <!-- Legend -->
-  <rect x="30" y="488" width="760" height="24" rx="4" fill="#f0f0f0" stroke="none"/>
-  <circle cx="50" cy="500" r="4" fill="#d5e8d4" stroke="#82b366"/>
-  <text x="60" y="504" font-size="8" fill="#555">Process</text>
-  <circle cx="120" cy="500" r="4" fill="#dae8fc" stroke="#6c8ebf"/>
-  <text x="130" y="504" font-size="8" fill="#555">External</text>
-  <circle cx="195" cy="500" r="4" fill="#fff2cc" stroke="#d6b656"/>
-  <text x="205" y="504" font-size="8" fill="#555">Data Store</text>
-  <circle cx="280" cy="500" r="4" fill="#e1d5e7" stroke="#9673a6"/>
-  <text x="290" y="504" font-size="8" fill="#555">On-chain</text>
-  <line x1="350" y1="500" x2="370" y2="500" stroke="#e03131" stroke-width="1.5" stroke-dasharray="4,2"/>
-  <text x="377" y="504" font-size="8" fill="#555">Trust Boundary</text>
-  <line x1="450" y1="500" x2="470" y2="500" stroke="#e67700" stroke-width="2"/>
-  <text x="477" y="504" font-size="8" fill="#e67700">TB2: KZG+BLS</text>
-  <line x1="545" y1="500" x2="565" y2="500" stroke="#7048e8" stroke-width="1.5"/>
-  <text x="572" y="504" font-size="8" fill="#7048e8">TB3: On-chain</text>
-  <circle cx="640" cy="500" r="4" fill="#f8cecc" stroke="#b85450"/>
-  <text x="650" y="504" font-size="8" fill="#555">Governance</text>
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- LEGEND                                              -->
+  <!-- ════════════════════════════════════════════════════ -->
+
+  <rect x="30" y="568" width="840" height="26" rx="6" fill="#f8f9fa" stroke="#e9ecef" stroke-width="1"/>
+
+  <!-- Write path -->
+  <line x1="50" y1="581" x2="72" y2="581" stroke="#4263eb" stroke-width="2" marker-end="url(#arr-blue)"/>
+  <text x="82" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">Write path</text>
+
+  <!-- Read path -->
+  <line x1="160" y1="581" x2="182" y2="581" stroke="#e67700" stroke-width="2" marker-end="url(#arr-orange)"/>
+  <text x="192" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">Read path</text>
+
+  <!-- Return / async -->
+  <line x1="270" y1="581" x2="292" y2="581" stroke="#2f9e44" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-green)"/>
+  <text x="302" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">Return</text>
+
+  <!-- On-chain -->
+  <line x1="365" y1="581" x2="387" y2="581" stroke="#7048e8" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+  <text x="397" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">On-chain</text>
+
+  <!-- Component colors -->
+  <rect x="480" y="575" width="12" height="12" rx="3" fill="#dbe4ff" stroke="#4263eb" stroke-width="1"/>
+  <text x="498" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">Disperser</text>
+
+  <rect x="565" y="575" width="12" height="12" rx="3" fill="#d3f9d8" stroke="#2f9e44" stroke-width="1"/>
+  <text x="583" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">DA Nodes</text>
+
+  <rect x="650" y="575" width="12" height="12" rx="3" fill="#fff4e6" stroke="#e67700" stroke-width="1"/>
+  <text x="668" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">Relay</text>
+
+  <rect x="720" y="575" width="12" height="12" rx="3" fill="#e5dbff" stroke="#7048e8" stroke-width="1"/>
+  <text x="738" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">On-chain</text>
+
+  <rect x="800" y="575" width="12" height="12" rx="3" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
+  <text x="818" y="585" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="9" fill="#555">Ext</text>
 </svg>

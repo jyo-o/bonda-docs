@@ -1,53 +1,50 @@
-# CEL-D04: Evidence Subsystem Three Code Defects (Hash Truncation / Buffer Unbounded / Expiry Gap)
+# CEL-D04: Three Code Defects in the Evidence Subsystem
 
 {% hint style="info" %}
-**Severity**: Low · **STRIDE**: D (Denial of Service) · **Scope**: protocol · **Status**: code_verified
+**Severity**: Low · **STRIDE**: D · **Status**: code_verified
 {% endhint %}
 
 ## Overview
 
-Three independent defects exist in celestia-core evidence processing, though practical impact is limited. First, LightClientAttackEvidence.Hash() copies only 31 of 32 bytes, but the probability of a 248-bit hash collision is effectively 0. Second, consensusBuffer has no cap, but it drains every block (~6 seconds) and ed25519 signature verification is the CPU bottleneck (~500-1000/sec), limiting entries to ~3,000-6,000 (~3 MB) within 6 seconds -- OOM is impossible. Practical impact is minor CPU load. Third, the evidence validity period (~17 days) exceeds unbonding (14 days) by ~3 days, but double signs are almost certainly detected within 14 days and tombstoning is the primary penalty, making the 2% slashing avoidance practically meaningless.
+Three independent code defects exist in celestia-core's evidence processing, though all have limited practical impact.
 
-## Core Invariants Affected
+The first defect is a hash truncation bug: LightClientAttackEvidence.Hash() copies only 31 of 32 bytes due to an off-by-one error at evidence.go line 325. However, the probability of a collision on a 248-bit hash is effectively zero, so this has no security consequence.
 
-`consensus_liveness`, `signing_liveness`
+The second defect is an unbounded consensus buffer: the consensusBuffer has no cap on entries. In theory a byzantine validator could flood it with conflicting votes. In practice, the buffer drains every block (approximately 6 seconds), and ed25519 signature verification is the CPU bottleneck at roughly 500-1000 verifications per second. This limits the buffer to about 3,000-6,000 entries (approximately 3 MB) within a drain cycle, making OOM impossible. The practical impact is minor CPU load.
 
-Claims that consensusBuffer OOM could crash consensus nodes exist, but this is impossible due to 6-second drain + CPU bottleneck.
+The third defect is an evidence expiry gap: the evidence validity period (approximately 17 days based on max_age_num_blocks=242,640) exceeds the unbonding period (14 days) by about 3 days. This creates a window where evidence might be submitted after unbonding completes. However, double signs are almost always detected well within 14 days, and tombstoning is the primary penalty, making the 2% slashing avoidance during the gap practically meaningless.
 
 ## Prerequisites
 
-Buffer attack can be attempted with 1 validator but cannot cause OOM. Expiry gap exploitation requires the unrealistic premise of no evidence submission for 14 days.
+- Buffer attack requires one validator but cannot cause OOM due to drain cycle and CPU bottleneck
+- Expiry gap exploitation requires the unrealistic premise of no evidence submission for 14 days
 
 ## Attack Scenario
 
-**Condition**: Byzantine validator mass-sending conflicting votes still drains at ~3 MB/block level
-
-**Example**: Mainnet: evidence.max_age_num_blocks=242,640, max_age_duration=1213200s (337h), unbonding_time=1213200s. 242640x6s ~ 404h > 337h, so ~17 days vs 14 days.
+1. A byzantine validator sends a large volume of conflicting votes to inflate the consensusBuffer.
+2. The buffer accepts entries without a cap, but drains every approximately 6 seconds.
+3. CPU-bound ed25519 signature verification limits throughput to roughly 3,000-6,000 entries per drain cycle.
+4. The buffer reaches approximately 3 MB before draining, far below OOM thresholds.
+5. Separately, a validator could attempt to exploit the 3-day expiry gap by double signing and unbonding before evidence is submitted, but detection within 14 days is virtually certain.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Low |
-| Likelihood | Unrealistic (OOM impossible: 6-second drain + CPU bottleneck. Probability of non-detection within 14 days ~0) |
-| Scope | protocol |
-| Target | Process |
-| Core Invariants | consensus_liveness, signing_liveness |
+All three defects have negligible practical impact. The hash truncation is a one-character fix with no exploitability. The buffer cannot be inflated beyond approximately 3 MB. The expiry gap is theoretically exploitable but practically irrelevant due to near-certain detection within the unbonding period.
 
-## Code References
+## Evidence
 
-- [`celestia-core/types/evidence.go:321-328 (Hash() off-by-one, line 325 copy(bz[:tmhash.Size-1]))`](https://github.com/celestiaorg/celestia-core/blob/main/types/evidence.go#L321-L328)
-- [`celestia-core/evidence/pool.go:47,179-186,459-537 (consensusBuffer unbounded append + drain)`](https://github.com/celestiaorg/celestia-core/blob/main/evidence/pool.go:47,179-186,459-537)
-- [`celestia-core/evidence/verify.go:308-316 (IsEvidenceExpired AND logic)`](https://github.com/celestiaorg/celestia-core/blob/main/evidence/verify.go#L308-L316)
-- [`celestia-core/consensus/state.go:2395 (ErrVoteConflictingVotes 핸들러)`](https://github.com/celestiaorg/celestia-core/blob/main/consensus/state.go#L2395)
-- On-chain: `cosmos/consensus/v1beta1/params (max_age_num_blocks=242640, max_age_duration=1213200s)`
+### Source Code
 
-## Verification & Evidence
+- `celestia-core/types/evidence.go:321-328` -- Hash() off-by-one: line 325 uses copy(bz[:tmhash.Size-1]) instead of tmhash.Size
+- `celestia-core/evidence/pool.go:47,179-186,459-537` -- consensusBuffer with unbounded append and per-block drain
+- `celestia-core/evidence/verify.go:308-316` -- IsEvidenceExpired uses AND logic for the two expiry conditions
+- `celestia-core/consensus/state.go:2395` -- ErrVoteConflictingVotes handler
 
-**Status**: code_verified
+### On-Chain / Network
 
-Full code audit completed. Evidence/consensus parameters confirmed via mainnet RPC. All three defects have limited practical impact.
+- Mainnet consensus parameters: max_age_num_blocks=242,640, max_age_duration=1,213,200s (337 hours), unbonding_time=1,213,200s
+- 242,640 blocks at 6 seconds each equals approximately 404 hours (17 days), exceeding the 14-day unbonding period by about 3 days
 
 ## Mitigations
 
-Recommendations: 1-char fix for evidence.go:325 (tmhash.Size-1 to tmhash.Size), add per-validator dedup + global cap (e.g., 1000 pairs/height) to consensusBuffer, change evidence expiry from AND to OR logic or set MaxAgeNumBlocks shorter than unbonding, add global evidence pool size cap.
+Recommended fixes include a one-character fix changing tmhash.Size-1 to tmhash.Size in evidence.go line 325, adding per-validator deduplication and a global cap (e.g., 1,000 pairs per height) to consensusBuffer, changing evidence expiry from AND to OR logic or setting MaxAgeNumBlocks shorter than unbonding, and adding a global evidence pool size cap.

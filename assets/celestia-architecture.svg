@@ -1,174 +1,163 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" width="820" height="520" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="12">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600"
+     font-family="Virgil, Segoe UI Emoji, Noto Color Emoji, sans-serif" font-size="12">
   <defs>
-    <marker id="arrow-c" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#555"/>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#444" stroke-width="1.5" stroke-linejoin="round"/>
     </marker>
-    <marker id="arrow-orange-c" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#e67700"/>
+    <marker id="arr-grn" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#37b24d" stroke-width="1.5" stroke-linejoin="round"/>
     </marker>
-    <marker id="arrow-green-c" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#2f9e44"/>
+    <marker id="arr-org" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#e67700" stroke-width="1.5" stroke-linejoin="round"/>
     </marker>
-    <marker id="arrow-purple-c" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#7048e8"/>
-    </marker>
-    <marker id="arrow-red-c" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#e03131"/>
+    <marker id="arr-pur" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#7048e8" stroke-width="1.5" stroke-linejoin="round"/>
     </marker>
   </defs>
 
-  <rect width="820" height="520" fill="#fafafa" rx="6"/>
+  <!-- Background -->
+  <rect width="900" height="600" fill="#fcfcfa" rx="8"/>
 
-  <!-- Title -->
-  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">Celestia Architecture</text>
-  <text x="410" y="44" text-anchor="middle" font-size="10" fill="#888">CometBFT Consensus → DAS Network → Blobstream Bridge</text>
+  <!-- =========================================== -->
+  <!-- TRUST BOUNDARIES (dashed rectangles)        -->
+  <!-- =========================================== -->
 
-  <!-- Trust Boundaries -->
-  <!-- TB0: PFB -->
-  <line x1="155" y1="55" x2="155" y2="310" stroke="#e03131" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
-  <text x="155" y="52" text-anchor="middle" font-size="8" fill="#e03131">TB0: PFB</text>
+  <!-- TB0: PFB entry -->
+  <rect x="20" y="52" width="180" height="270" rx="10" fill="none"
+        stroke="#e8590c" stroke-width="1.4" stroke-dasharray="8,5" opacity="0.55"/>
+  <text x="30" y="70" font-size="10" fill="#e8590c" font-weight="600" opacity="0.8">TB0  PFB entry (permissionless)</text>
 
-  <!-- TB1: Consensus→DA -->
-  <line x1="370" y1="55" x2="370" y2="310" stroke="#e67700" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
-  <text x="370" y="52" text-anchor="middle" font-size="8" fill="#e67700">TB1: Consensus→DA</text>
+  <!-- TB1: Consensus to DA bridge ingest -->
+  <rect x="210" y="52" width="310" height="270" rx="10" fill="none"
+        stroke="#e67700" stroke-width="1.4" stroke-dasharray="8,5" opacity="0.55"/>
+  <text x="220" y="70" font-size="10" fill="#e67700" font-weight="600" opacity="0.8">TB1  Consensus -> DA bridge ingest</text>
 
-  <!-- TB2: DAS -->
-  <line x1="590" y1="55" x2="590" y2="310" stroke="#2f9e44" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.5"/>
-  <text x="590" y="52" text-anchor="middle" font-size="8" fill="#2f9e44">TB2: DAS</text>
+  <!-- TB2: DAS sampling -->
+  <rect x="530" y="52" width="200" height="270" rx="10" fill="none"
+        stroke="#37b24d" stroke-width="1.4" stroke-dasharray="8,5" opacity="0.55"/>
+  <text x="540" y="70" font-size="10" fill="#37b24d" font-weight="600" opacity="0.8">TB2  DAS sampling</text>
 
   <!-- Ethereum L1 boundary -->
-  <rect x="180" y="330" width="600" height="160" rx="8" fill="none" stroke="#7048e8" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
-  <text x="190" y="348" font-size="9" fill="#7048e8" font-weight="600">Blobstream → Ethereum L1</text>
+  <rect x="20" y="430" width="860" height="150" rx="12" fill="#f1f0fb"
+        stroke="#7048e8" stroke-width="1.6" stroke-dasharray="10,5" opacity="0.6"/>
+  <text x="40" y="452" font-size="11" fill="#7048e8" font-weight="700" opacity="0.85">Ethereum L1</text>
 
-  <!-- External Entity: Rollup Sequencer -->
-  <rect x="30" y="90" width="115" height="55" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
-  <text x="87" y="113" text-anchor="middle" font-size="10" font-weight="600" fill="#333">Rollup</text>
-  <text x="87" y="127" text-anchor="middle" font-size="9" fill="#666">Sequencer</text>
+  <!-- =========================================== -->
+  <!-- SUBMISSION FLOW (top row)                   -->
+  <!-- =========================================== -->
 
-  <!-- Process: Consensus Block Production -->
-  <rect x="175" y="75" width="175" height="85" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="262" y="100" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Consensus</text>
-  <text x="262" y="115" text-anchor="middle" font-size="9" fill="#666">CometBFT (celestia-core)</text>
-  <text x="262" y="130" text-anchor="middle" font-size="8" fill="#888">PrepareProposal → EDS</text>
-  <text x="262" y="143" text-anchor="middle" font-size="8" fill="#888">ProcessProposal → Vote</text>
+  <!-- BlobTx label -->
+  <rect x="38" y="100" width="145" height="52" rx="10" fill="#e7f5ff" stroke="#4dabf7" stroke-width="1.5"/>
+  <text x="110" y="122" text-anchor="middle" font-size="13" font-weight="600" fill="#1971c2">BlobTx</text>
+  <text x="110" y="138" text-anchor="middle" font-size="9" fill="#5c7cfa">(PayForBlobs MsgType)</text>
 
-  <!-- Datastore: Chain State -->
-  <path d="M210,195 Q210,185 262,185 Q315,185 315,195 L315,218 Q315,228 262,228 Q210,228 210,218 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
-  <path d="M210,195 Q210,205 262,205 Q315,205 315,195" fill="none" stroke="#d6b656" stroke-width="1"/>
-  <text x="262" y="220" text-anchor="middle" font-size="9" fill="#666">Chain State</text>
+  <!-- Consensus (CometBFT) -->
+  <rect x="230" y="82" width="270" height="90" rx="12" fill="#dbe4ff" stroke="#4c6ef5" stroke-width="1.6"/>
+  <text x="365" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#364fc7">Consensus (CometBFT)</text>
+  <text x="365" y="124" text-anchor="middle" font-size="10" fill="#5c7cfa">Block production, EDS + DAH construction</text>
 
-  <!-- Process: Bridge Node -->
-  <rect x="395" y="75" width="175" height="85" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="482" y="100" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Bridge Node</text>
-  <text x="482" y="115" text-anchor="middle" font-size="9" fill="#666">celestia-node</text>
-  <text x="482" y="130" text-anchor="middle" font-size="8" fill="#888">EDS Constructor</text>
-  <text x="482" y="143" text-anchor="middle" font-size="8" fill="#888">Shrex + Bitswap Server</text>
+  <!-- Submission sub-steps inside consensus -->
+  <text x="250" y="152" font-size="9" fill="#5c7cfa">PrepareProposal</text>
+  <text x="340" y="152" font-size="9" fill="#5c7cfa">-></text>
+  <text x="356" y="152" font-size="9" fill="#5c7cfa">ProcessProposal</text>
+  <text x="452" y="152" font-size="9" fill="#5c7cfa">-></text>
+  <text x="466" y="152" font-size="9" fill="#5c7cfa">Finality</text>
 
-  <!-- Datastore: EDS Storage -->
-  <path d="M410,195 Q410,185 482,185 Q555,185 555,195 L555,218 Q555,228 482,228 Q410,228 410,218 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
-  <path d="M410,195 Q410,205 482,205 Q555,205 555,195" fill="none" stroke="#d6b656" stroke-width="1"/>
-  <text x="482" y="220" text-anchor="middle" font-size="9" fill="#666">EDS File Store</text>
+  <!-- Arrow: BlobTx -> Consensus -->
+  <line x1="183" y1="126" x2="228" y2="126" stroke="#444" stroke-width="1.6" marker-end="url(#arr)"/>
 
-  <!-- Process: Light Node -->
-  <rect x="615" y="105" width="155" height="80" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="692" y="130" text-anchor="middle" font-size="11" font-weight="600" fill="#333">Light Node</text>
-  <text x="692" y="145" text-anchor="middle" font-size="9" fill="#666">DAS (16 samples)</text>
-  <text x="692" y="159" text-anchor="middle" font-size="8" fill="#888">shrex → bitswap</text>
-  <text x="692" y="172" text-anchor="middle" font-size="7" fill="#c00">⚠ Bridge-only source</text>
+  <!-- =========================================== -->
+  <!-- DAS FLOW (middle row)                       -->
+  <!-- =========================================== -->
 
-  <!-- External Entity: Rollup Consumer -->
-  <rect x="690" y="230" width="110" height="55" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
-  <text x="745" y="253" text-anchor="middle" font-size="10" font-weight="600" fill="#333">Rollup</text>
-  <text x="745" y="267" text-anchor="middle" font-size="9" fill="#666">Consumer</text>
+  <!-- Bridge Node -->
+  <rect x="280" y="200" width="200" height="70" rx="12" fill="#d3f9d8" stroke="#37b24d" stroke-width="1.6"/>
+  <text x="380" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#2b8a3e">Bridge Node</text>
+  <text x="380" y="243" text-anchor="middle" font-size="9" fill="#51cf66">Receives raw blocks, constructs EDS</text>
+  <text x="380" y="257" text-anchor="middle" font-size="9" fill="#51cf66">Serves via shrex + bitswap</text>
 
-  <!-- Blobstream Components -->
-  <!-- Process: Orchestrator/Relayer -->
-  <rect x="200" y="365" width="155" height="70" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
-  <text x="277" y="390" text-anchor="middle" font-size="10" font-weight="600" fill="#333">Blobstream</text>
-  <text x="277" y="405" text-anchor="middle" font-size="9" fill="#666">Orchestrator / Relayer</text>
-  <text x="277" y="418" text-anchor="middle" font-size="8" fill="#888">60m loop</text>
+  <!-- Light Node -->
+  <rect x="548" y="200" width="165" height="70" rx="12" fill="#ebfbee" stroke="#69db7c" stroke-width="1.5"/>
+  <text x="630" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#2b8a3e">Light Node</text>
+  <text x="630" y="243" text-anchor="middle" font-size="9" fill="#51cf66">DAS sampling, 16 random cells</text>
+  <text x="630" y="257" text-anchor="middle" font-size="9" fill="#51cf66">Client-only</text>
 
-  <!-- Process: SP1 Verifier -->
-  <rect x="420" y="365" width="140" height="70" rx="6" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5"/>
-  <text x="490" y="390" text-anchor="middle" font-size="10" font-weight="600" fill="#333">SP1 Verifier</text>
-  <text x="490" y="405" text-anchor="middle" font-size="9" fill="#666">PLONK Proof</text>
-  <text x="490" y="418" text-anchor="middle" font-size="8" fill="#2f9e44">ZK verification</text>
+  <!-- Arrow: Consensus -> Bridge Node -->
+  <line x1="365" y1="172" x2="365" y2="198" stroke="#37b24d" stroke-width="1.6" marker-end="url(#arr-grn)"/>
+  <text x="374" y="190" font-size="8" fill="#37b24d">raw block</text>
 
-  <!-- Datastore: Blobstream Contract -->
-  <path d="M560" y="380 Q560,370 650,370 Q740,370 740,380 L740,415 Q740,425 650,425 Q560,425 560,415 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
-  <path d="M560,380 Q560,390 650,390 Q740,390 740,380" fill="none" stroke="#d6b656" stroke-width="1"/>
-  <text x="650" y="413" text-anchor="middle" font-size="9" fill="#666">SP1Blobstream</text>
-  <text x="650" y="403" text-anchor="middle" font-size="8" fill="#888">Contract (Ethereum)</text>
+  <!-- Arrow: Bridge Node -> Light Node (shrex/bitswap) -->
+  <line x1="480" y1="235" x2="546" y2="235" stroke="#37b24d" stroke-width="1.6" marker-end="url(#arr-grn)"/>
+  <text x="513" y="228" text-anchor="middle" font-size="8" fill="#37b24d">shrex / bitswap</text>
 
-  <!-- Guardian -->
-  <rect x="580" y="450" width="140" height="35" rx="4" fill="#ffe6e6" stroke="#e03131" stroke-width="1.2"/>
-  <text x="650" y="472" text-anchor="middle" font-size="9" fill="#e03131">Guardian (4-of-6 Safe)</text>
+  <!-- Callout: Light nodes cannot peer with each other -->
+  <rect x="582" y="278" width="158" height="30" rx="6" fill="#fff3bf" stroke="#fab005" stroke-width="1" opacity="0.9"/>
+  <text x="590" y="292" font-size="8.5" fill="#e67700" font-weight="600">Light nodes cannot peer</text>
+  <text x="590" y="302" font-size="8.5" fill="#e67700" font-weight="600">with each other</text>
 
-  <!-- Data Flow Arrows -->
-  <!-- Rollup → Consensus -->
-  <line x1="145" y1="115" x2="173" y2="115" stroke="#555" stroke-width="1.5" marker-end="url(#arrow-c)"/>
-  <text x="155" y="108" text-anchor="middle" font-size="8" fill="#555">BlobTx</text>
+  <!-- =========================================== -->
+  <!-- BLOBSTREAM FLOW (bottom, into Ethereum)     -->
+  <!-- =========================================== -->
 
-  <!-- Consensus → Chain State -->
-  <line x1="262" y1="160" x2="262" y2="183" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-c)"/>
+  <!-- Blobstream Relayer -->
+  <rect x="50" y="350" width="190" height="55" rx="12" fill="#fff4e6" stroke="#e67700" stroke-width="1.5"/>
+  <text x="145" y="373" text-anchor="middle" font-size="13" font-weight="700" fill="#d9480f">Blobstream Relayer</text>
+  <text x="145" y="390" text-anchor="middle" font-size="9" fill="#e67700">Relays validator commitments</text>
 
-  <!-- Consensus → Bridge Node (TB1 crossing) -->
-  <line x1="350" y1="115" x2="393" y2="115" stroke="#e67700" stroke-width="2" marker-end="url(#arrow-orange-c)"/>
-  <text x="373" y="108" text-anchor="middle" font-size="7" fill="#e67700">Raw block</text>
+  <!-- SP1 Prover -->
+  <rect x="300" y="350" width="180" height="55" rx="12" fill="#fff4e6" stroke="#e67700" stroke-width="1.5"/>
+  <text x="390" y="373" text-anchor="middle" font-size="13" font-weight="700" fill="#d9480f">SP1 Prover</text>
+  <text x="390" y="390" text-anchor="middle" font-size="9" fill="#e67700">PLONK proof generation</text>
 
-  <!-- Bridge Node → EDS Storage -->
-  <line x1="482" y1="160" x2="482" y2="183" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-c)"/>
+  <!-- SP1 Verifier Contract (inside Ethereum boundary) -->
+  <rect x="550" y="468" width="220" height="65" rx="12" fill="#e5dbff" stroke="#7048e8" stroke-width="1.6"/>
+  <text x="660" y="493" text-anchor="middle" font-size="13" font-weight="700" fill="#5f3dc4">SP1 Verifier Contract</text>
+  <text x="660" y="510" text-anchor="middle" font-size="9" fill="#7950f2">On-chain verification (write-only oracle)</text>
+  <text x="660" y="524" text-anchor="middle" font-size="9" fill="#7950f2">Ethereum L1</text>
 
-  <!-- Light Node ↔ Bridge Node (DAS) -->
-  <line x1="615" y1="130" x2="572" y2="115" stroke="#2f9e44" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow-green-c)"/>
-  <text x="595" y="100" text-anchor="middle" font-size="7" fill="#2f9e44">DAS requests</text>
-  <line x1="570" y1="140" x2="613" y2="155" stroke="#2f9e44" stroke-width="2" marker-end="url(#arrow-green-c)"/>
-  <text x="595" y="167" text-anchor="middle" font-size="7" fill="#2f9e44">Cell + NMT proof</text>
+  <!-- Arrow: Consensus -> Relayer -->
+  <path d="M300,172 L300,180 Q300,188 292,188 L162,188 Q145,188 145,200 L145,348"
+        fill="none" stroke="#e67700" stroke-width="1.5" marker-end="url(#arr-org)"/>
+  <text x="155" y="276" font-size="8" fill="#e67700">validator</text>
+  <text x="155" y="286" font-size="8" fill="#e67700">commitments</text>
 
-  <!-- Bridge Node → Consumer -->
-  <line x1="550" y1="155" x2="688" y2="245" stroke="#555" stroke-width="1.2" marker-end="url(#arrow-c)"/>
-  <text x="630" y="195" text-anchor="middle" font-size="7" fill="#555">Blob + NMT proof</text>
+  <!-- Arrow: Relayer -> SP1 Prover -->
+  <line x1="240" y1="377" x2="298" y2="377" stroke="#e67700" stroke-width="1.5" marker-end="url(#arr-org)"/>
 
-  <!-- Light Node → Consumer (Verified DAH) -->
-  <line x1="730" y1="185" x2="745" y2="228" stroke="#2f9e44" stroke-width="1.5" marker-end="url(#arrow-green-c)"/>
-  <text x="760" y="210" text-anchor="start" font-size="7" fill="#2f9e44">DAH</text>
+  <!-- Arrow: SP1 Prover -> SP1 Verifier -->
+  <path d="M480,377 L520,377 Q540,377 540,400 L540,490 L548,490"
+        fill="none" stroke="#7048e8" stroke-width="1.6" marker-end="url(#arr-pur)"/>
+  <text x="505" y="440" font-size="8" fill="#7048e8">PLONK proof</text>
 
-  <!-- Blobstream Contract → Consumer -->
-  <line x1="700" y1="372" x2="760" y2="287" stroke="#7048e8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-purple-c)"/>
-  <text x="745" y="340" text-anchor="middle" font-size="7" fill="#7048e8">verifyAttestation</text>
+  <!-- =========================================== -->
+  <!-- CALLOUT: 0 verifyAttestation calls          -->
+  <!-- =========================================== -->
+  <rect x="555" y="540" width="210" height="24" rx="6" fill="#ffe3e3" stroke="#ff6b6b" stroke-width="1" opacity="0.9"/>
+  <text x="660" y="556" text-anchor="middle" font-size="10" fill="#c92a2a" font-weight="700">0 verifyAttestation calls</text>
 
-  <!-- Consensus → Orchestrator -->
-  <line x1="262" y1="228" x2="262" y2="363" stroke="#7048e8" stroke-width="1.5" marker-end="url(#arrow-purple-c)"/>
-  <text x="248" y="295" text-anchor="end" font-size="7" fill="#7048e8">Validator commits</text>
+  <!-- =========================================== -->
+  <!-- FLOW LABELS (secondary)                     -->
+  <!-- =========================================== -->
 
-  <!-- Orchestrator → SP1 Verifier -->
-  <line x1="355" y1="400" x2="418" y2="400" stroke="#7048e8" stroke-width="2" marker-end="url(#arrow-purple-c)"/>
-  <text x="387" y="393" text-anchor="middle" font-size="7" fill="#7048e8">SP1 ZK proof</text>
+  <!-- Submission flow label -->
+  <rect x="745" y="100" width="130" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1"/>
+  <text x="810" y="117" text-anchor="middle" font-size="9" fill="#868e96" font-weight="600">SUBMISSION FLOW</text>
+  <text x="810" y="132" text-anchor="middle" font-size="8" fill="#adb5bd">BlobTx -> Finality</text>
 
-  <!-- SP1 Verifier → Contract -->
-  <line x1="560" y1="400" x2="558" y2="397" stroke="#7048e8" stroke-width="2" marker-end="url(#arrow-purple-c)"/>
-  <text x="535" y="420" text-anchor="middle" font-size="7" fill="#7048e8">commitHeaderRange</text>
+  <!-- DAS flow label -->
+  <rect x="745" y="155" width="130" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1"/>
+  <text x="810" y="172" text-anchor="middle" font-size="9" fill="#37b24d" font-weight="600">DAS FLOW</text>
+  <text x="810" y="187" text-anchor="middle" font-size="8" fill="#69db7c">Light &lt;- Bridge &lt;- Consensus</text>
 
-  <!-- Guardian → Contract -->
-  <line x1="650" y1="450" x2="650" y2="427" stroke="#e03131" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-red-c)"/>
-  <text x="690" y="442" text-anchor="start" font-size="7" fill="#e03131">⚠ No timelock</text>
+  <!-- Blobstream flow label -->
+  <rect x="745" y="210" width="130" height="44" rx="8" fill="#f8f9fa" stroke="#ced4da" stroke-width="1"/>
+  <text x="810" y="227" text-anchor="middle" font-size="9" fill="#e67700" font-weight="600">BLOBSTREAM FLOW</text>
+  <text x="810" y="242" text-anchor="middle" font-size="8" fill="#fab005">Consensus -> Ethereum</text>
 
-  <!-- Legend -->
-  <rect x="30" y="488" width="760" height="24" rx="4" fill="#f0f0f0" stroke="none"/>
-  <circle cx="50" cy="500" r="4" fill="#d5e8d4" stroke="#82b366"/>
-  <text x="60" y="504" font-size="8" fill="#555">Process</text>
-  <circle cx="120" cy="500" r="4" fill="#dae8fc" stroke="#6c8ebf"/>
-  <text x="130" y="504" font-size="8" fill="#555">External</text>
-  <circle cx="195" cy="500" r="4" fill="#fff2cc" stroke="#d6b656"/>
-  <text x="205" y="504" font-size="8" fill="#555">Data Store</text>
-  <line x1="280" y1="500" x2="300" y2="500" stroke="#e67700" stroke-width="2"/>
-  <text x="307" y="504" font-size="8" fill="#e67700">Consensus→DA</text>
-  <line x1="380" y1="500" x2="400" y2="500" stroke="#2f9e44" stroke-width="2"/>
-  <text x="407" y="504" font-size="8" fill="#2f9e44">DAS Sampling</text>
-  <line x1="470" y1="500" x2="490" y2="500" stroke="#7048e8" stroke-width="2"/>
-  <text x="497" y="504" font-size="8" fill="#7048e8">Blobstream Bridge</text>
-  <circle cx="590" cy="500" r="4" fill="#e1d5e7" stroke="#9673a6"/>
-  <text x="600" y="504" font-size="8" fill="#555">On-chain / ZK</text>
-  <circle cx="665" cy="500" r="4" fill="#ffe6e6" stroke="#e03131"/>
-  <text x="675" y="504" font-size="8" fill="#555">Guardian</text>
+  <!-- =========================================== -->
+  <!-- TITLE                                        -->
+  <!-- =========================================== -->
+  <text x="450" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#333">Celestia Data Flow Architecture</text>
+  <text x="450" y="46" text-anchor="middle" font-size="10" fill="#868e96">CometBFT Consensus  |  DAS Network  |  Blobstream Bridge to Ethereum</text>
+
 </svg>

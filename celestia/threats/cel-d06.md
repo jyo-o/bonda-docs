@@ -1,52 +1,44 @@
-# CEL-D06: EnableBlackListing Disabled by Default — Sybil Peer Reconnection Allowed
+# CEL-D06: Peer Blacklisting Disabled by Default Allowing Sybil Reconnection
 
 {% hint style="info" %}
-**Severity**: Medium · **STRIDE**: D (Denial of Service) · **Scope**: implementation · **Status**: code_verified
+**Severity**: Medium · **STRIDE**: D · **Status**: code_verified
 {% endhint %}
 
 ## Overview
 
-The SHREX peer manager's EnableBlackListing defaults to false (options.go:62, TODO comment: 'enable blacklisting once all related issues are resolved'). In blacklistPeers() (manager.go:416-438), when EnableBlackListing=false, calls to connGater.BlockPeer() and host.Network().ClosePeer() are skipped. As a result, peers that sent invalid data are only logged but not actually blocked, allowing them to reconnect immediately or continue attacks on the existing connection. This default weakens the defense premises of CEL-D03 (blacklistedHashes unbounded growth), CEL-D05 (ShrEx unbounded response), and CEL-S01 (DAS Selective Disclosure). CEL-D05 and CEL-S01 cite 'peer blacklisting after one failure' as an existing defense, but this defense is inoperative under default settings.
+The SHREX peer manager's EnableBlackListing flag defaults to false, as set in options.go line 62 with a TODO comment stating "enable blacklisting once all related issues are resolved." When this flag is false, the blacklistPeers function in manager.go skips calls to connGater.BlockPeer() and host.Network().ClosePeer(), meaning peers that send invalid data are logged but never actually disconnected or blocked.
 
-## Core Invariants Affected
+This default undermines the defense assumptions of several other threats. CEL-D03 (blacklistedHashes unbounded growth) relies on eventual peer blocking to limit injection rate. CEL-D05 (ShrEx unbounded response) and CEL-S01 (DAS Selective Disclosure) both cite "peer blacklisting after one failure" as an existing defense, but this defense does not function under default settings.
 
-`data_recoverability`
-
-Not a direct DA invariant violation but defense mechanism disabled. Acts as an enabler that amplifies the blast radius of CEL-D03/D05/S01.
+The result is that a malicious peer can send invalid data, get logged, and immediately continue its attack or reconnect without any penalty. This acts as a force multiplier for multiple other vulnerabilities.
 
 ## Prerequisites
 
-None. The default configuration itself is the threat condition. Malicious peers need only P2P access to retry indefinitely without being blocked.
+- None required beyond the default configuration itself
+- Any malicious peer with P2P access can retry indefinitely without being blocked
 
 ## Attack Scenario
 
-**Condition**: Light node running with celestia-node default settings. EnableBlackListing=false is the default.
-
-**Example**: Default settings: EnableBlackListing=false, PoolValidationTimeout=2min, GcInterval=30s. Malicious peer sends fake DataHash -> hash added to blacklistedHashes but peer itself is not blocked (BlockPeer()/ClosePeer() not called) -> peer retries with new hash.
+1. A Light node runs with default celestia-node settings where EnableBlackListing is false.
+2. A malicious peer connects via P2P and sends fake DataHashes or invalid ShrEx responses.
+3. The peer manager detects the invalid data and marks the hash in its blacklist map.
+4. However, because EnableBlackListing is false, BlockPeer() and ClosePeer() are never called.
+5. The malicious peer remains connected and continues sending new fake hashes or invalid data.
+6. This amplifies the blast radius of CEL-D03, CEL-D05, and CEL-S01.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Medium |
-| Likelihood | Immediate (default configuration is itself the threat; no separate attack action needed) |
-| Scope | implementation |
-| Target | Process, Actor |
-| Core Invariants | data_recoverability |
+Defense mechanism bypass that enables unlimited retries from malicious peers. The default configuration itself is the threat condition, requiring no separate exploit. This is not a direct DA invariant violation but an enabler that increases the severity of multiple related threats.
 
-## Code References
+## Evidence
 
-- [`celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62 (EnableBlackListing: false, TODO comment)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/options.go#L60-L62)
-- [`celestia-node/share/shwap/p2p/shrex/peers/manager.go:416-438 (blacklistPeers: EnableBlackListing=false → skip BlockPeer/ClosePeer)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go#L416-L438)
-- [`celestia-node/share/shwap/p2p/shrex/peers/manager.go:423-425 (if !m.params.EnableBlackListing { continue })`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go#L423-L425)
-- Commit: `celestia-node f8cefbe3e5bd3e144a414cb2140dd223ec6191c6`
+### Source Code
 
-## Verification & Evidence
-
-**Status**: code_verified
-
-Code directly confirmed (commit f8cefbe). EnableBlackListing=false default, TODO comment original text, and blacklistPeers() gating logic all confirmed. Cross-verified that CEL-D05/S01's 'blacklist defense' claim is inoperative under default settings.
+- `celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62` -- EnableBlackListing defaults to false with TODO comment
+- `celestia-node/share/shwap/p2p/shrex/peers/manager.go:416-438` -- blacklistPeers function: when EnableBlackListing is false, BlockPeer and ClosePeer are skipped
+- `celestia-node/share/shwap/p2p/shrex/peers/manager.go:423-425` -- the gating condition: if !m.params.EnableBlackListing { continue }
+- Verified at commit celestia-node f8cefbe3e5bd3e144a414cb2140dd223ec6191c6
 
 ## Mitigations
 
-Recommendations: (1) Change EnableBlackListing default to true, (2) Publish roadmap for resolving TODO ('all related issues'), (3) Add EnableBlackListing=true recommendation to operator documentation, (4) Implement per-peer rate limit that works without blacklisting.
+Recommended fixes include changing the EnableBlackListing default to true, publishing a roadmap for resolving the TODO-referenced "related issues," adding a recommendation for EnableBlackListing=true in operator documentation, and implementing per-peer rate limits that function independently of the blacklisting mechanism.

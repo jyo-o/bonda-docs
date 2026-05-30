@@ -1,54 +1,53 @@
-# CEL-D01: Zero-cost Prevote-nil Censorship by 1/3 Cartel
+# CEL-D01: Zero-cost Prevote-nil Censorship by One-third Cartel
 
-{% hint style="info" %}
-**Severity**: Informational · **STRIDE**: D (Denial of Service) · **Scope**: protocol · **Status**: verified
+{% hint style="success" %}
+**Severity**: Informational · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Overview
 
-A cartel controlling 1/3 of voting power can permanently censor targeted block proposals by sending nil votes at the prevote stage indefinitely. When the 2/3 threshold is not met, nil precommit followed by round timeout and proposer rotation repeats, leaving the targeted block permanently unfinalized. The slashing penalty is 0 TIA, and cartel members can avoid jail by signing just 10/10,000 blocks (min_signed_per_window=0.001, downtime_jail_duration=60s). The absence of a nil-vote evidence type makes it impossible to distinguish honest from malicious nil votes.
+Celestia uses Tendermint-based BFT consensus where a block is finalized only when it receives prevotes from more than two-thirds of voting power. If a cartel controls at least one-third of voting power, it can permanently censor targeted block proposals by casting nil votes at the prevote stage indefinitely.
 
-## Core Invariants Affected
+When the two-thirds threshold is not met, the round produces nil precommits, triggers a timeout, and rotates to the next proposer. This cycle repeats endlessly, leaving the targeted block permanently unfinalized. The slashing penalty for this behavior is zero TIA because prevote-nil is not classified as a double sign. Cartel members can avoid jail by signing as few as 10 out of 10,000 blocks, since min_signed_per_window is set to 0.001 and downtime_jail_duration is only 60 seconds.
 
-`consensus_liveness`
-
-1/3 withholding signatures (prevote-nil) blocks targeted block finalization = targeted denial of consensus liveness.
+The root cause is the absence of a nil-vote evidence type in the evidence subsystem. The protocol cannot distinguish between honest nil votes (e.g., a validator that genuinely did not receive the proposal) and malicious nil votes cast for censorship purposes.
 
 ## Prerequisites
 
-Control of at least 1/3 of active bonded validators. Technical cost is 0 TIA (no slashing); the only opportunity cost is block rewards lost during the 60-second jail period.
+- Control of at least one-third of active bonded validators' voting power
+- Technical cost is zero TIA due to no slashing for downtime
+- Opportunity cost is limited to block rewards lost during the 60-second jail period
 
 ## Attack Scenario
 
-**Condition**: 1/3 voting power collusion + slash_fraction_downtime=0 (active on mainnet)
-
-**Example**: Mainnet (2026-05-20, height 11,172,730): slash_fraction_downtime=0, min_signed_per_window=0.001, signed_blocks_window=10000, downtime_jail_duration=60s.
+1. A cartel of validators controlling at least one-third of voting power identifies a target block proposal to censor.
+2. When the target block is proposed, all cartel members send prevote-nil instead of prevoting for the block.
+3. The block fails to reach the two-thirds prevote threshold, resulting in nil precommits.
+4. A round timeout occurs and the proposer rotates to the next validator.
+5. If the new proposer re-proposes the same transactions, the cartel repeats nil voting.
+6. The targeted block remains permanently unfinalized while the cartel members avoid jail by occasionally signing other blocks (10 out of 10,000 is sufficient).
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Informational |
-| Likelihood | Unrealistic (requires collusion of top 8 institutional validators with no economic incentive) |
-| Scope | protocol |
-| Target | Process |
-| Core Invariants | consensus_liveness |
+Targeted block censorship with zero on-chain cost. The attack is considered unrealistic because it requires collusion among the top 8 institutional validators with no economic incentive to do so. However, the protocol lacks any mechanism to detect or penalize this behavior if it were to occur.
 
-## Code References
+## Evidence
 
-- [`celestia-core/types/evidence.go:22-219 (Evidence 구현체 2종만, nil-vote evidence 부재)`](https://github.com/celestiaorg/celestia-core/blob/main/types/evidence.go#L22-L219)
-- [`celestia-core/consensus/state.go:1553-1577 (정직/악의 prevote-nil 동일 호출)`](https://github.com/celestiaorg/celestia-core/blob/main/consensus/state.go#L1553-L1577)
-- [`celestia-core/consensus/state.go:1711-1722 (round timeout)`](https://github.com/celestiaorg/celestia-core/blob/main/consensus/state.go#L1711-L1722)
-- [`celestia-app/app/default_overrides.go:113-122 (슬래싱 기본값)`](https://github.com/celestiaorg/celestia-app/blob/main/app/default_overrides.go#L113-L122)
-- On-chain: `cosmos/slashing/v1beta1/params (slash_fraction_downtime=0, min_signed_per_window=0.001)`
-- [PR #7090: 2026-04-17 MERGED, 'to match mainnet governance'](https://github.com/celestiaorg/celestia-app/pull/7090)
+### Source Code
 
-## Verification & Evidence
+- `celestia-core/types/evidence.go:22-219` -- only two evidence types are implemented; no nil-vote evidence type exists
+- `celestia-core/consensus/state.go:1553-1577` -- honest and malicious prevote-nil follow the same code path
+- `celestia-core/consensus/state.go:1711-1722` -- round timeout logic
+- `celestia-app/app/default_overrides.go:113-122` -- slashing default values
 
-**Status**: verified
+### On-Chain / Network
 
-Phase 1 gap analysis. Slashing parameters cross-source verified against mainnet REST (celestia-rest.publicnode.com). Code file:line independently re-verified.
+- Mainnet slashing parameters (2026-05-20, height 11,172,730): slash_fraction_downtime=0, min_signed_per_window=0.001, signed_blocks_window=10000, downtime_jail_duration=60s
+- Source: `celestia-rest.publicnode.com/cosmos/slashing/v1beta1/params`
+- PR celestia-app#7090 (merged 2026-04-17): changed defaults "to match mainnet governance"
 
 ## Mitigations
 
-Currently only slash_fraction_double_sign=0.02 is active; prevote-nil is not a double sign and therefore not penalized. Recommendations: (1) Introduce nil-vote evidence type (consensus-breaking), (2) Set slash_fraction_downtime>0 via governance, (3) Explore correlation penalty, (4) Surface censorship pattern monitoring.
+Currently only slash_fraction_double_sign=0.02 is active. Prevote-nil is not classified as a double sign and therefore carries no penalty.
+
+Recommended fixes include introducing a nil-vote evidence type (consensus-breaking change), setting slash_fraction_downtime above zero via governance, exploring a correlation penalty mechanism, and building monitoring tools to surface censorship patterns on-chain.

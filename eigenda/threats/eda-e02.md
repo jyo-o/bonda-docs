@@ -1,20 +1,27 @@
-# EDA-E02: Single 3-of-4 Multisig Controls 8 Core Contracts Simultaneously
+# EDA-E02: Single Multisig Controls All Eight Core Contracts Without Timelock
 
 {% hint style="info" %}
-**Severity**: Low (2.7/10) · **STRIDE**: E · **Scope**: bridge · **Status**: Verified
+**Severity**: Low (2.7/10) · **STRIDE**: E · **Status**: Verified
 {% endhint %}
 
 ## Overview
 
-Gnosis Safe 0x002721... (3-of-4 multisig, no timelock) is the owner of 8 core contracts: ServiceManager (0x870679...), RegistryCoordinator (0x0BAAc7...), EjectionManager (0x130d8E...), ThresholdRegistry (0xdb4c89...), RelayRegistry (0xD160e6...), DisperserRegistry (0x78cb05...), PaymentVault (0xb2e7ef...), CertVerifierRouter (0x1be725...). All 4 signers are EOAs (0xA3e302..., 0x1b6cC4..., 0x403F4d..., 0x891bbC...) with no ENS or metadataURI set, making onchain identity verification impossible. Compromising 3 keys enables total governance takeover. Impact scenarios: (1) ThresholdRegistry -- modify confirmationThreshold/adversaryThreshold to manipulate security inequality. (2) CertVerifierRouter -- addCertVerifier() to replace cert verification logic. CertVerifier itself (0x61692e...) is immutable (owner() reverts) but can be bypassed via Router. (3) PaymentVault -- withdraw(uint256) onlyOwner to drain vault balance. (4) EjectionManager -- force eject operators to manipulate quorum. (5) DisperserRegistry/RelayRegistry -- replace disperser/relay to control data paths.
+A single Gnosis Safe multisig (`0x002721...`) with a 3-of-4 threshold and no timelock controls the ownership of eight core EigenDA contracts: ServiceManager (`0x870679...`), RegistryCoordinator (`0x0BAAc7...`), EjectionManager (`0x130d8E...`), ThresholdRegistry (`0xdb4c89...`), RelayRegistry (`0xD160e6...`), DisperserRegistry (`0x78cb05...`), PaymentVault (`0xb2e7ef...`), and CertVerifierRouter (`0x1be725...`). All four signers are externally owned accounts (EOAs) with no ENS names or metadata URIs set, making on-chain identity verification impossible.
+
+Compromising any three of the four signer keys would grant total governance control over EigenDA. The impact scenarios include: modifying `confirmationThreshold` and `adversaryThreshold` in the ThresholdRegistry to manipulate security parameters; using `addCertVerifier()` in the CertVerifierRouter to replace certificate verification logic (though the CertVerifier itself at `0x61692e...` is immutable); calling `withdraw(uint256)` on PaymentVault to drain the vault balance; force-ejecting operators via EjectionManager to manipulate quorum composition; and replacing dispersers or relays via their respective registries to control data paths.
+
+This finding is consistent with the Dedaub N1 audit item, which classified it as Informational. Key EigenDA-specific observations include the absence of a timelock (execution is immediate with no community response window), the concentration of all eight core contracts under a single Safe (no privilege separation), and the inability to verify signer identities on-chain.
 
 ## Prerequisites
 
-Compromise 3 of 4 signer private keys. Signers: 0xA3e302..., 0x1b6cC4..., 0x403F4d..., 0x891bbC...
+- Compromise of 3 out of 4 signer private keys. Signers: `0xA3e302...`, `0x1b6cC4...`, `0x403F4d...`, `0x891bbC...`.
 
 ## Attack Scenario
 
-See details above.
+1. An attacker compromises three of the four signer EOA private keys through phishing, social engineering, or key theft.
+2. The attacker constructs a multisig transaction targeting one of the eight controlled contracts.
+3. The transaction executes immediately with no timelock delay, giving the community no time to respond.
+4. Depending on the target contract, the attacker can drain the PaymentVault, replace certificate verification logic, eject honest operators, or take over data routing infrastructure.
 
 ## Impact
 
@@ -22,59 +29,36 @@ See details above.
 |--------|-------|
 | BVSS Score | 2.7/10 (Low) |
 | BVSS Vector | `BVSS:1.1/B:N/AV:P/AC:H/PR:R/UI:N/S:U/C:H/I:H/A:H/CI:M/II:M/AI:M` |
-| Likelihood | Unrated |
-| Scope | bridge |
-| Target | Process |
+| Scope | Bridge |
 
-### BVSS Rationale
+### Scoring Rationale
 
-B:N -- Multisig key compromise leading to fund theft is a common premise for all Safe-based protocols, not an EigenDA-specific vulnerability. Consistent with Dedaub N1 Informational classification. AV:P -- Simultaneous compromise of 3 independent keys requires physical access or social engineering. AC:H -- 3-of-4 multisig is a security hardening measure; binary BVSS choice (H/L) overrepresents actual difficulty. PR:R -- Signer credentials required. EigenDA-specific findings: (1) No timelock -- execution is immediate with no community response time. (2) Single Safe for 8 core contracts -- no privilege separation. (3) Signer identities not onchain-verified. CIA reflects full control on successful compromise, but Impact downgraded to M -- the compromise scenario itself is governance observation, not an exploit path.
+Blockchain Impact (B) is None because multisig key compromise leading to fund theft is a common premise for all Safe-based protocols and is not an EigenDA-specific vulnerability, consistent with the Dedaub N1 Informational classification. Attack Vector (AV) is Physical because simultaneous compromise of 3 independent keys requires physical access or social engineering. Attack Complexity (AC) is High because 3-of-4 multisig is a security hardening measure, though the binary BVSS choice between High and Low overrepresents the actual difficulty. Privileges Required (PR) is Reserved because signer credentials are needed. The CIA scores reflect full control upon successful compromise, but the Impact is downgraded to Medium because the compromise scenario is a governance observation rather than an exploit path.
 
-## Code References
+## Evidence
+
+### On-Chain Verification
+
+- `getOwners()` returns 4 signers: `[0xA3e3, 0x1b6c, 0x403F, 0x891b]`.
+- `getThreshold()` returns 3.
+- `owner()` called on all 8 contracts returns `0x002721B4`.
+- CertVerifier at `0x61692e...`: `owner()` call reverts (immutable contract).
+- CertVerifierRouter at `0x1be725...`: `owner()` returns `0x002721B4`.
+- `certVersion()` returns 3 on mainnet (code indicates 4, but mainnet is at version 3).
+- Verified at block 25101686.
 
 ### Source Code
 
-- [`contracts/src/integrations/cert/router/EigenDACertVerifierRouter.sol`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/integrations/cert/router/EigenDACertVerifierRouter.sol)
+- [`contracts/src/integrations/cert/router/EigenDACertVerifierRouter.sol`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/integrations/cert/router/EigenDACertVerifierRouter.sol) -- Router contract with `addCertVerifier()` gated by `onlyOwner`.
 
-### Audit References
+### PoC Testing
 
-- Dedaub N1(Informational)
-
-### Onchain Evidence
-
-- `getOwners()=[4 signers]`
-- `getThreshold()=3`
-- `block 25097183`
-- `owner() 호출로 8개 컨트랙트 확인`
-- `CertVerifierRouter owner()=0x002721B4`
-- `CertVerifier owner()=reverted(immutable)`
-
-### PoC Notes
-
-- block=25101686
-- poc/04-*/evidence.yaml [VERIFIED]
-- CertVerifier.owner()=reverted
-- poc/03-*/evidence.yaml [VERIFIED]
-
-### Other References
-
-- getThreshold()=3
-- getOwners()=[0xA3e3
-- 0x1b6c
-- 0x403F
-- 0x891b]
-- owner()×8=0x002721B4 (all confirmed)
-- CertVerifierRouter.owner()=0x002721B4
-- certVersion()=3(NOT 4 — code says 4 but mainnet is 3)
-
-## Verification & Evidence
-
-**Status**: Verified
-
-DA Ops Safe 3-of-4, all EOAs, no timelock. 17 contracts of which 12 are EIP-1967 proxies under a single ProxyAdmin. CertVerifier confirmed immutable; Router-based replacement confirmed possible.
+- `poc/04-*/evidence.yaml` confirmed multisig configuration and ownership.
+- `poc/03-*/evidence.yaml` confirmed CertVerifier immutability and Router-based replacement path.
+- 17 contracts total, 12 are EIP-1967 proxies under a single ProxyAdmin.
 
 **PoC References**: #02, #03
 
 ## Mitigations
 
-3-of-4 multisig structure. Also noted by Dedaub N1. However, signer identities are not onchain-verified.
+The 3-of-4 multisig structure provides baseline security against single-key compromise. This was also noted by the Dedaub N1 audit. However, the absence of a timelock means that any multisig transaction executes immediately, and signer identities are not verifiable on-chain. Adding a timelock and separating contract ownership across multiple Safes would improve the governance posture.

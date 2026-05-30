@@ -1,50 +1,47 @@
-# CEL-D02: Large PFB Blockspace Monopoly — Low-cost Sustained Congestion Attack
+# CEL-D02: Low-cost Blockspace Monopoly via Large PFB Transactions
 
 {% hint style="info" %}
-**Severity**: Medium · **STRIDE**: D (Denial of Service) · **Scope**: protocol · **Status**: code_verified
+**Severity**: Medium · **STRIDE**: D · **Status**: code_verified
 {% endhint %}
 
 ## Overview
 
-Due to Celestia's block structure, a single PFB transaction can occupy up to 8 MiB (MaxTxSize), and only 4 maximum-size PFBs are needed to fill an entire block (BlockMaxBytes=32 MiB). Transaction inclusion order follows fee/gas-based priority, while shares within the square are sorted by namespace (go-square builder.go). An attacker can submit large PFBs repeatedly at minimum gas cost to delay or block normal transactions from being included. While a MaxPFBMessages cap was introduced in v9, it does not resolve the blockspace monopoly issue itself. The fee market increases costs as the attack persists, but initial entry cost is low enough for short-term congestion.
+Celestia's block structure allows a single PayForBlobs (PFB) transaction to occupy up to 8 MiB (MaxTxSize), while the maximum block size is 32 MiB (BlockMaxBytes). This means only four maximum-size PFB transactions are needed to completely fill a block, crowding out all other transactions.
 
-## Core Invariants Affected
+Transaction inclusion follows fee-per-gas priority, and shares within the data square are sorted by namespace. An attacker can repeatedly submit large PFB transactions at the minimum gas price to delay or prevent normal transactions from being included in blocks. While a MaxPFBMessages cap was introduced in v9, it does not resolve the fundamental blockspace monopoly problem.
 
-Blob inclusion delay means DA commitment cannot be obtained, preventing settlement layer submission and delaying rollup finality. Rollup sequencers using Celestia as DA must submit DA commitments from Celestia blocks to the settlement layer (e.g., Ethereum) for state updates to be finalized. Blockspace monopoly-induced inclusion delays temporarily sever this chain. Since the fee market responds and retries resolve it, this constitutes temporary finality delay rather than complete service disruption.
+The fee market provides a natural defense by raising costs as congestion increases, but the initial entry cost is low enough to sustain short-term congestion attacks cheaply. Rollup sequencers using Celestia as their DA layer are directly impacted because blob inclusion delays prevent them from obtaining DA commitments needed for settlement layer submission, causing temporary finality delays.
 
 ## Prerequisites
 
-No barrier to entry beyond TIA gas costs. However, the fee market competition increases sustained attack costs.
+- No barrier beyond TIA gas costs
+- Fee market competition increases the cost of sustained attacks over time
 
 ## Attack Scenario
 
-**Condition**: Attacker can repeatedly submit 8 MiB PFBs by paying only gas costs
-
-**Example**: Mainnet (2026-05-26): GasPerBlobByte=8, minimum_gas_price=0.002 utia/gas, TIA=$0.468. One 8 MiB PFB costs ~0.134 TIA (~$0.063), filling entire block (x4) ~$0.25/block, 1 hour sustained (600 blocks) ~$151. Pre-fee-market short-term congestion cost is very low.
+1. The attacker crafts maximum-size PFB transactions (8 MiB each) with the minimum gas price.
+2. Four such transactions fill an entire block, leaving no room for legitimate transactions.
+3. The attacker repeats this across consecutive blocks.
+4. Normal transaction inclusion is delayed or blocked until the fee market raises gas prices beyond what the attacker is willing to pay.
+5. Rollup sequencers cannot obtain DA commitments, causing temporary finality delays on dependent L2 chains.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Medium |
-| Likelihood | Conditional (initial cost low, sustained cost rises due to fee market response) |
-| Scope | protocol |
-| Target | Process |
+Temporary blockspace denial for legitimate users and rollup finality delays. At mainnet prices (2026-05-26), a single 8 MiB PFB costs approximately 0.134 TIA (about $0.063), filling an entire block costs about $0.25, and sustaining the attack for one hour (600 blocks) costs roughly $151 before fee market response.
 
-## Code References
+## Evidence
 
-- [`celestia-app/pkg/appconsts/app_consts.go (BlockMaxBytes=32 MiB, MaxTxSize=8 MiB, GasPerBlobByte=8)`](https://github.com/celestiaorg/celestia-app/blob/main/pkg/appconsts/app_consts.go)
-- [`go-square/builder.go:261 (blob 정렬: namespace 순, tx priority 보존)`](https://github.com/celestiaorg/go-square/blob/main/builder.go#L261)
-- [`celestia-app/app/filtered_square_builder.go (Fill: fee/gas 우선순위 기반 포함)`](https://github.com/celestiaorg/celestia-app/blob/main/app/filtered_square_builder.go)
-- On-chain: `celestia-rest.publicnode.com/cosmos/base/node/v1beta1/config (minimum_gas_price=0.002utia)`
-- [PR #6604: MaxPFBMessages cap 도입](https://github.com/celestiaorg/celestia-app/pull/6604)
+### Source Code
 
-## Verification & Evidence
+- `celestia-app/pkg/appconsts/app_consts.go` -- BlockMaxBytes=32 MiB, MaxTxSize=8 MiB, GasPerBlobByte=8
+- `go-square/builder.go:261` -- blob sorting by namespace order with tx priority preserved
+- `celestia-app/app/filtered_square_builder.go` -- Fill function uses fee/gas priority-based inclusion
 
-**Status**: code_verified
+### On-Chain / Network
 
-app_consts.go parameters confirmed. Sort criteria in go-square builder.go directly verified as namespace-ordered -- D02 original claim of byte-budget priority ordering inconsistent with code. Actual mechanism is low-cost blockspace monopoly by large PFBs under fee/gas priority. minimum_gas_price on-chain confirmed. Cost calculations verified.
+- Mainnet minimum_gas_price=0.002 utia/gas confirmed via `celestia-rest.publicnode.com/cosmos/base/node/v1beta1/config`
+- PR celestia-app#6604 introduced MaxPFBMessages cap
 
 ## Mitigations
 
-Recommendations: (1) Re-weight PFB ordering by fee-per-byte instead of byte-budget, (2) Weighted cost for large PFBs, (3) Per-user PFB ratio cap.
+The fee market naturally raises costs during sustained attacks, but initial entry cost remains low. Recommended fixes include re-weighting PFB ordering by fee-per-byte instead of flat priority, applying weighted gas costs for large PFBs, and introducing per-user PFB ratio caps.

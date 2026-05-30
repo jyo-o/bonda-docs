@@ -1,61 +1,78 @@
 # Ethereum DA (PeerDAS)
 
-Ethereum's data availability layer is evolving through EIP-4844 (Proto-Danksharding) and PeerDAS (Peer Data Availability Sampling). Blobs are committed using KZG polynomial commitments and distributed across the peer-to-peer network as data columns. PeerDAS, activated in the Fulu fork, introduces column-level sampling where nodes are assigned custody groups based on their node ID and are responsible for storing and serving specific data columns. Reconstruction of the full data from a subset of columns uses erasure coding.
-
-Ethereum DA is unique in its multi-client architecture: multiple independent consensus client implementations (Lighthouse, Prysm, Teku, Lodestar, Nimbus) must maintain behavioral consistency for network health. This analysis covers cross-client divergences, KZG verification mechanics, and blob/column lifecycle threats.
+> **How to Read This Section**
+>
+> Each threat is identified by an SID like `ETH-S01` and linked to a detailed write-up. Severity scores use the Halborn BVSS 1.1 framework on a 0--10 scale. Status indicates verification depth: `verified` means confirmed through specification and documentation review, `code_verified` means confirmed by reading the actual source code, and `partial` means the threat is identified but not yet fully verified across all relevant implementations.
 
 ## Architecture
 
-![Ethereum DA Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/ethereum-architecture.svg)
+![Ethereum PeerDAS Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/ethereum-architecture.svg)
+
+## What is PeerDAS?
+
+PeerDAS stands for Peer Data Availability Sampling. It is Ethereum's upcoming data availability scaling upgrade, defined in EIP-7594. Before PeerDAS, every Ethereum node had to download and store all blob data attached to blocks. PeerDAS changes this by splitting blob data into 128 columns and distributing the storage responsibility across the network. Each validator only needs to hold a small subset of columns rather than the full dataset.
+
+The core mechanism works through custody groups. Every validator is assigned to one or more custody groups based on its node ID. Each custody group is responsible for storing and serving a specific set of data columns. When a validator needs data it does not hold locally, it requests the missing columns from peers in the appropriate custody groups. If enough columns are available, the full data can be reconstructed using erasure coding, a mathematical technique that allows recovery of the original data from any sufficiently large subset of columns.
+
+Ethereum's data availability layer is unique because of its multi-client architecture. Unlike most blockchain networks that rely on a single reference implementation, Ethereum has multiple independent client teams building separate software that must all behave identically. Consensus clients like Lighthouse (written in Rust by Sigma Prime) and Prysm (written in Go by Prysmatic Labs) each implement the PeerDAS specification from scratch. The execution client go-ethereum handles blob transactions and the blobpool. This diversity strengthens the network against single-implementation bugs, but it also introduces the risk of subtle behavioral divergences between clients.
+
+Data integrity in PeerDAS relies on KZG commitments, a cryptographic proof scheme based on polynomial commitments. Each blob is committed using a KZG commitment, and each data column carries a KZG proof that allows any node to verify the column's correctness without downloading the full blob. The KZG scheme depends on a trusted setup ceremony that produced a shared set of cryptographic parameters used by all clients.
+
+## System Components
+
+| Component | Role | Trust Level |
+|-----------|------|-------------|
+| Beacon Chain | Coordinates consensus, manages validator duties and blob references | Core protocol -- highest trust |
+| PeerDAS Network | Distributes data columns across custody groups via peer-to-peer networking | Protocol-level -- depends on honest majority of custody peers |
+| KZG Commitments | Provides cryptographic proofs for blob and data column integrity | Cryptographic -- trust depends on trusted setup ceremony |
+| Lighthouse | Rust-based consensus client by Sigma Prime; implements PeerDAS spec independently | Implementation -- verified against spec |
+| Prysm | Go-based consensus client by Prysmatic Labs; implements PeerDAS spec independently | Implementation -- verified against spec |
+| go-ethereum | Primary execution client; handles blob transactions, fee market, and blobpool | Implementation -- verified against spec |
+| Blobpool | Transaction pool within go-ethereum that manages pending blob-carrying transactions | Subsystem -- bounded by per-account and global limits |
+
+## Key Numbers
+
+- **11** threats identified across the Ethereum DA stack
+- **6** verified through specification and documentation review
+- **3** code_verified through direct source code analysis
+- **2** partial, identified but not yet fully verified across all implementations
+- **Medium (5.3)** is the highest severity found
+- **6** source code repositories analyzed
+- **1** multi-client behavioral divergence discovered (ETH-E01: Lighthouse vs Prysm)
+
+> **Note on Multi-Client Analysis**
+>
+> The Ethereum section is the only part of BONDA that performs cross-client divergence analysis. Because PeerDAS is implemented independently by multiple teams, threats can emerge not just from specification gaps but from differences in how separate codebases handle the same edge cases. ETH-E01 is a direct result of this analysis approach.
 
 ## Threat Summary
 
-11 threats identified through multi-client source code analysis (go-ethereum, Lighthouse, Prysm), consensus-specs review, and c-kzg-4844 verification. All threats are scored using the Halborn BVSS 1.1 framework.
-
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [ETH-E01](threats/eth-e01.md) | Reconstruction Failure Mode Mismatch Between Lighthouse and Prysm | High (8.2) | code_verified |
-| [ETH-T02](threats/eth-t02.md) | KZG Trusted Setup File Replacement | Medium (4.2) | code_verified |
-| [ETH-S02](threats/eth-s02.md) | Custody Group Node ID Grinding | Low (3.5) | code_verified |
-| [ETH-T03](threats/eth-t03.md) | Gloas Data Column Inclusion Proof Omission | Low (3.5) | partial |
-| [ETH-T05](threats/eth-t05.md) | Gloas Column Proof Verification | Low (3.5) | partial |
-| [ETH-D02](threats/eth-d02.md) | Reconstruction Failure Discards All Verified Columns (Lighthouse) | Low (3.5) | code_verified |
-| [ETH-S01](threats/eth-s01.md) | Testing API JWT Authentication Not Applied | Low (2.8) | code_verified |
-| [ETH-R01](threats/eth-r01.md) | Blob/DataColumn Equivocation Detection Failure | Low (1.1) | code_verified |
-| [ETH-T01](threats/eth-t01.md) | Blob Fee Denominator Fork-Dependent Formula | Low (0.8) | code_verified |
-| [ETH-T04](threats/eth-t04.md) | Cell Index Bounds Check Asymmetry | Low (0.8) | code_verified |
-| [ETH-D01](threats/eth-d01.md) | Per-Account Blobpool Exhaustion via 1-Wei Fee | Low (0.8) | verified |
+| [ETH-S01](threats/eth-s01.md) | Testing API JWT Authentication Missing | Medium (5.3) | verified |
+| [ETH-S02](threats/eth-s02.md) | Custody Group Node ID Grinding | Medium (5.3) | verified |
+| [ETH-T01](threats/eth-t01.md) | Blob Fee Denominator Fork Dependency | Low (3.7) | code_verified |
+| [ETH-T02](threats/eth-t02.md) | KZG Trusted Setup File Replacement | Low (2.5) | verified |
+| [ETH-T03](threats/eth-t03.md) | Data Column Inclusion Proof Omission | Low (2.5) | code_verified |
+| [ETH-T04](threats/eth-t04.md) | Cell Index Bounds Check Asymmetry | Low (1.3) | verified |
+| [ETH-T05](threats/eth-t05.md) | Column Proof Verification Gap | Low (1.3) | verified |
+| [ETH-R01](threats/eth-r01.md) | Blob/DataColumn Equivocation Detection Failure | Low (0.8) | verified |
+| [ETH-D01](threats/eth-d01.md) | Per-Account Blobpool Exhaustion | Low (0.8) | code_verified |
+| [ETH-D02](threats/eth-d02.md) | Verified Column Discard on Reconstruction Failure | Low (0.6) | partial |
+| [ETH-E01](threats/eth-e01.md) | Reconstruction Failure Mode Mismatch (Lighthouse vs Prysm) | Low (0.6) | partial |
 
 ## Key Findings
 
-### ETH-E01: Reconstruction Failure Mode Mismatch (High, BVSS 8.2)
+### ETH-S01: Testing API JWT Authentication Missing -- Medium (5.3)
 
-The most significant finding is a behavioral divergence between Lighthouse and Prysm in handling data column reconstruction failures:
+The Beacon Chain testing API endpoints lack JWT authentication enforcement in certain configurations. These endpoints expose internal state and control surfaces intended only for development and testing. If a node operator inadvertently leaves the testing API accessible in a production environment, an attacker on the same network could invoke privileged operations without authentication. The severity reflects the realistic deployment scenario where testing APIs are disabled by default but occasionally left enabled during debugging.
 
-- **Lighthouse:** On reconstruction failure, deletes ALL columns (including previously verified ones), requiring O(N/2) re-download. Found in `overflow_lru_cache.rs`.
-- **Prysm:** On reconstruction failure, marks reconstructed columns as verified WITHOUT re-verification.
+### ETH-S02: Custody Group Node ID Grinding -- Medium (5.3)
 
-This cross-client inconsistency affects the primary DA path in Fulu where reconstruction is a core mechanism. A single malicious column can trigger divergent behavior across the network: Lighthouse nodes waste bandwidth re-downloading valid data, while Prysm nodes may accept unverified data as valid. This threatens both consensus safety and data recoverability invariants.
+PeerDAS custody group assignment is deterministic: a validator's node ID directly determines which data columns it must store and serve. An attacker with sufficient computing resources could generate node IDs that concentrate custody on specific columns, potentially degrading the availability of those columns by flooding the corresponding custody groups with attacker-controlled nodes. The practical cost of this attack is bounded by the number of custody groups and the computational difficulty of ID grinding, but the deterministic assignment means the attack surface is structurally permanent.
 
-### ETH-D02: Verified Column Discard on Reconstruction Failure (Low, BVSS 3.5)
+### ETH-E01: Reconstruction Failure Mode Mismatch -- Low (0.6)
 
-Specific to Lighthouse: when reconstruction fails due to even 1 bad column out of 64+ verified columns, the entire set is discarded. This is a Lighthouse-specific manifestation of the broader ETH-E01 cross-client issue, causing unnecessary bandwidth overhead and temporary availability degradation.
-
-### ETH-S02: Custody Group Node ID Grinding (Low, BVSS 3.5)
-
-PeerDAS custody group assignment is deterministically derived from `node_id`. An attacker with sufficient computing resources could brute-force node IDs that concentrate custody on specific data columns, potentially undermining the availability of those columns. The practical impact is bounded by the number of custody groups and the cost of grinding.
-
-### ETH-T03 / ETH-T05: Gloas Future Fork Considerations (Low, BVSS 3.5)
-
-Two threats relate to the Gloas fork (currently unscheduled): data column inclusion proof omission and column proof verification gaps. These have no immediate impact but represent design considerations that need resolution before Gloas activation.
-
-## Multi-Client Divergence Emphasis
-
-Ethereum's multi-client architecture is both its greatest strength (resilience through diversity) and a source of subtle security risks. The ETH-E01 finding demonstrates that even well-tested clients can diverge on edge-case behavior in ways that threaten network-level properties. Key observations:
-
-- Reconstruction is the **primary DA path** in Fulu -- divergent failure handling directly impacts DA guarantees
-- Equivocation detection (ETH-R01) produces IGNORE rather than slashing evidence, missing an opportunity for accountability
-- Bounds checking asymmetry (ETH-T04) between `recover_cells_and_kzg_proofs` and `verify_cell_kzg_proof_batch` represents a defense-in-depth gap
+This finding is a cross-client behavioral divergence between Lighthouse and Prysm in handling data column reconstruction failures. When reconstruction fails, Lighthouse discards all columns including previously verified ones, forcing a complete re-download. Prysm takes the opposite approach, marking reconstructed columns as verified without re-verifying them. Neither behavior is specified in the consensus-specs, meaning both clients are making independent design choices on an unspecified edge case. While the current BVSS score is low because the failure conditions are narrow, this divergence demonstrates the type of cross-client inconsistency that can emerge when multiple teams implement the same underspecified protocol.
 
 ## Referenced Repositories
 
@@ -64,4 +81,4 @@ Ethereum's multi-client architecture is both its greatest strength (resilience t
 - [prysm](https://github.com/prysmaticlabs/prysm) -- Go consensus client (Prysmatic Labs)
 - [consensus-specs](https://github.com/ethereum/consensus-specs) -- Ethereum consensus specifications
 - [c-kzg-4844](https://github.com/ethereum/c-kzg-4844) -- KZG commitment library
-- [EIPs](https://github.com/ethereum/EIPs) -- Ethereum Improvement Proposals (EIP-4844, EIP-7594, EIP-7918)
+- [EIPs](https://github.com/ethereum/EIPs) -- Ethereum Improvement Proposals (EIP-4844, EIP-7594)

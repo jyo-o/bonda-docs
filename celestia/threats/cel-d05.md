@@ -1,50 +1,46 @@
-# CEL-D05: ShrEx Client-side Unbounded Response Size — Defensive Coding Gap
+# CEL-D05: ShrEx Client-side Unbounded Response Size
 
-{% hint style="info" %}
-**Severity**: Informational · **STRIDE**: D (Denial of Service) · **Scope**: protocol · **Status**: code_verified
+{% hint style="success" %}
+**Severity**: Informational · **STRIDE**: D · **Status**: code_verified
 {% endhint %}
 
 ## Overview
 
-The ShrEx client (shrex_getter) reads responses using bytes.Buffer.ReadFrom without io.LimitReader. While the server side applies ReserveMemory, per-peer stream cap, and rate limits, the client side has no byte ceiling -- only stream deadlines (60-120 seconds). Four code defects are identified: (1) GetEDS uses an unbounded bytes.Buffer, calling ReadFrom without io.LimitReader at client.go:142. (2) NamespaceData.ReadFrom collects frames until EOF with no frame count limit; individual frames have a serde 1 MiB cap but the number is unlimited. (3) server.go calls Validate() only without Verify(odsSize), potentially returning abnormal ResponseSize values, but the libp2p resource manager rejects reservations under default settings so practical impact is nil. (4) bitswap block_store's Put/PutMany/DeleteBlock/AllKeysChan/HashOnRead panic with 'not implemented', but these are client receive paths (not serving paths Get/Has/GetSize) on bridge nodes and are dead code under normal operation.
+The ShrEx client (shrex_getter) reads responses using bytes.Buffer.ReadFrom without io.LimitReader, meaning there is no byte ceiling on the client side. The server side applies ReserveMemory, per-peer stream caps, and rate limits, but the client relies solely on stream deadlines of 60 to 120 seconds to bound data ingestion.
 
-## Core Invariants Affected
+Four specific code defects have been identified. First, GetEDS uses an unbounded bytes.Buffer at client.go line 142, calling ReadFrom without io.LimitReader. Second, NamespaceData.ReadFrom collects frames until EOF with no frame count limit; individual frames have a 1 MiB serde cap but the number of frames is unlimited. Third, server.go calls Validate() without calling Verify(odsSize), which could return abnormal ResponseSize values, but the libp2p resource manager rejects oversized reservations under default settings, neutralizing the impact. Fourth, the bitswap block_store implements Put, PutMany, DeleteBlock, AllKeysChan, and HashOnRead with panic("not implemented"), but these are client receive paths on bridge nodes and constitute dead code under normal operation.
 
-Unrelated to consensus nodes. Only transient memory spike possibility on DA serving nodes; automatic recovery via existing defenses.
+Despite these defects, existing defenses including stream deadlines, peer blacklisting after failure, peer scoring, and garbage collection make practical exploitation unrealistic. A malicious peer would be blacklisted after a single failed attempt, and any temporary memory spike would be reclaimed by the garbage collector.
 
 ## Prerequisites
 
-Sybil peer infrastructure. However, peers are blacklisted after one failure, so sustained attacks require many peer IDs.
+- Sybil peer infrastructure to place a malicious node in the victim's peer table
+- The victim must select the malicious peer for a ShrEx request
+- After one failure, the peer is blacklisted, requiring many peer IDs for sustained attacks
 
 ## Attack Scenario
 
-**Condition**: Malicious peer must enter victim's peer table, and victim must select that peer for a ShrEx request
-
-**Example**: Normal maximum EDS size is ~32 MiB (MaxSquareSize=512). At 100 Mbps, malicious streaming for 60 seconds could cause a ~750 MB transient spike, but with bridge node recommended specs (8-32 GB), OOM probability is low and GC reclaims immediately.
+1. The attacker deploys a malicious peer that enters the victim node's peer table.
+2. The victim selects this peer for a ShrEx data request.
+3. The malicious peer streams an oversized response, exploiting the lack of io.LimitReader on the client.
+4. At 100 Mbps, the malicious peer could stream up to approximately 750 MB over a 60-second deadline window.
+5. The peer is blacklisted after the failed request, preventing repeat attacks from the same identity.
+6. The temporary memory spike is reclaimed by the garbage collector. With bridge node recommended specs of 8-32 GB, OOM is unlikely.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| Severity | Informational |
-| Likelihood | Unrealistic (requires malicious peer in victim's peer table + victim selecting that peer; one-shot then blacklisted; transient memory spike then GC reclaims) |
-| Scope | protocol |
-| Target | Process |
+A transient memory spike on DA serving nodes that is automatically recovered through garbage collection and peer blacklisting. The normal maximum EDS size is approximately 32 MiB (MaxSquareSize=512), so legitimate responses are well within memory bounds.
 
-## Code References
+## Evidence
 
-- [`celestia-node/share/shwap/p2p/shrex/client.go:142 (resp.ReadFrom unbounded)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/client.go#L142)
-- [`celestia-node/share/shwap/p2p/shrex/shrex_getter/shrex.go:221-249 (GetEDS buffer)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/shrex_getter/shrex.go#L221-L249)
-- [`celestia-node/share/shwap/namespace_data.go:60-80 (frame count 무제한)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/namespace_data.go#L60-L80)
-- [`celestia-node/share/shwap/p2p/shrex/server.go:202 (Validate only)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/server.go#L202)
-- [`celestia-node/share/shwap/p2p/bitswap/block_store.go:88-101 (panic dead code)`](https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/bitswap/block_store.go#L88-L101)
+### Source Code
 
-## Verification & Evidence
-
-**Status**: code_verified
-
-Full code audit completed. All 4 defects are confirmed code-level issues, but existing defenses (timeout, blacklist, peer scoring, GC) make practical exploitation impossible. Defensive coding improvement recommended.
+- `celestia-node/share/shwap/p2p/shrex/client.go:142` -- resp.ReadFrom called without io.LimitReader
+- `celestia-node/share/shwap/p2p/shrex/shrex_getter/shrex.go:221-249` -- GetEDS buffer allocation
+- `celestia-node/share/shwap/namespace_data.go:60-80` -- frame collection with no count limit
+- `celestia-node/share/shwap/p2p/shrex/server.go:202` -- calls Validate() only, omits Verify(odsSize)
+- `celestia-node/share/shwap/p2p/bitswap/block_store.go:88-101` -- panic("not implemented") on dead code paths
 
 ## Mitigations
 
-Existing defenses: stream deadlines (60-120s), peer blacklisting on failure, peer scoring-based selection, server-side ReserveMemory with rate limit (85 RPS, burst 256). Recommendations: Apply io.LimitReader(stream, maxResponseSize) on client side, add frame count cap to NamespaceData.
+Existing defenses include stream deadlines (60-120 seconds), peer blacklisting on failure, peer scoring-based selection, and server-side ReserveMemory with rate limiting (85 RPS, burst 256). Recommended fixes include applying io.LimitReader(stream, maxResponseSize) on the client side and adding a frame count cap to NamespaceData.
