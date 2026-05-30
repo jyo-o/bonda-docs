@@ -18,6 +18,7 @@ The absence of DAS manifests at multiple levels.
 
 ```solidity
 // contracts/src/integrations/cert/libraries/EigenDACertVerificationLib.sol:232-246
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/integrations/cert/libraries/EigenDACertVerificationLib.sol
 // @audit Certificate verification checks only BLS signatures and 55% threshold
 (DATypesV1.QuorumStakeTotals memory quorumStakeTotals,) = signatureVerifier.checkSignatures(
     batchHashRoot, signedQuorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature

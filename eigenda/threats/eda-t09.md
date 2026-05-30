@@ -21,6 +21,7 @@ This means the ejector can remove up to one-third of a quorum's stake in a rolli
 
 ```solidity
 // contracts/src/periphery/ejection/EigenDAEjectionManager.sol
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/periphery/ejection/EigenDAEjectionManager.sol
 // @audit Ejection manager with rate limiting — ejector is a single EOA, not a multisig
 contract EigenDAEjectionManager is ImmutableEigenDAEjectionsStorage, IEigenDASemVer {
     // ...

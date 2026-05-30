@@ -18,6 +18,7 @@ The anchor signature non-enforcement exists at two independent layers.
 
 ```go
 // disperser/server_config.go
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/server_config.go
 // @audit TolerateMissingAnchorSignature defaults to true
 // TODO (litt3): this field should eventually be set to false, and then removed,
 // once all clients have updated to a version that includes anchor signatures.
@@ -31,6 +32,7 @@ The anchor validation function reflects this layered bypass. When `DisableAnchor
 
 ```go
 // disperser/apiserver/disperse_blob_v2.go:280-300
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/disperse_blob_v2.go
 // @audit Anchor validation can be entirely skipped or tolerate missing signatures
 func (s *DispersalServerV2) validateAnchorSignature(
     req *pb.DisperseBlobRequest,
@@ -53,6 +55,7 @@ func (s *DispersalServerV2) validateAnchorSignature(
 
 ```protobuf
 // api/proto/disperser/v2/disperser_v2.proto:68-81
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/api/proto/disperser/v2/disperser_v2.proto
 // @audit anchor_signature (field 5) is implicit-optional — proto3 allows omission
 bytes anchor_signature = 5;
 uint32 disperser_id = 6;
