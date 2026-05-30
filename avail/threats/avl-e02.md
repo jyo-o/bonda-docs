@@ -12,7 +12,7 @@ Avail uses three separate governance multisigs for different functions, but exte
 
 The bridge infrastructure relies on three separate multisig wallets for different governance functions. In principle, this provides defense in depth. In practice, the overlapping membership undermines true independence.
 
-![Key holder overlap across three governance multisigs](../assets/avl-e02-key-overlap.png)
+![Key holder overlap across three governance multisigs](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/avl-e02-key-overlap.png)
 
 The practical consequence is that the three multisigs do not provide truly independent layers of security. A governance compromise cascades into pauser control, and a single key holder participating in all three creates a concentrated point of risk.
 
