@@ -56,7 +56,7 @@ No DA protocol assessed has effective economic penalties for operator misbehavio
 |---|---|---|---|
 | EigenDA | EDA-P01 | Not implemented. Zero slash/freeze functions in core contracts. AllocationManager OperatorSetCount=0. 500K blocks with 0 slash events. | Operators can sign attestations without storing data (free-riding). 11 dead operators observed. |
 | Avail | AVL-P01 | Infrastructure exists in code (67 runtime metadata references). 688 eras with 0 slashes applied (UnappliedSlashes=empty). | Slashing is technically possible but has never been triggered. No economic deterrent demonstrated. |
-| Celestia | CEL-D01 | slash_fraction_downtime=0%. min_signed_per_window=0.001 (10/10,000 blocks). | 1/3 cartel can halt the chain at zero on-chain cost. |
+| Celestia | CEL-G01 | slash_fraction_downtime=0%. min_signed_per_window=0.001 (10/10,000 blocks). | 1/3 cartel can halt the chain at zero on-chain cost. |
 
 The pattern is consistent: DA layers prioritize network growth over economic security enforcement. This creates an asymmetric incentive structure where operators earn rewards without risk of penalty for misbehavior.
 

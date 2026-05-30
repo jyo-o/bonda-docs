@@ -32,8 +32,8 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 
 ## Key Numbers
 
-- **18** threats identified through STRIDE analysis, on-chain verification, and source code review
-- **5 High**, **7 Medium**, **6 Low**
+- **12** threats identified through STRIDE analysis, on-chain verification, and source code review
+- **4 High**, **6 Medium**, **2 Low**
 - **94 / 100** active validators (near saturation)
 - **35.77%** voting power held by top 8 validators (exceeds the 33% censorship threshold)
 - **6 of top 8** validators are KYC-regulated entities in US, EU, Swiss, or HK jurisdictions
@@ -44,22 +44,16 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 |-----|--------|----------|--------|
 | [CEL-G01](threats/cel-g01.md) | KYC Validator Concentration Enabling Legal Censorship | High (8.7) | verified |
 | [CEL-E01](threats/cel-e01.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | High (7.7) | verified |
-| [CEL-D11](threats/cel-d11.md) | Unbounded Memory Growth in pendingSeenTracker | High (7.5) | code_verified |
 | [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | High (7.5) | code_verified |
 | [CEL-D17](threats/cel-d17.md) | TxCache Key Mismatch Causing Permanent Cache Leak | High (7.5) | poc_verified |
 | [CEL-P01](threats/cel-p01.md) | DAS-Only Safety Model After Fraud Proof Removal | Medium (6.5) | verified |
 | [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium (5.9) | code_verified |
-| [CEL-D12](threats/cel-d12.md) | Nil Pointer Panic in GetProposal During Block Sync | Medium (5.9) | code_verified |
 | [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium (5.9) | code_verified |
 | [CEL-D03](threats/cel-d03.md) | Unbounded Memory Growth via Fake DataHash Injection | Medium (5.3) | poc_verified |
 | [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium (5.3) | code_verified |
 | [CEL-G02](threats/cel-g02.md) | Documentation vs Code Information Asymmetry | Medium (5.3) | verified |
-| [CEL-D01](threats/cel-d01.md) | Zero-Cost Prevote-Nil Censorship by Validator Cartel | Medium (4.2) | verified |
 | [CEL-D04](threats/cel-d04.md) | Evidence Subsystem Code Defects (Hash, Buffer, Expiry) | Low (3.7) | code_verified |
 | [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.7) | partial |
-| [CEL-D10](threats/cel-d10.md) | Worst-Case Memory Reservation on Empty Namespace Query | Low (3.7) | code_verified |
-| [CEL-D14](threats/cel-d14.md) | TxCache Bypass Forcing Full Recomputation by Proposer | Low (3.7) | code_verified |
-| [CEL-D05](threats/cel-d05.md) | Unlimited Response Size in ShrEx Protocol | Low (3.7) | code_verified |
 
 ## Key Findings
 
@@ -74,10 +68,6 @@ The top 8 validators control 35.77% of total voting power, which crosses the cri
 ### CEL-D17: Transaction Cache Leak Leading to Validator Crash (High, PoC Verified)
 
 When a blob transaction enters the mempool, CheckTx caches it using the hash of the inner SDK transaction. But when the block is finalized, FinalizeBlock looks up the cache using the hash of the full BlobTx wire bytes. Because the keys are different, cached entries are never cleaned up. The cache has no size limit and no expiration. A PoC confirmed that a 100 Mbps stream of rejected transactions leaks roughly 1 GB of memory every 160 seconds, eventually crashing the validator with an out-of-memory error.
-
-### CEL-D11: Mempool Tracking Structure Grows Without Bound (High)
-
-The CAT mempool tracks which transactions each validator has seen using a structure called `pendingSeenTracker`. While there is a per-signer cap of 128 entries, there is no limit on the total number of signers tracked and no time-based eviction. An attacker can use publicly known on-chain account addresses with future sequence numbers to grow this map indefinitely. A draft fix exists (PR #3061) but has not been merged.
 
 ## Attack Chains
 

@@ -71,7 +71,7 @@ flowchart LR
 | Protocol | Verified (L4) | PoC Verified (L3) | Code Verified (L2) | Partial (L1) | Unverified (L0) |
 |----------|:-------------:|:------------------:|:-------------------:|:-------------:|:---------------:|
 | EigenDA  | 12 | -- | 4 | 1 | -- |
-| Celestia | 4  | 4  | 8 | 2 | -- |
+| Celestia | 4  | 2  | 5 | 1 | -- |
 | Avail    | 8  | -- | -- | -- | 1 |
 | Ethereum | 6  | -- | 3 | 2 | -- |
 

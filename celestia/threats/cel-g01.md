@@ -10,7 +10,7 @@ Celestia's validator set is highly concentrated: only 8 validators are needed to
 
 ## Description
 
-The root cause is a combination of validator set concentration and regulatory surface area:
+The root cause is a combination of validator set concentration, regulatory surface area, and the absence of any on-chain mechanism to detect or penalize censorship behavior.
 
 **Voting Power Concentration**
 
@@ -24,7 +24,29 @@ The `max_validators` parameter is set to 100 with 94 currently bonded, effective
 
 Six of the top 8 validators are KYC-regulated entities operating under jurisdictions with established legal mechanisms for compelling compliance. A court order or OFAC sanctions designation targeting these 6-7 entities would align more than one-third of voting power for censorship purposes.
 
-The censorship mechanism is identical to CEL-D01: when targeted blocks are proposed, compelled validators cast prevote-nil, preventing the block from reaching the two-thirds prevote threshold. Because validators act under legal obligation, there is no economic deterrent or community remedy. Delegator diversification does not help because redistributing stake among the same validators does not reduce the number of entities needed to reach the threshold.
+**Censorship Mechanism**
+
+When targeted blocks are proposed, compelled validators cast prevote-nil, preventing the block from reaching the two-thirds prevote threshold required for finalization. The protocol cannot distinguish between honest nil votes (e.g., proposal not received) and malicious censorship because there is no nil-vote evidence type in the evidence subsystem:
+
+```go
+// celestia-core/types/evidence.go:22-219
+// Only DuplicateVoteEvidence and LightClientAttackEvidence are implemented
+// No nil-vote evidence type exists
+```
+
+```go
+// celestia-core/consensus/state.go:1553-1577
+// Honest and malicious prevote-nil follow the same code path
+```
+
+The on-chain cost is zero. Mainnet slashing parameters (2026-05-20, height 11,172,730) confirmed via `celestia-rest.publicnode.com/cosmos/slashing/v1beta1/params`:
+- `slash_fraction_downtime=0`
+- `min_signed_per_window=0.001` (10 of 10,000 blocks)
+- `downtime_jail_duration=60s`
+
+Cartel members can avoid jail by signing as few as 10 out of 10,000 blocks (0.1%). PR `celestia-app#7090` (merged 2026-04-17) changed these defaults "to match mainnet governance." Only `slash_fraction_double_sign=0.02` carries any penalty, and prevote-nil is not classified as a double sign.
+
+Because validators act under legal obligation, there is no economic deterrent or community remedy. Delegator diversification does not help because redistributing stake among the same validators does not reduce the number of entities needed to reach the threshold.
 
 ## Proof of Concept
 
@@ -52,7 +74,9 @@ Legally enforced, indefinite transaction censorship with zero technical cost and
 
 ## Recommendation
 
-1. Create incentive programs for non-KYC validator participation to reduce the regulatory attack surface across the top-8 set.
-2. Increase `MaxValidators` beyond 100 to reduce validator set saturation and allow new independent validators to join.
-3. Actively work to resolve validator set saturation (94/100 slots filled, 192 unbonding) so new geographically and jurisdictionally diverse validators can participate.
-4. Provide L2 and user-side censorship resistance SLA evaluation tools to enable downstream consumers to assess their exposure to this risk.
+1. Introduce a nil-vote evidence type in the evidence subsystem to enable detection of systematic nil-voting patterns.
+2. Set `slash_fraction_downtime` above zero via governance to create at least minimal cost for nil-voting behavior.
+3. Create incentive programs for non-KYC validator participation to reduce the regulatory attack surface across the top-8 set.
+4. Increase `MaxValidators` beyond 100 to reduce validator set saturation and allow new independent validators to join.
+5. Explore a correlation penalty mechanism that increases slashing for coordinated nil-voting by multiple validators.
+6. Provide L2 and user-side censorship resistance SLA evaluation tools to enable downstream consumers to assess their exposure to this risk.

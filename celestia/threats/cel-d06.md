@@ -6,7 +6,7 @@
 
 ## Summary
 
-The SHREX peer manager's `EnableBlackListing` flag defaults to `false`, meaning peers that send invalid data are logged but never actually disconnected or blocked. This default undermines the defense assumptions of multiple other threats (CEL-D03, CEL-D05, CEL-S01) that cite peer blacklisting as an existing defense mechanism, acting as a force multiplier for these vulnerabilities.
+The SHREX peer manager's `EnableBlackListing` flag defaults to `false`, meaning peers that send invalid data are logged but never actually disconnected or blocked. This default undermines the defense assumptions of multiple other threats (CEL-D03, CEL-S01) that cite peer blacklisting as an existing defense mechanism, acting as a force multiplier for these vulnerabilities.
 
 ## Description
 
@@ -33,7 +33,6 @@ Verified at commit `celestia-node f8cefbe3e5bd3e144a414cb2140dd223ec6191c6`.
 
 The result is that a malicious peer can send invalid data, get logged, and immediately continue its attack or reconnect without any penalty. This undermines defenses for:
 - **CEL-D03**: `blacklistedHashes` unbounded growth relies on eventual peer blocking to limit injection rate
-- **CEL-D05**: ShrEx unbounded response cites "peer blacklisting after one failure" as an existing defense
 - **CEL-S01**: DAS Selective Disclosure cites peer blacklisting as a defense, but it does not function under default settings
 
 ## Proof of Concept
@@ -42,7 +41,7 @@ No proof of concept was conducted for this threat. The default configuration is 
 
 ## Impact
 
-Defense mechanism bypass that enables unlimited retries from malicious peers. The default configuration itself is the threat condition, requiring no separate exploit. This is not a direct DA invariant violation but an enabler that increases the severity of CEL-D03, CEL-D05, and CEL-S01.
+Defense mechanism bypass that enables unlimited retries from malicious peers. The default configuration itself is the threat condition, requiring no separate exploit. This is not a direct DA invariant violation but an enabler that increases the severity of CEL-D03 and CEL-S01.
 
 ### CVSS 3.1
 
