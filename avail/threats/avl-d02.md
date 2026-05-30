@@ -12,16 +12,7 @@ Avail's mainnet runs only 105 validators out of a maximum 1,200 slots, utilizing
 
 The validator set operates at low utilization with 105 of 1,200 available slots filled. The total staked amount is approximately 4.794 billion AVAIL, representing roughly 48% of the 10 billion total supply. The Nakamoto coefficient is approximately 34, meaning an attacker would need to compromise at least 34 validators to disrupt consensus.
 
-```
-// Validator set metrics at Era #688
-// Active validators: 105 out of 1,200 slots — 8.75% utilization
-// Nakamoto coefficient: ~34 validators needed to disrupt consensus
-// Full BFT attack: 70 validators needed for 66.67% stake
-// Top validator: 50.79M AVAIL at 1.06% of total stake
-// Bottom validator: 42.4M AVAIL at 0.88%
-// Max/min stake ratio: 1.20x — strong Phragmen equalization
-// Top 10 validators: 10.54% of total stake
-```
+![Avail validator set utilization and stake distribution](../assets/avl-d02-validator-utilization.png)
 
 The Phragmen election algorithm achieves remarkably even stake distribution, making it significantly harder for any small group to accumulate disproportionate influence. However, the small absolute number of active validators means fewer independent operators need to be compromised for a consensus attack.
 

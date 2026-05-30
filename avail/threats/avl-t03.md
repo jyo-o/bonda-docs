@@ -12,15 +12,7 @@ The AVAIL token contract is immutable with no admin, but its minting authority r
 
 The AVAIL token contract at 0xeeb4...c6bd8 is immutable since calling `owner()` reverts, confirming there is no admin function. Minting and burning authority resides solely in the Bridge proxy contract at 0x054f...
 
-```
-// Token minting risk via upgrade paths
-// Token contract at 0xeeb4...c6bd8: immutable, owner() reverts
-// Mint/burn authority: Bridge proxy at 0x054f... only
-// Bridge upgrade: 24-hour TimelockController + 4/7 multisig
-// VectorX upgrade: immediate with 4/7 multisig, no timelock
-// @audit VectorX is the weaker link — no detection window
-//        for community to respond before damage is done.
-```
+![Two upgrade paths to AVAIL token minting](../assets/avl-t03-upgrade-paths.png)
 
 The Bridge contract is protected by a TimelockController that enforces a 24-hour delay, giving users time to detect a malicious proposal and exit. VectorX has no timelock and can be upgraded immediately, making it the weaker link in the upgrade chain. A successful attack through either path would allow arbitrary inflation of the token supply.
 

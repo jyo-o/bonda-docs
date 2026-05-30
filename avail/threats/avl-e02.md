@@ -12,16 +12,7 @@ Avail uses three separate governance multisigs for different functions, but exte
 
 The bridge infrastructure relies on three separate multisig wallets for different governance functions. In principle, this provides defense in depth. In practice, the overlapping membership undermines true independence.
 
-```
-// Multisig key holder overlap
-// Governance Multisig: 4-of-7 threshold
-// Pauser Multisig at 0x1a5b...8930: 3-of-5 threshold
-//   — 4 of 5 owners overlap with Governance
-// SP1VerifierGateway at 0xCafE...6878: 2-of-3 threshold
-// @audit Address 0x72Ff...4f54 appears in ALL THREE multisigs
-//        as Governance #4, Pauser #4, and SP1VerifierGateway #2.
-//        Compromising 3 Governance keys also meets Pauser's 3-of-5 threshold.
-```
+![Key holder overlap across three governance multisigs](../assets/avl-e02-key-overlap.png)
 
 The practical consequence is that the three multisigs do not provide truly independent layers of security. A governance compromise cascades into pauser control, and a single key holder participating in all three creates a concentrated point of risk.
 
