@@ -12,6 +12,8 @@ The root cause is the concentration of all governance authority in a single Safe
 
 ## Description
 
+![Governance centralization — single multisig controls all contracts](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/eda-e02-governance-map.png)
+
 The multisig (`0x002721...`) owns the following eight core contracts:
 
 1. ServiceManager (`0x870679...`)

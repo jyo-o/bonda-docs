@@ -14,6 +14,8 @@ If 3 operators in Q0 or Q1 collude, they can sign invalid data availability cert
 
 ## Description
 
+![Stake concentration — top 3 operators exceed 33% safety threshold](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/eda-e03-stake-concentration.png)
+
 Stake distribution was queried at block 25097183 using `StakeRegistry.getCurrentStake()` across 120 operators.
 
 **Quorum 0 (ETH)** has a total stake of `2.368e24`:

@@ -12,6 +12,8 @@ If this key is compromised, an attacker could systematically remove honest opera
 
 ## Description
 
+![Ejector attack flow — single EOA key compromise cascade](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/eda-t09-ejector-attack.png)
+
 The `EjectionManager` contract (`0x130d8E...`) is owned by the multisig (`0x002721...`), but delegates ejection authority to a single EOA. The on-chain parameters are:
 
 - `rateLimitWindow` = 259,200 seconds (3 days)
