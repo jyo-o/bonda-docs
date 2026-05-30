@@ -6,23 +6,29 @@
 
 ## Summary
 
-VectorX relies on a single relayer EOA (0x27BF7DE579c5779DBfBB8e9D69999E4d1370787D) to submit Avail block header commitments to Ethereum. This relayer is the only address authorized to call `commitHeaderRange()`, and if it goes offline, the entire bridge halts with no fallback. The contract has no on-chain heartbeat, timeout, or staleness detection mechanism, and `setRelayerApproval()` emits no events, making relayer changes invisible to off-chain monitoring.
+The VectorX bridge contract submits Avail block header commitments to Ethereum through a single relayer. If this relayer goes offline for any reason, the entire bridge halts because no fallback address is authorized and the contract has no mechanism to detect or recover from relayer failure.
 
 ## Description
 
-The VectorX contract enforces relayer access control through an `approvedRelayers` mapping with `checkRelayer` enabled. Only the single approved relayer can call `commitHeaderRange()`, which posts ZK-verified block headers that the bridge depends on.
+The VectorX contract enforces relayer access control through an `approvedRelayers` mapping with `checkRelayer` enabled. Only the single approved relayer at 0x27BF...787D can call `commitHeaderRange()`, which posts ZK-verified block headers that the bridge depends on.
 
 ```solidity
-// @audit — SP1Vector.sol: commitHeaderRange() is restricted to approvedRelayers.
-//          Only one relayer (0x27BF...) is approved. No on-chain heartbeat,
-//          timeout, or staleness detection exists anywhere in the inheritance chain.
-//          setRelayerApproval() emits no events, unlike removeHeaderHash which
-//          emits HeaderHashRemoved.
+// SP1Vector.sol (VectorX — 0x02993cdC...bf298d)
+// @audit commitHeaderRange() is restricted to a single approved relayer.
+//        No on-chain heartbeat, timeout, or staleness detection exists
+//        anywhere in the inheritance chain. Zero references to block.timestamp.
+//        setRelayerApproval() emits no events, unlike removeHeaderHash
+//        which emits HeaderHashRemoved — relayer changes are invisible.
+mapping(address => bool) public approvedRelayers;
+bool public checkRelayer;
+
+function commitHeaderRange(bytes calldata proof, bytes calldata publicValues) external;
+function setRelayerApproval(address _relayer, bool _approved) external;
 ```
 
-The relayer's client-side software (operator.rs) uses a 60-minute loop interval (`LOOP_INTERVAL_MINS=60`) and `BLOCK_UPDATE_INTERVAL=360`, but these are purely off-chain and cannot be enforced or monitored by the contract. The `commitHeaderRange()` function contains zero references to `block.timestamp` and has no cooldown or rate limit logic in the full inheritance chain.
+The relayer's client-side software operator.rs uses a 60-minute loop interval and processes 360 blocks per update, but these timing parameters are purely off-chain and cannot be enforced or monitored by the contract. The `commitHeaderRange()` function contains zero references to `block.timestamp` and has no cooldown or rate limit logic.
 
-A previous relayer (0x3243...2D) was rotated out, confirming that relayer changes have occurred, but there is no on-chain mechanism to propose or approve a replacement in an emergency.
+A previous relayer at 0x3243...2D was rotated out, confirming that relayer changes have occurred, but there is no on-chain mechanism to propose or approve a replacement in an emergency.
 
 ## Proof of Concept
 

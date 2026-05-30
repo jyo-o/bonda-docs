@@ -6,19 +6,20 @@
 
 ## Summary
 
-The AVAIL token contract (0xeeb4d8400aeefafc1b2953e0094134a887c76bd8) holds ~791 million tokens and is itself immutable with no admin. However, minting authority resides in the Bridge proxy contract, which can be upgraded. Two upgrade paths exist: the Bridge contract is protected by a 24-hour timelock, but VectorX can be upgraded immediately with a 4-of-7 multisig approval. A malicious upgrade through either path could enable unlimited token minting.
+The AVAIL token contract is immutable with no admin, but its minting authority resides in the Bridge proxy contract which can be upgraded. Two upgrade paths exist with different protection levels: the Bridge enforces a 24-hour timelock, while VectorX can be upgraded immediately. A malicious upgrade through either path could enable unlimited token minting.
 
 ## Description
 
-The AVAIL token contract is immutable -- `owner()` reverts, and there is no admin function. Minting and burning authority resides solely in the Bridge proxy contract (0x054f...).
+The AVAIL token contract at 0xeeb4...c6bd8 is immutable since calling `owner()` reverts, confirming there is no admin function. Minting and burning authority resides solely in the Bridge proxy contract at 0x054f...
 
 ```
-// @audit — Token minting risk via upgrade paths:
-//          Token contract: immutable, owner() reverts, no admin
-//          Mint/burn authority: Bridge proxy (0x054f...) only
-//          Bridge upgrade path: 24-hour TimelockController delay + 4/7 multisig
-//          VectorX upgrade path: immediate upgrade with 4/7 multisig (no timelock)
-//          VectorX is the weaker link — no detection window for community.
+// Token minting risk via upgrade paths
+// Token contract at 0xeeb4...c6bd8: immutable, owner() reverts
+// Mint/burn authority: Bridge proxy at 0x054f... only
+// Bridge upgrade: 24-hour TimelockController + 4/7 multisig
+// VectorX upgrade: immediate with 4/7 multisig, no timelock
+// @audit VectorX is the weaker link — no detection window
+//        for community to respond before damage is done.
 ```
 
 The Bridge contract is protected by a TimelockController that enforces a 24-hour delay, giving users time to detect a malicious proposal and exit. VectorX has no timelock and can be upgraded immediately, making it the weaker link in the upgrade chain. A successful attack through either path would allow arbitrary inflation of the token supply.

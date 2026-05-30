@@ -6,21 +6,27 @@
 
 ## Summary
 
-VectorX uses the UUPS proxy pattern and can be upgraded instantly by the Governance Multisig (4-of-7 Safe) which holds the TIMELOCK_ROLE. Unlike the Avail Bridge contract which enforces a 24-hour timelock delay, VectorX has no such delay. The base contract `TimelockedUpgradeable` is misleadingly named -- it provides only an AccessControl role wrapper with no actual timelock logic, meaning the community has no detection window before a malicious upgrade takes effect.
+VectorX uses the UUPS proxy pattern and can be upgraded instantly by the Governance Multisig with no timelock delay. Unlike the Avail Bridge which enforces a 24-hour delay before upgrades take effect, VectorX upgrades execute immediately, giving the community no window to detect and respond to a malicious upgrade.
 
 ## Description
 
 VectorX is the ZK light-client bridge contract that verifies Avail block headers on Ethereum. It uses the UUPS proxy pattern where upgrade logic lives inside the implementation contract. The EIP-1967 admin slot is set to `0x0`, confirming this UUPS design.
 
 ```solidity
-// @audit — TimelockedUpgradeable.sol: misleadingly named base contract.
-//          The onlyTimelock modifier only checks hasRole(TIMELOCK_ROLE, msg.sender).
-//          No delay, queue, schedule, or execute pattern exists.
-//          VectorX upgrades execute immediately upon role authorization,
-//          unlike the Avail Bridge which enforces a 24-hour delay.
+// TimelockedUpgradeable.sol
+// @audit Misleadingly named — no actual timelock logic exists.
+//        The modifier only checks role membership, not time delay.
+//        VectorX upgrades execute immediately upon authorization,
+//        unlike the Avail Bridge which enforces a 24-hour delay.
+modifier onlyTimelock() {
+    if (!hasRole(TIMELOCK_ROLE, msg.sender)) {
+        revert OnlyTimelock();
+    }
+    _;
+}
 ```
 
-The Governance Multisig (Multisig 1, a 4-of-7 Safe at 0x7F2f87B0Efc66Fea0b7c30C61654E53C37993666) holds the TIMELOCK_ROLE and can upgrade VectorX in a single transaction with no delay. This creates an inconsistency in governance protections between VectorX and the Avail Bridge.
+The Governance Multisig, a 4-of-7 Safe at 0x7F2f...3666, holds the TIMELOCK_ROLE and can upgrade VectorX in a single transaction with no delay. This creates an inconsistency in governance protections between VectorX and the Avail Bridge.
 
 ## Proof of Concept
 

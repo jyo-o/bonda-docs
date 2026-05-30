@@ -6,20 +6,21 @@
 
 ## Summary
 
-Avail's three governance multisigs (Governance 4-of-7, Pauser 3-of-5, SP1VerifierGateway 2-of-3) have extensive key holder overlap. Four of five Pauser Multisig owners are also Governance Multisig members, and one address (0x72Ff...4f54) appears in all three multisigs. This overlap means that compromising the Governance Multisig effectively compromises the Pauser Multisig, undermining the intended separation of governance functions.
+Avail uses three separate governance multisigs for different functions, but extensive key holder overlap undermines their independence. Four of five Pauser Multisig owners are also Governance Multisig members, and one address appears in all three multisigs. Compromising the Governance Multisig effectively compromises the Pauser as well, since overlapping members exceed the Pauser threshold.
 
 ## Description
 
 The bridge infrastructure relies on three separate multisig wallets for different governance functions. In principle, this provides defense in depth. In practice, the overlapping membership undermines true independence.
 
 ```
-// @audit — Multisig key holder overlap:
-//          Governance Multisig: 4-of-7 threshold
-//          Pauser Multisig (0x1a5b...8930): 3-of-5 threshold, 4/5 owners overlap with Governance
-//          SP1VerifierGateway (0xCafE...6878): 2-of-3 threshold
-//          Address 0x72Ff...4f54: present in ALL THREE multisigs
-//          (Governance #4, Pauser #4, SP1VerifierGateway #2)
-//          Compromising 3 Governance keys also meets Pauser's 3-of-5 threshold.
+// Multisig key holder overlap
+// Governance Multisig: 4-of-7 threshold
+// Pauser Multisig at 0x1a5b...8930: 3-of-5 threshold
+//   — 4 of 5 owners overlap with Governance
+// SP1VerifierGateway at 0xCafE...6878: 2-of-3 threshold
+// @audit Address 0x72Ff...4f54 appears in ALL THREE multisigs
+//        as Governance #4, Pauser #4, and SP1VerifierGateway #2.
+//        Compromising 3 Governance keys also meets Pauser's 3-of-5 threshold.
 ```
 
 The practical consequence is that the three multisigs do not provide truly independent layers of security. A governance compromise cascades into pauser control, and a single key holder participating in all three creates a concentrated point of risk.
@@ -34,7 +35,7 @@ On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../e
 
 ## Impact
 
-Compromising 4 of the 7 Governance Multisig keys automatically grants control over the Pauser Multisig (since at least 3 of those keys also meet the Pauser's 3-of-5 threshold). The attacker can pause the bridge at will or prevent emergency pauses during an active attack. If the compromised set includes the shared key holder 0x72Ff...4f54, the attacker also gains a signing position in the SP1VerifierGateway's 2-of-3 multisig, needing only one more key to manipulate ZK verifier routing.
+Compromising 4 of the 7 Governance Multisig keys automatically grants control over the Pauser Multisig because at least 3 of those keys also meet the Pauser's 3-of-5 threshold. The attacker can pause the bridge at will or prevent emergency pauses during an active attack. If the compromised set includes the shared key holder 0x72Ff...4f54, the attacker also gains a signing position in the SP1VerifierGateway's 2-of-3 multisig, needing only one more key to manipulate ZK verifier routing.
 
 ### CVSS 3.1
 **Score**: 2.9/10 (Low)  

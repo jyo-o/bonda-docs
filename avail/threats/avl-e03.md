@@ -6,20 +6,23 @@
 
 ## Summary
 
-The deployer EOA (0xDEd0000E32f8F40414d3ab3a830f735a3553E18e) still holds DEFAULT_ADMIN_ROLE on the VectorX bridge contract. This role is the admin of all other roles, meaning the deployer can grant itself TIMELOCK_ROLE and immediately upgrade the contract to an arbitrary implementation in just two transactions, bypassing all governance protections. The root cause is commented-out revocation code in the Guardian.s.sol deployment script that was intended to remove this role but was never executed.
+The deployer EOA still holds DEFAULT_ADMIN_ROLE on the VectorX bridge contract. Because this role controls all other roles, the deployer can grant itself upgrade authority and replace the entire contract implementation in just two transactions, bypassing all governance protections. The root cause is that the revocation code in the deployment script was commented out and never executed.
 
 ## Description
 
-VectorX uses OpenZeppelin's AccessControl system to manage permissions across roles including DEFAULT_ADMIN_ROLE, TIMELOCK_ROLE, and GUARDIAN_ROLE. The deployment script (`Guardian.s.sol`) contains code to revoke DEFAULT_ADMIN_ROLE from the deployer, but that code is commented out and was never executed on-chain.
+VectorX uses OpenZeppelin's AccessControl system to manage permissions across roles including DEFAULT_ADMIN_ROLE, TIMELOCK_ROLE, and GUARDIAN_ROLE. The deployment script Guardian.s.sol contains code to revoke DEFAULT_ADMIN_ROLE from the deployer, but that code is commented out and was never executed on-chain.
 
 ```solidity
-// @audit — Guardian.s.sol: revocation of DEFAULT_ADMIN_ROLE from deployer
-//          is commented out, leaving the deployer with full admin authority.
-//          The deployer can call grantRole(TIMELOCK_ROLE, self) followed by
-//          upgradeTo(malicious) in two transactions.
+// Guardian.s.sol — deployment script
+// @audit DEFAULT_ADMIN_ROLE revocation from deployer is commented out.
+//        The deployer retains full admin authority, enabling a 2-transaction
+//        upgrade path: grantRole(TIMELOCK_ROLE) then upgradeTo(malicious).
+//
+// Intended but never executed:
+// sp1Vector.revokeRole(sp1Vector.DEFAULT_ADMIN_ROLE(), msg.sender);
 ```
 
-The deployer address is a regular EOA (not a contract), confirmed by `eth_getCode` returning `0x`. Its nonce of 1107 indicates it is an actively used account. Since DEFAULT_ADMIN_ROLE is the admin of TIMELOCK_ROLE (getRoleAdmin returns 0x00), the deployer can unilaterally grant itself upgrade authority.
+The deployer at 0xDEd0000E...E18e is a regular externally owned account rather than a smart contract, confirmed by `eth_getCode` returning empty code. Its nonce of 1107 indicates it is an actively used account. Since DEFAULT_ADMIN_ROLE is the admin of TIMELOCK_ROLE as confirmed by getRoleAdmin returning 0x00, the deployer can unilaterally grant itself upgrade authority.
 
 ## Proof of Concept
 

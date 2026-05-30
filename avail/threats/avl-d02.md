@@ -6,21 +6,21 @@
 
 ## Summary
 
-Avail's mainnet supports up to 1,200 validator slots, but only 105 are currently active (8.75% utilization). The Nakamoto coefficient is approximately 34, meaning an attacker would need to compromise at least 34 validators to disrupt consensus. While the NPoS Phragmen election produces a very even stake distribution (1.20x max/min ratio), the small active set relative to capacity increases concentration risk.
+Avail's mainnet runs only 105 validators out of a maximum 1,200 slots, utilizing less than 9% of available capacity. While the NPoS Phragmen election produces remarkably even stake distribution across validators, the small active set means fewer independent operators need to be compromised for a consensus attack.
 
 ## Description
 
-The validator set operates at low utilization with 105 of 1,200 available slots filled. Total staked amount is approximately 4.794 billion AVAIL (~48% of 10 billion total supply).
+The validator set operates at low utilization with 105 of 1,200 available slots filled. The total staked amount is approximately 4.794 billion AVAIL, representing roughly 48% of the 10 billion total supply. The Nakamoto coefficient is approximately 34, meaning an attacker would need to compromise at least 34 validators to disrupt consensus.
 
 ```
-// @audit — Validator set metrics (Era #688):
-//          Active validators: 105 / 1,200 slots (8.75% utilization)
-//          Nakamoto coefficient: ~34 (33.33% stake threshold)
-//          Full BFT attack: 70 validators (66.67% stake)
-//          Top validator: 50.79M AVAIL (1.06% of total stake)
-//          Bottom validator: 42.4M AVAIL (0.88%)
-//          Max/min stake ratio: 1.20x
-//          Top 10 validators: 10.54% of total stake
+// Validator set metrics at Era #688
+// Active validators: 105 out of 1,200 slots — 8.75% utilization
+// Nakamoto coefficient: ~34 validators needed to disrupt consensus
+// Full BFT attack: 70 validators needed for 66.67% stake
+// Top validator: 50.79M AVAIL at 1.06% of total stake
+// Bottom validator: 42.4M AVAIL at 0.88%
+// Max/min stake ratio: 1.20x — strong Phragmen equalization
+// Top 10 validators: 10.54% of total stake
 ```
 
 The Phragmen election algorithm achieves remarkably even stake distribution, making it significantly harder for any small group to accumulate disproportionate influence. However, the small absolute number of active validators means fewer independent operators need to be compromised for a consensus attack.
@@ -35,7 +35,7 @@ On-chain state and Subscan Era #688 data were analyzed. See [Verification Eviden
 
 ## Impact
 
-An attacker controlling 34 or more validators (~33.33% of stake) could block finality by refusing to vote on blocks. With 70 or more compromised validators (~66.67% of stake), the attacker could seize full control of finality, potentially censoring transactions, reorganizing blocks, or halting the chain entirely. However, the even Phragmen distribution requires targeting many validators with similar stake levels rather than focusing on a few high-stake validators.
+An attacker controlling 34 or more validators, representing roughly 33% of total stake, could block finality by refusing to vote on blocks. With 70 or more compromised validators at roughly 67% of stake, the attacker could seize full control of finality, potentially censoring transactions, reorganizing blocks, or halting the chain entirely. However, the even Phragmen distribution requires targeting many validators with similar stake levels rather than focusing on a few high-stake validators.
 
 ### CVSS 3.1
 **Score**: 5.9/10 (Medium)  

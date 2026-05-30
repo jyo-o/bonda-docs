@@ -6,20 +6,21 @@
 
 ## Summary
 
-Avail's NPoS consensus includes complete slashing infrastructure in its runtime (67 slash-related functions, SlashDeferDuration of 27 eras, BondingDuration of 28 eras). However, zero slashing events have occurred across 688 eras of operation. This absence of enforcement weakens the economic security model, as validators face no real financial punishment for misbehavior despite slashing existing as a theoretical deterrent.
+Avail's NPoS consensus includes complete slashing infrastructure in its runtime with 67 slash-related functions, but zero slashing events have occurred across 688 eras of operation. Validators face no real financial punishment for misbehavior despite slashing existing as a theoretical deterrent, weakening the economic security model that NPoS depends on.
 
 ## Description
 
-The runtime metadata contains 67 references to slash-related functions, and the chain defines specific slashing parameters.
+The runtime metadata contains 67 references to slash-related functions, and the chain defines specific slashing parameters including a 27-era deferral period and 28-era bonding duration.
 
 ```
-// @audit — Slashing infrastructure vs. enforcement:
-//          Runtime slash references: 67 functions
-//          SlashDeferDuration: 27 eras
-//          BondingDuration: 28 eras
-//          SessionsPerEra: 6
-//          UnappliedSlashes (era 688): null (zero events ever)
-//          688 eras of operation with zero slashing enforcement.
+// Avail slashing infrastructure vs enforcement
+// Runtime slash references: 67 functions
+// SlashDeferDuration: 27 eras
+// BondingDuration: 28 eras
+// SessionsPerEra: 6
+// UnappliedSlashes at era 688: null — zero events in history
+// @audit 688 eras of operation with zero slashing enforcement.
+//        Infrastructure exists but has never been triggered.
 ```
 
 The gap between implemented infrastructure and actual enforcement may reflect conditions that are too lenient, insufficient monitoring, or social dynamics within the validator set that discourage reporting. The practical consequence is that the economic deterrent that NPoS relies on to keep validators honest has never been exercised.
