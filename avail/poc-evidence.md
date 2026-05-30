@@ -240,7 +240,7 @@ curl -s "https://avail-rpc.publicnode.com" \
 | Top validator share | 1.06% |
 | Max/min stake ratio | 1.20x (Phragmen equalization) |
 
-### Slashing Status (AVL-R01)
+### Slashing Status (AVL-P01)
 
 ```bash
 # ActiveEra

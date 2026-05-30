@@ -67,9 +67,9 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 | [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Medium (4.0) | verified |
 | [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Medium (4.0) | verified |
 | [AVL-T04](threats/avl-t04.md) | Guardian can inject commitments without ZK proof verification | Medium (4.0) | verified |
-| [AVL-I01](threats/avl-i01.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | unverified |
+| [AVL-P02](threats/avl-p02.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | unverified |
 | [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (2.9) | verified |
-| [AVL-R01](threats/avl-r01.md) | Slashing exists but has never been triggered in 688 eras | Low (2.1) | verified |
+| [AVL-P01](threats/avl-p01.md) | Slashing exists but has never been triggered in 688 eras | Low (2.1) | verified |
 | [AVL-T02](threats/avl-t02.md) | Bridge has 24h timelock, relatively safe upgrade path | Low (1.8) | verified |
 | [AVL-S01](threats/avl-s01.md) | TimelockedUpgradeable contract name is misleading, contains no timelock | Informational (0.0) | verified |
 

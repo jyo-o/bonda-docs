@@ -56,7 +56,7 @@ No DA protocol assessed has effective economic penalties for operator misbehavio
 | Protocol | Threat ID | Slashing Status | Consequence |
 |---|---|---|---|
 | EigenDA | EDA-P01 | Not implemented. Zero slash/freeze functions in core contracts. AllocationManager OperatorSetCount=0. 500K blocks with 0 slash events. | Operators can sign attestations without storing data (free-riding). 11 dead operators observed. |
-| Avail | AVL-R01 | Infrastructure exists in code (67 runtime metadata references). 688 eras with 0 slashes applied (UnappliedSlashes=empty). | Slashing is technically possible but has never been triggered. No economic deterrent demonstrated. |
+| Avail | AVL-P01 | Infrastructure exists in code (67 runtime metadata references). 688 eras with 0 slashes applied (UnappliedSlashes=empty). | Slashing is technically possible but has never been triggered. No economic deterrent demonstrated. |
 | Celestia | CEL-D01 | slash_fraction_downtime=0%. min_signed_per_window=0.001 (10/10,000 blocks). | 1/3 cartel can halt the chain at zero on-chain cost. |
 
 The pattern is consistent: DA layers prioritize network growth over economic security enforcement. This creates an asymmetric incentive structure where operators earn rewards without risk of penalty for misbehavior.
@@ -68,7 +68,7 @@ DAS is the theoretical foundation for trust-minimized DA verification, but imple
 | Protocol | Threat ID | DAS Status |
 |---|---|---|
 | EigenDA | EDA-P02 | **No DAS by design.** Spec explicitly states DAS is not used. Clients must trust the quorum's BLS aggregate signature (55% stake threshold). Client-side random shuffle is load balancing, not cryptographic sampling. |
-| Avail | AVL-I01 | **DAS implemented, reconstruction incomplete.** Light client DAS achieves 99.84% confidence (Observatory measured). However, block reconstruction protocol is still in development -- full recovery from DAS samples alone is not yet possible. |
+| Avail | AVL-P02 | **DAS implemented, reconstruction incomplete.** Light client DAS achieves 99.84% confidence (Observatory measured). However, block reconstruction protocol is still in development -- full recovery from DAS samples alone is not yet possible. |
 | Celestia | CEL-T01 | **DAS-only model after BEFP removal.** BEFP (Bad Encoding Fraud Proofs) were removed as dead code in PR #4934 (April 2026). Light nodes now rely solely on 16-sample DAS for availability, with no correctness verification. Documentation still claims BEFP+DAS model. |
 | Ethereum | (PeerDAS) | **PeerDAS active in Fulu fork.** Column-based sampling with custody groups. Most mature DAS implementation, but cross-client reconstruction failure modes exist (ETH-E01, ETH-D02). |
 

@@ -59,10 +59,10 @@ Learn more about verification levels in the [Verification Methodology](../method
 | **Tampering** | 2 | 1 | 5 | 5 | **13** | Data integrity violations, upgrade path abuse |
 | **Elevation of Privilege** | 3 | 1 | 4 | 1 | **9** | Governance abuse, role escalation, multisig concentration |
 | **Spoofing** | 1 | 1 | 1 | 2 | **5** | Identity forgery, signature replay |
-| **Protocol Design** | 2 | 0 | 0 | 0 | **2** | Structural gaps in the protocol specification |
+| **Protocol Design** | 2 | 0 | 2 | 0 | **4** | Structural gaps in the protocol specification |
 | **Governance** | 1 | 2 | 0 | 0 | **3** | Validator concentration, information asymmetry |
-| **Information Disclosure** | 1 | 0 | 1 | 0 | **2** | Key exposure, unauthenticated data access |
-| **Repudiation** | 0 | 0 | 1 | 1 | **2** | Missing audit trails, undetectable misbehavior |
+| **Information Disclosure** | 1 | 0 | 0 | 0 | **1** | Key exposure, unauthenticated data access |
+| **Repudiation** | 0 | 0 | 0 | 1 | **1** | Missing audit trails, undetectable misbehavior |
 
 **Key takeaways**:
 - Denial of Service dominates across all protocols (39% of all threats), which is expected for DA layers where availability is the core security guarantee.

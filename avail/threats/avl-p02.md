@@ -1,7 +1,7 @@
-# AVL-I01: Incomplete Block Reconstruction Limits DAS Security Guarantees
+# AVL-P02: Incomplete Block Reconstruction Limits DAS Security Guarantees
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: I · **Status**: Unverified
+**Severity**: Low (3.7/10) · **STRIDE**: P · **Status**: Unverified
 {% endhint %}
 
 ## Summary
