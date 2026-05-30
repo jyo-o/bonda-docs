@@ -21,15 +21,11 @@
 * [EDA-D03: Disperser V2 KZG Unauthenticated](eigenda/threats/eda-d03.md)
 * [EDA-G01: Infrastructure Concentration](eigenda/threats/eda-g01.md)
 * [EDA-S03: Signature Replay](eigenda/threats/eda-s03.md)
-* [EDA-I02: BLS Key Exposure](eigenda/threats/eda-i02.md)
 * [EDA-E02: Single Multisig Controls 8 Contracts](eigenda/threats/eda-e02.md)
 * [EDA-D12: Dead Operators](eigenda/threats/eda-d12.md)
 * [EDA-D07: GetBlob No Authentication](eigenda/threats/eda-d07.md)
 * [EDA-E01: Anchor Verification Bypass](eigenda/threats/eda-e01.md)
-* [EDA-T10: Attestation Overwrite](eigenda/threats/eda-t10.md)
 * [EDA-D02: Proxy Rate Limit Absence](eigenda/threats/eda-d02.md)
-* [EDA-D10: Unauthenticated POST Flood](eigenda/threats/eda-d10.md)
-* [EDA-D04: Encoding Failure No Fallback](eigenda/threats/eda-d04.md)
 * [Monitoring](eigenda/monitoring.md)
 
 ## Celestia

@@ -1,7 +1,7 @@
 # EigenDA
 
 > **How to Read This Section**
-> This page introduces EigenDA's architecture and summarizes all 17 identified threats. Each threat ID links to a dedicated page with full analysis, evidence, and scoring details. Start here for the big picture, then dive into individual threats as needed.
+> This page introduces EigenDA's architecture and summarizes all 13 identified threats. Each threat ID links to a dedicated page with full analysis, evidence, and scoring details. Start here for the big picture, then dive into individual threats as needed.
 
 ## Architecture
 
@@ -33,8 +33,8 @@ One important architectural note: EigenDA does not implement Data Availability S
 
 | Metric | Value |
 |--------|-------|
-| Total threats identified | 17 |
-| Verification status | 12 verified, 4 code_verified, 1 partial |
+| Total threats identified | 13 |
+| Verification status | 11 verified, 2 code_verified |
 | Highest severity | High (CVSS 7.5) |
 | Registered operators | 272 |
 | Dead operators (0% chunk serving) | 11 |
@@ -53,15 +53,11 @@ One important architectural note: EigenDA does not implement Data Availability S
 | [EDA-E02](threats/eda-e02.md) | Single 3-of-4 Multisig Controls 8 Core Contracts | Medium (6.3) | verified |
 | [EDA-D03](threats/eda-d03.md) | Disperser V2 KZG Compute Exposed Without Auth | Medium (5.9) | verified |
 | [EDA-G01](threats/eda-g01.md) | Operator Infrastructure Concentration | Medium (5.9) | verified |
-| [EDA-I02](threats/eda-i02.md) | BLS Private Key Exposure Enables Signature Forgery | Medium (5.6) | code_verified |
 | [EDA-D07](threats/eda-d07.md) | GetBlob No Authentication | Medium (5.3) | verified |
 | [EDA-D12](threats/eda-d12.md) | 11 Dead Operators, 0% Chunk Serving | Medium (5.3) | verified |
 | [EDA-E01](threats/eda-e01.md) | DisableAnchorSignatureVerification Flag Bypass | Medium (4.0) | code_verified |
 | [EDA-D02](threats/eda-d02.md) | Proxy Rate Limit Absence | Low (3.7) | code_verified |
-| [EDA-D10](threats/eda-d10.md) | Unauthenticated POST Bulk Requests to Proxy | Low (3.7) | code_verified |
 | [EDA-S03](threats/eda-s03.md) | Cross-chain Signature Replay | Low (3.5) | verified |
-| [EDA-D04](threats/eda-d04.md) | Encoding Failure Transitions Blob to Failed | Low (3.1) | verified |
-| [EDA-T10](threats/eda-t10.md) | PutAttestation Unconditional Overwrite | Low (1.8) | partial |
 
 ## Key Findings
 

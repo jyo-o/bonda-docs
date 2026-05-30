@@ -13,7 +13,7 @@ This section compares threat modeling results across all four Data Availability 
 | **DAS Support** | No | Yes (16 samples/block) | Yes (KZG-based) | Yes (PeerDAS, custody groups) |
 | **Bridge to Ethereum** | ServiceManager on-chain | SP1Blobstream | VectorX + SP1 | Native (no bridge needed) |
 | **Scoring Method** | CVSS 3.1 | CVSS 3.1 | CVSS 3.1 | CVSS 3.1 |
-| **Threats Found** | 17 | 12 | 9 | 11 |
+| **Threats Found** | 13 | 12 | 9 | 11 |
 
 ---
 
@@ -23,10 +23,10 @@ This section compares threat modeling results across all four Data Availability 
 |----------|:-------:|:--------:|:-----:|:--------:|:-----:|
 | **Critical (9.0-10.0)** | 0 | 0 | 0 | 0 | **0** |
 | **High (7.0-8.9)** | 2 | 4 | 2 | 0 | **8** |
-| **Medium (4.0-6.9)** | 10 | 6 | 4 | 4 | **24** |
-| **Low (0.1-3.9)** | 5 | 2 | 3 | 7 | **17** |
+| **Medium (4.0-6.9)** | 9 | 6 | 4 | 4 | **23** |
+| **Low (0.1-3.9)** | 2 | 2 | 3 | 7 | **14** |
 | **Informational (0.0)** | 0 | 0 | 0 | 0 | **0** |
-| **Total** | **17** | **12** | **9** | **11** | **49** |
+| **Total** | **13** | **12** | **9** | **11** | **45** |
 
 No threats reach CVSS Critical (9.0+). This is consistent with the threat landscape: DA layers do not directly custody user funds, and most attacks require either multisig compromise (PR:H) or high complexity (AC:H), both of which cap the exploitability sub-score.
 
@@ -36,12 +36,12 @@ No threats reach CVSS Critical (9.0+). This is consistent with the threat landsc
 
 | Status | EigenDA | Celestia | Avail | Ethereum | Total |
 |--------|:-------:|:--------:|:-----:|:--------:|:-----:|
-| **Verified** (mainnet confirmed) | 12 | 4 | 8 | 6 | **30** |
+| **Verified** (mainnet confirmed) | 11 | 4 | 8 | 6 | **29** |
 | **PoC Verified** (fork test) | 0 | 2 | 0 | 0 | **2** |
-| **Code Verified** (source audit) | 4 | 5 | 0 | 3 | **12** |
-| **Partial** (incomplete evidence) | 1 | 1 | 0 | 2 | **4** |
+| **Code Verified** (source audit) | 2 | 5 | 0 | 3 | **10** |
+| **Partial** (incomplete evidence) | 0 | 1 | 0 | 2 | **3** |
 | **Unverified** (design analysis only) | 0 | 0 | 1 | 0 | **1** |
-| **Total** | **17** | **12** | **9** | **11** | **49** |
+| **Total** | **13** | **12** | **9** | **11** | **45** |
 
 Avail has the highest verified rate at 89%, achieved through systematic on-chain `cast` queries against live contracts. EigenDA follows at 71% with extensive mainnet probing.
 
@@ -53,13 +53,13 @@ Learn more about verification levels in the [Verification Methodology](../method
 
 | Category | EigenDA | Celestia | Avail | Ethereum | Total | What It Covers |
 |----------|:-------:|:--------:|:-----:|:--------:|:-----:|----------------|
-| **Denial of Service** | 7 | 7 | 2 | 2 | **18** | Availability attacks, resource exhaustion, liveness failures |
-| **Tampering** | 2 | 0 | 2 | 5 | **9** | Data integrity violations, upgrade path abuse |
+| **Denial of Service** | 5 | 7 | 2 | 2 | **16** | Availability attacks, resource exhaustion, liveness failures |
+| **Tampering** | 1 | 0 | 2 | 5 | **8** | Data integrity violations, upgrade path abuse |
 | **Elevation of Privilege** | 3 | 1 | 3 | 1 | **8** | Governance abuse, role escalation, multisig concentration |
 | **Spoofing** | 1 | 1 | 0 | 2 | **4** | Identity forgery, signature replay |
 | **Protocol Design** | 2 | 1 | 2 | 0 | **5** | Structural gaps in the protocol specification |
 | **Governance** | 1 | 2 | 0 | 0 | **3** | Validator concentration, information asymmetry |
-| **Information Disclosure** | 1 | 0 | 0 | 0 | **1** | Key exposure, unauthenticated data access |
+| **Information Disclosure** | 0 | 0 | 0 | 0 | **0** | Key exposure, unauthenticated data access |
 | **Repudiation** | 0 | 0 | 0 | 1 | **1** | Missing audit trails, undetectable misbehavior |
 
 **Key takeaways**:
@@ -72,11 +72,11 @@ Learn more about verification levels in the [Verification Methodology](../method
 
 | Scope | EigenDA | Celestia | Avail | Ethereum | Total |
 |-------|:-------:|:--------:|:-----:|:--------:|:-----:|
-| **Protocol** | 10 | 6 | 0 | 11 | **27** |
+| **Protocol** | 7 | 6 | 0 | 11 | **24** |
 | **Bridge** | 4 | 1 | 6 | 0 | **11** |
 | **Implementation** | 0 | 5 | 0 | 0 | **5** |
 | **Chain** | 0 | 0 | 3 | 0 | **3** |
-| **Rollup** | 3 | 0 | 0 | 0 | **3** |
+| **Rollup** | 2 | 0 | 0 | 0 | **2** |
 
 - **Avail** threats concentrate in the bridge layer (6 of 9). The VectorX bridge is where Avail's DA guarantees meet Ethereum, making it the primary trust boundary and attack surface.
 - **Celestia** splits between protocol design issues and implementation bugs in celestia-core/celestia-node.

@@ -36,7 +36,7 @@ The two highest-scoring threats (CEL-G01 at 8.7, AVL-E03 at 8.2) both involve Sc
 | DA Protocol | Average | Min | Max | Threat Count |
 |---|---|---|---|---|
 | Celestia | 6.1 | 3.7 | 8.7 | 12 |
-| EigenDA | 5.1 | 1.8 | 7.5 | 17 |
+| EigenDA | 6.1 | 3.5 | 7.5 | 13 |
 | Avail | 4.9 | 2.1 | 8.2 | 9 |
 | Ethereum / PeerDAS | 4.1 | 3.7 | 6.5 | 11 |
 
@@ -48,8 +48,8 @@ Celestia's higher average reflects governance-level risks and bridge vulnerabili
 |---|---|---|---|---|---|
 | Critical (9.0-10.0) | 0 | 0 | 0 | 0 | 0 |
 | High (7.0-8.9) | 2 | 4 | 2 | 0 | 8 |
-| Medium (4.0-6.9) | 10 | 6 | 4 | 4 | 24 |
-| Low (0.1-3.9) | 5 | 2 | 3 | 7 | 17 |
+| Medium (4.0-6.9) | 9 | 6 | 4 | 4 | 23 |
+| Low (0.1-3.9) | 2 | 2 | 3 | 7 | 14 |
 | Informational (0.0) | 0 | 0 | 0 | 0 | 0 |
 
 No threats reach CVSS Critical (9.0+). This is consistent with the threat landscape: DA layers do not directly custody user funds, and most attacks require either multisig compromise (PR:H) or high complexity (AC:H), both of which cap the exploitability sub-score.

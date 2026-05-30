@@ -10,7 +10,7 @@ BONDA analyzes the security of four major DA protocols by combining STRIDE-based
 
 Data Availability is one of the most critical layers in the Ethereum rollup stack. Rollups post their transaction data to DA layers, and if that data becomes unavailable, users cannot verify rollup state or withdraw their funds. BONDA systematically identifies threats to these DA layers — from governance risks and bridge vulnerabilities to code-level bugs and protocol design gaps.
 
-This documentation covers **49 verified threats** across four protocols, each with detailed analysis, on-chain evidence, and severity scoring.
+This documentation covers **45 verified threats** across four protocols, each with detailed analysis, on-chain evidence, and severity scoring.
 
 ---
 
@@ -18,7 +18,7 @@ This documentation covers **49 verified threats** across four protocols, each wi
 
 | Protocol | Description | Threats | Highest Severity |
 |----------|-------------|---------|-----------------|
-| [**EigenDA**](eigenda/) | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 17 | High (7.5) |
+| [**EigenDA**](eigenda/) | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 13 | High (7.5) |
 | [**Celestia**](celestia/) | Modular DA layer with CometBFT consensus and light client DAS | 12 | High (8.7) |
 | [**Avail**](avail/) | Substrate-based DA chain with VectorX bridge to Ethereum | 9 | High (8.2) |
 | [**Ethereum / PeerDAS**](ethereum/) | Ethereum's upcoming DA scaling upgrade with multi-client architecture | 11 | Medium (6.5) |
@@ -29,11 +29,11 @@ This documentation covers **49 verified threats** across four protocols, each wi
 
 | Metric | Count |
 |--------|-------|
-| Total threats | 49 |
-| Verified on mainnet | 30 |
+| Total threats | 45 |
+| Verified on mainnet | 29 |
 | PoC verified | 2 |
-| Code verified | 12 |
-| Partial evidence | 4 |
+| Code verified | 10 |
+| Partial evidence | 3 |
 | Unverified | 1 |
 
 All verification levels are explained in the [Verification Methodology](methodology/verification.md).

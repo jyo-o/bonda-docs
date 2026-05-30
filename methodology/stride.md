@@ -108,10 +108,10 @@ Governance/Concentration threats use the `G` category suffix within their protoc
 
 | Protocol | S | T | R | I | D | E | P | G | Total |
 |----------|---|---|---|---|---|---|---|---|-------|
-| EigenDA  | 1 | 2 | — | 1 | 7 | 3 | 2 | 1 | 17 |
+| EigenDA  | 1 | 1 | — | — | 5 | 3 | 2 | 1 | 13 |
 | Celestia | 1 | — | — | — | 7 | 1 | 1 | 2 | 12 |
 | Avail    | 0 | 2 | — | — | 2 | 3 | 2 | — | 9 |
 | Ethereum | 2 | 5 | 1 | — | 2 | 1 | — | — | 11 |
-| **Total**| **4** | **9** | **1** | **1** | **18** | **8** | **5** | **3** | **49** |
+| **Total**| **4** | **8** | **1** | **0** | **16** | **8** | **5** | **3** | **45** |
 
 Denial of Service (D) dominates across all protocols, reflecting the fundamental challenge of DA layers: they must remain available under adversarial conditions. Elevation of Privilege (E) and Tampering (T) are also prevalent, driven by the prevalence of upgradeable contracts and multisig governance structures in bridge components.
