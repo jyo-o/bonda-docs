@@ -52,7 +52,6 @@
 * [CEL-D14: ProcessProposal TxCache Bypass](celestia/threats/cel-d14.md)
 * [CEL-S01: DAS Selective Disclosure](celestia/threats/cel-s01.md)
 * [CEL-D01: Prevote-nil Censorship](celestia/threats/cel-d01.md)
-* [CEL-P01: Flat 2% Slashing](celestia/threats/cel-p01.md)
 * [CEL-D05: ShrEx Unbounded Response](celestia/threats/cel-d05.md)
 * [Attack Chains](celestia/attack-chains.md)
 

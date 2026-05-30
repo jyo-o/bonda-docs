@@ -6,7 +6,7 @@ This page documents three concrete attack chains against Celestia, constructed b
 
 ## Attack Chain A: Zero-Cost Liveness Halt
 
-**Composed from:** CEL-D01 (prevote-nil censorship), CEL-G01 (KYC validator concentration), CEL-P01 (no downtime slashing)
+**Composed from:** CEL-D01 (prevote-nil censorship), CEL-G01 (KYC validator concentration)
 
 ### Preconditions
 
@@ -88,7 +88,7 @@ This page documents three concrete attack chains against Celestia, constructed b
 
 ## Attack Chain C: Coordinated Safety Violation
 
-**Composed from:** CEL-P01 (flat 2% double-sign slashing), CEL-G01 (validator concentration)
+**Composed from:** CEL-G01 (validator concentration)
 
 ### Preconditions
 

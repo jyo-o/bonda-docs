@@ -32,8 +32,8 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 
 ## Key Numbers
 
-- **19** threats identified through STRIDE analysis, on-chain verification, and source code review
-- **2 Critical**, **5 High**, **5 Medium**, **4 Low**, **3 Informational**
+- **18** threats identified through STRIDE analysis, on-chain verification, and source code review
+- **5 High**, **7 Medium**, **6 Low**
 - **94 / 100** active validators (near saturation)
 - **35.77%** voting power held by top 8 validators (exceeds the 33% censorship threshold)
 - **6 of top 8** validators are KYC-regulated entities in US, EU, Swiss, or HK jurisdictions
@@ -60,7 +60,6 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 | [CEL-D10](threats/cel-d10.md) | Worst-Case Memory Reservation on Empty Namespace Query | Low (3.7) | code_verified |
 | [CEL-D14](threats/cel-d14.md) | TxCache Bypass Forcing Full Recomputation by Proposer | Low (3.7) | code_verified |
 | [CEL-D05](threats/cel-d05.md) | Unlimited Response Size in ShrEx Protocol | Low (3.7) | code_verified |
-| [CEL-P01](threats/cel-p01.md) | Flat 2% Slashing for Double Signing Without Correlation Penalty | Low (3.7) | verified |
 
 ## Key Findings
 
