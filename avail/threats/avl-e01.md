@@ -24,13 +24,10 @@ The vulnerability lies in the low threshold combined with key holder overlap. On
 
 ## Proof of Concept
 
-On-chain verification confirmed the multisig configuration and key holder overlap:
+On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#2-sp1verifiergateway-multisig-analysis-avl-e01) for full commands and results.
 
-- `cast call 0xCafE...6878 "getThreshold()(uint256)"` returns `2`, confirming the 2-of-3 threshold
-- `cast call 0xCafE...6878 "getOwners()(address[])"` returns 3 owner addresses
-- Owner #2 (0x72Ff26D9517324eEFA89A48B75c5df41132c4f54) was cross-verified as identical to Governance Multisig Owner #4
-
-Reference: poc_onchain_verification.md, section 4.
+- `getThreshold()` returns `2`, confirming the 2-of-3 threshold
+- `getOwners()` returns 3 addresses; Owner #2 (0x72Ff...4f54) cross-verified as identical to Governance Multisig Owner #4
 
 ## Impact
 

@@ -25,13 +25,10 @@ The Bridge contract is protected by a TimelockController that enforces a 24-hour
 
 ## Proof of Concept
 
-On-chain verification confirmed the token contract's immutability and minting authority:
+On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#5-bridge-and-token-verification) for full commands and results.
 
-- `cast call 0xeeb4...c6bd8 "totalSupply()(uint256)"` returns approximately 791 million AVAIL tokens
-- `cast call 0xeeb4...c6bd8 "owner()(address)"` reverts, confirming the token contract has no admin
-- Mint and burn functions are restricted to the Bridge proxy contract only
-
-Reference: poc_onchain_verification.md, section 6.
+- Token `owner()` reverts — confirms the AVAIL token contract is immutable with no admin
+- `totalSupply()` returns ~791 million AVAIL; mint/burn authority is restricted to the Bridge proxy contract only
 
 ## Impact
 

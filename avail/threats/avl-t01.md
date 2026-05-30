@@ -24,9 +24,10 @@ The Governance Multisig (Multisig 1, a 4-of-7 Safe at 0x7F2f87B0Efc66Fea0b7c30C6
 
 ## Proof of Concept
 
-On-chain verification confirmed the UUPS pattern via the EIP-1967 admin slot value of `0x0`. Source code review of `TimelockedUpgradeable.sol` confirmed the absence of timelock delay logic -- the `onlyTimelock` modifier performs only `hasRole(TIMELOCK_ROLE, msg.sender)`.
+No exploit reproduction was conducted. This finding is based on on-chain state verification and source code analysis.
 
-References: poc_onchain_verification.md sections 2 and 4.
+- EIP-1967 admin slot reads `0x0`, confirming the UUPS proxy pattern where upgrade logic lives in the implementation
+- Source code review of `TimelockedUpgradeable.sol` confirmed the `onlyTimelock` modifier performs only `hasRole(TIMELOCK_ROLE, msg.sender)` with no delay, queue, or schedule logic
 
 ## Impact
 

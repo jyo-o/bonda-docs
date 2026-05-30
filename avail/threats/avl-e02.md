@@ -26,14 +26,11 @@ The practical consequence is that the three multisigs do not provide truly indep
 
 ## Proof of Concept
 
-On-chain verification confirmed the overlap:
+On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#3-governance-multisig-cross-analysis-avl-e02) for full commands and results.
 
-- `cast call 0x1a5b...8930 "getOwners()(address[])"` returns 5 owners, of which 4 are identical to Governance Multisig members
-- `cast call 0x1a5b...8930 "getThreshold()(uint256)"` returns `3`, confirming the 3-of-5 threshold
-- Address 0x72Ff26D9517324eEFA89A48B75c5df41132c4f54 confirmed present in all three multisigs through cross-referencing owner lists
+- Pauser Multisig `getOwners()` returns 5 owners, 4 of which are identical to Governance Multisig members
+- Address 0x72Ff...4f54 confirmed present in all three multisigs through cross-referencing owner lists
 - Pauser Multisig was initially discovered by tracing `RoleGranted` events on the bridge contracts
-
-Reference: poc_onchain_verification.md, section 11.
 
 ## Impact
 

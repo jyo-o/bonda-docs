@@ -1,6 +1,6 @@
-# Avail PoC Evidence Summary
+# Avail Evidence Summary
 
-This page summarizes the on-chain verification evidence collected for Avail DA threat findings. All results are from Ethereum mainnet and Avail mainnet, using `cast` (Foundry) and Substrate RPC calls. Zero speculation -- every conclusion traces to a raw on-chain response.
+This page summarizes the on-chain verification evidence collected for Avail DA threat findings. All results are from Ethereum mainnet and Avail mainnet, using `cast` (Foundry) and Substrate RPC calls. Every conclusion traces to a raw on-chain response.
 
 **Verification date**: 2026-05-21 to 2026-05-24
 **Tools**: cast (Foundry), curl (Substrate RPC)

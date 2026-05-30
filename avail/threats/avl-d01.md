@@ -26,22 +26,11 @@ A previous relayer (0x3243...2D) was rotated out, confirming that relayer change
 
 ## Proof of Concept
 
-Anvil mainnet fork PoC executed three tests:
+Anvil mainnet fork PoC and on-chain state verification were conducted. See [Verification Evidence](../evidence.md#1-vectorx-single-relayer-verification-avl-d01) for full commands and results.
 
-1. Confirmed single relayer access control -- only the approved relayer can call `commitHeaderRange()`
-2. Confirmed absence of staleness detection -- no on-chain mechanism detects relayer failure
-3. Confirmed guardian ZK bypass as the intended fallback mechanism
-
-On-chain state at time of verification:
-- `eth_getCode(0x27BF...)` returns `0x` -- confirms EOA, not a contract
-- Nonce = 2632, balance = 0.82 ETH -- active account
-- `approvedRelayers(0x27BF...)` returns `true` -- sole approved relayer
-- `checkRelayer` returns `true` -- relayer access control is enforced
-- `latestBlock` = 2975481, `headerRangeCommitmentTreeSize` = 2048
-
-The relayer operates approximately every 120 minutes in batches of 358 blocks, consuming about 458,612 gas per commitment.
-
-References: poc_onchain_verification.md sections 2 and 14; avl_d01_relayer_spof_poc.sh (Anvil fork, 3 tests).
+- Anvil fork confirmed single relayer access control, absence of staleness detection, and guardian ZK bypass as the intended fallback
+- `approvedRelayers(0x27BF...)` returns `true` with `checkRelayer` enabled — sole approved relayer is an EOA (nonce 2632, balance 0.82 ETH)
+- Relayer operates approximately every 120 minutes in batches of ~358 blocks at ~458,612 gas per commitment
 
 ## Impact
 

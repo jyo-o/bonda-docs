@@ -58,7 +58,7 @@
 * [AVL-P02: Incomplete Block Reconstruction](avail/threats/avl-p02.md)
 * [AVL-E02: Multisig Key Overlap](avail/threats/avl-e02.md)
 * [AVL-P01: Slashing Never Triggered](avail/threats/avl-p01.md)
-* [PoC Evidence](avail/poc-evidence.md)
+* [Verification Evidence](avail/evidence.md)
 
 ## Ethereum / PeerDAS
 

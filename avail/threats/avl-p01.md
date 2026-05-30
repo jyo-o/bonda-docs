@@ -26,14 +26,11 @@ The gap between implemented infrastructure and actual enforcement may reflect co
 
 ## Proof of Concept
 
-On-chain verification confirmed the absence of slashing enforcement:
+On-chain state was queried via Avail Substrate RPC. See [Verification Evidence](../evidence.md#6-avail-chain-verification) for full commands and results.
 
-- `state_getStorage` for ActiveEra returns 688 after SCALE decoding, confirming long-running chain operation
-- `UnappliedSlashes` storage query for era 688 returns null, confirming zero slashing events
-- Runtime constants: `SlashDeferDuration` = 27 eras, `BondingDuration` = 28 eras, `SessionsPerEra` = 6
-- Runtime metadata contains 67 references to slash-related functions, confirming the infrastructure exists in code
-
-Reference: poc_onchain_verification.md, section 10.
+- `ActiveEra` storage returns 688 after SCALE decoding — 688 eras of operation with zero slashing events
+- `UnappliedSlashes` for era 688 returns null — no pending or historical slashes
+- Runtime metadata contains 67 slash-related function references, confirming infrastructure exists but has never been triggered
 
 ## Impact
 

@@ -23,17 +23,11 @@ The deployer address is a regular EOA (not a contract), confirmed by `eth_getCod
 
 ## Proof of Concept
 
-Exhaustive role verification across 3 roles and 2 principals confirmed that DEFAULT_ADMIN_ROLE is the only active role for the deployer. The following on-chain queries established the attack path:
+On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#4-deployer-admin-role-verification-avl-e03) for full commands and results.
 
-- `hasRole(DEFAULT_ADMIN_ROLE, 0xDEd...)` returns `true` -- deployer still holds admin
-- `hasRole(TIMELOCK_ROLE, 0xDEd...)` returns `false` -- not yet granted, but grantable
-- `getRoleAdmin(TIMELOCK_ROLE)` returns `0x00` (DEFAULT_ADMIN_ROLE) -- confirms admin can grant it
-- `eth_getCode(0xDEd...)` returns `0x` -- confirms this is an EOA, not a contract
-- `eth_getTransactionCount(0xDEd...)` returns `1107` -- actively used account
-
-TIMELOCK_ROLE admin mapping to 0x00 was verified, confirming the grant-then-upgrade attack path.
-
-References: poc_onchain_verification.md sections 8 and 9.
+- `hasRole(DEFAULT_ADMIN_ROLE, 0xDEd...)` returns `true` — deployer still holds admin
+- `getRoleAdmin(TIMELOCK_ROLE)` returns `0x00` (DEFAULT_ADMIN_ROLE) — confirms the deployer can grant itself TIMELOCK_ROLE
+- Deployer is an EOA (nonce 1107), confirming a 2-transaction upgrade path that bypasses the 4-of-7 governance multisig
 
 ## Impact
 
