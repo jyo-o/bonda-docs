@@ -50,4 +50,4 @@ The monitoring system provides observability for the following threat findings:
 | EDA-T09 | Ejection event count, ejector address activity | On-chain indexing |
 | EDA-P01 | Slash event count (expected: 0) | On-chain indexing |
 | EDA-D03 | Disperser response times, error rates | Write probe data |
-| G-CON-03 | Operator IP/ASN diversity metrics | Operator probe metadata |
+| EDA-G01 | Operator IP/ASN diversity metrics | Operator probe metadata |

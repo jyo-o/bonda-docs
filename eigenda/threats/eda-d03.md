@@ -1,59 +1,75 @@
 # EDA-D03: Disperser V2 KZG Compute Surface Exposed Without Authentication or Prepayment
 
-{% hint style="warning" %}
-**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: Verified
+{% hint style="info" %}
+**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: Verified
 {% endhint %}
 
-## Overview
+## Summary
 
-Two specific gRPC surfaces on the Disperser V2 server expose computationally expensive KZG operations without requiring authentication or prepayment. The first is `GetBlobCommitment`, which directly calls `committer.GetCommitmentsForPaddedLength` without any auth or payment check. Its disable flag (`DisableGetBlobCommitment`) defaults to `false`, meaning the endpoint is exposed by default. A mainnet single-read probe confirmed that it returns an actual `BlobCommitmentReply` response.
+Two gRPC surfaces on the Disperser V2 server expose computationally expensive KZG operations without requiring authentication or prepayment. `GetBlobCommitment` calls `committer.GetCommitmentsForPaddedLength` with no auth or payment check and is enabled by default. `DisperseBlob` recomputes the KZG commitment inside `validateDispersalRequest` before calling `AuthorizePayment`, consuming CPU before payment rejection. The root cause is missing pre-computation authentication gates. A local reproduction demonstrated baseline KZG computation at 1.77 seconds, rising to 15.29 seconds p50 at concurrency 8 with no throttling.
 
-The second surface is `DisperseBlob`, which recomputes the KZG commitment inside `validateDispersalRequest` before calling `AuthorizePayment`. This means a well-formed request with valid blob, header, and signature will consume CPU on KZG computation before payment is checked and potentially rejected. In contrast, `GetBlobStatus` burst requests hit a DynamoDB read path and are not relevant to this compute-exhaustion threat.
+## Description
 
-A local exact-path reproduction demonstrated that baseline KZG computation takes 1.77 seconds, and at concurrency 8, the p50 latency rises to 15.29 seconds with no throttling. Large-scale mainnet exploitability remains uncertain due to potential Cloudflare/WAF protections that have not been verified.
+### Case #1: `GetBlobCommitment` Unauthenticated Compute
 
-## Prerequisites
+The V2 unary interceptor only collects metrics. `GetBlobCommitment` directly calls `GetCommitmentsForPaddedLength` without any auth or payment check.
 
-- Access to the Disperser gRPC endpoint (publicly reachable).
-- For the `DisperseBlob` path, the attacker must construct a valid blob, header, and signature.
+**Source**: [`disperser/apiserver/server_v2.go:230-233,286-310`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/server_v2.go#L230-L233) -- V2 unary interceptor only collects metrics; `GetBlobCommitment` calls `GetCommitmentsForPaddedLength` without auth or payment.
 
-## Attack Scenario
+The disable flag `DisableGetBlobCommitment` defaults to `false`, meaning the endpoint is exposed by default.
 
-1. The attacker identifies the publicly available Disperser V2 gRPC endpoint (confirmed via `grpcurl` listing V1, V2, Health, and Reflection services).
-2. The attacker sends repeated `GetBlobCommitment` requests, each triggering a full KZG commitment computation (G1 + 2xG2 MSM, sequential all-core) without authentication.
-3. Alternatively, the attacker constructs valid `DisperseBlob` requests that pass header validation and trigger KZG recomputation before being rejected at the payment stage.
-4. The Disperser's CPU resources are exhausted, degrading service for legitimate users.
+**Source**: [`disperser/cmd/apiserver/flags/flags.go:251-256`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/cmd/apiserver/flags/flags.go#L251-L256) -- `DisableGetBlobCommitment` defaults to `false`.
 
-## Impact
+The underlying KZG computation performs G1 + 2xG2 MSM sequential all-core operations.
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 5.3/10 (Medium) |
-| BVSS Vector | `BVSS:1.1/B:N/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/CI:N/II:N/AI:M` |
-| Scope | Protocol |
+**Source**: [`encoding/v2/kzg/committer/committer.go:149-176`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/encoding/v2/kzg/committer/committer.go#L149-L176) -- G1 + 2xG2 MSM sequential all-core computation.
 
-### Scoring Rationale
+### Case #2: `DisperseBlob` Pre-Payment KZG Recomputation
 
-Blockchain Impact (B) is None because this is a computing resource exhaustion issue with no financial impact. Attack Vector (AV) is Network since the gRPC endpoint is publicly accessible. Attack Complexity (AC) is High because mainnet WAF/CDN protection layers are presumed to exist but have not been verified, and the impact was only confirmed in a local PoC, making production-scale exploitability uncertain. Availability impact (A) is High because the unauthenticated KZG compute surface exposure is confirmed. Availability Infrastructure impact (AI) is Medium because actual service disruption at production infrastructure scale is unproven, and auto-scaling or replica capacity may absorb the load.
+`validateDispersalRequest` performs KZG recomputation before `AuthorizePayment` is called. A well-formed request with valid blob, header, and signature consumes CPU on KZG computation before payment is checked and potentially rejected.
 
-## Evidence
+**Source**: [`disperser/apiserver/disperse_blob_v2.go:54,257,67`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/disperse_blob_v2.go#L54) -- `validateDispersalRequest` performs KZG recomputation before `AuthorizePayment`.
 
-### Source Code
+Note: `GetBlobStatus` burst requests hit a DynamoDB read path and are not relevant to this compute-exhaustion threat.
 
-- [`disperser/apiserver/server_v2.go:230-233,286-310`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/server_v2.go#L230-L233) -- V2 unary interceptor only collects metrics; `GetBlobCommitment` calls `GetCommitmentsForPaddedLength` without auth or payment.
-- [`disperser/cmd/apiserver/flags/flags.go:251-256`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/cmd/apiserver/flags/flags.go#L251-L256) -- `DisableGetBlobCommitment` defaults to `false`.
-- [`encoding/v2/kzg/committer/committer.go:149-176`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/encoding/v2/kzg/committer/committer.go#L149-L176) -- G1 + 2xG2 MSM sequential all-core computation.
-- [`disperser/apiserver/disperse_blob_v2.go:54,257,67`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/disperse_blob_v2.go#L54) -- `validateDispersalRequest` performs KZG recomputation before `AuthorizePayment`.
+## Proof of Concept
 
-### PoC Testing
+### Reproduction
 
 - `grpcurl disperser.eigenda.xyz list` confirmed V1, V2, Health, and Reflection services are all publicly accessible.
 - Single-request `GetBlobCommitment` probe returned a valid `BlobCommitmentReply` on mainnet.
-- Local exact-path load test: baseline 1.77s, concurrency 8 p50 15.29s, no throttling observed. See [eigenda-kzg-dos-poc](https://github.com/jyo-o/eigenda-kzg-dos-poc).
+
+### Results
+
+- Local exact-path load test: baseline 1.77s, concurrency 8 p50 15.29s, no throttling observed.
+- PoC repository: [eigenda-kzg-dos-poc](https://github.com/jyo-o/eigenda-kzg-dos-poc).
 - PoC #02's 100 parallel `GetBlobStatus` hits a cheap DynamoDB read path and is not relevant evidence for this threat.
 
 **PoC References**: #20
 
-## Mitigations
+## Impact
 
-Payment is only enforced after `DisperseBlob` processing completes, and `GetBlobCommitment` has no payment check at all. Cloudflare or WAF may exist upstream of the Disperser, but application-layer rate thresholds have not been verified. Adding per-endpoint rate limiting or requiring authentication for `GetBlobCommitment` would close this surface.
+An attacker can exhaust the Disperser's CPU resources by sending repeated `GetBlobCommitment` or crafted `DisperseBlob` requests, each triggering full KZG commitment computations (G1 + 2xG2 MSM) without authentication. The local PoC demonstrated an 8.6x latency increase at concurrency 8 with no throttling. No authentication is required for `GetBlobCommitment`. For `DisperseBlob`, the attacker must construct a valid blob, header, and signature, but CPU is consumed before payment rejection. Large-scale mainnet exploitability remains uncertain due to potential Cloudflare/WAF protections that have not been verified.
+
+### CVSS 3.1
+
+**Score**: 5.9/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H`
+
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV (Attack Vector) | N (Network) | The gRPC endpoint is publicly accessible |
+| AC (Attack Complexity) | H (High) | Mainnet WAF/CDN protection layers are presumed to exist but have not been verified; impact was only confirmed in a local PoC, making production-scale exploitability uncertain |
+| PR (Privileges Required) | N (None) | No authentication required for `GetBlobCommitment`; `DisperseBlob` requires a valid blob but no payment |
+| UI (User Interaction) | N (None) | No user interaction required |
+| S (Scope) | U (Unchanged) | Impact is within the Disperser service |
+| C (Confidentiality) | N (None) | No data exposure |
+| I (Integrity) | N (None) | No data integrity impact |
+| A (Availability) | H (High) | Unauthenticated KZG compute surface exposure confirmed; 8.6x latency increase demonstrated at concurrency 8 |
+
+## Recommendation
+
+1. Add per-endpoint rate limiting on `GetBlobCommitment` to prevent compute exhaustion.
+2. Require lightweight authentication (API key or similar) for `GetBlobCommitment` access.
+3. Reorder the `DisperseBlob` flow to call `AuthorizePayment` before `validateDispersalRequest` to prevent pre-payment KZG computation.
+4. Set `DisableGetBlobCommitment` to `true` by default if the endpoint is not required for normal client operations.

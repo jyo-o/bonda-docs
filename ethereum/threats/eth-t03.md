@@ -1,49 +1,52 @@
 # ETH-T03: Gloas Data Column Inclusion Proof Omission
 
 {% hint style="info" %}
-**Severity**: Low (3.5/10) · **STRIDE**: T (Tampering) · **Status**: partial
+**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: partial
 {% endhint %}
 
-## Overview
+## Summary
 
-Gloas is a proposed future Ethereum fork that introduces changes to the data availability architecture. In its current design, Gloas omits data column inclusion proofs, meaning that nodes would accept data columns without cryptographic proof that those columns are correctly included in a committed dataset. Without inclusion proofs, an attacker could potentially supply fabricated or corrupted data columns that pass validation.
+The Gloas fork proposal omits data column inclusion proofs from its design, meaning nodes would accept data columns without cryptographic proof that those columns are correctly included in a committed dataset. Without inclusion proofs, an attacker could supply fabricated or corrupted data columns that pass validation. Gloas is currently unscheduled with no confirmed timeline, making this a design-phase threat.
 
-Gloas is currently unscheduled with no confirmed timeline for activation. This makes the threat theoretical at present, with no immediate impact on the live network. However, if Gloas is activated without addressing this design gap, it would create a tampering vector in the data availability layer.
+## Description
 
-The partial verification status reflects that while the Gloas-related code paths have been identified and reviewed, the feature is not yet finalized. Re-evaluation will be necessary once Gloas moves to a scheduled status and its specification stabilizes.
+Data column inclusion proof verification is absent from the current Gloas design. Code paths related to Gloas have been identified but remain in an unfinished state consistent with the fork's unscheduled status.
 
-## Prerequisites
+```
+# @audit — no inclusion proof verification in Gloas design
+# Gloas fork: data columns accepted without cryptographic inclusion proof
+# Nodes cannot verify that a received column is correctly included
+# in any committed blob dataset.
+# Fabricated columns with valid-looking formats would pass validation.
+```
 
-- The Gloas fork must be scheduled and activated on the Ethereum mainnet
-- The inclusion proof omission must persist in the final Gloas specification
+This is a design gap rather than an implementation bug. If Gloas is activated without addressing it, an attacker could craft data columns with valid-looking formats but without verifiable inclusion in any committed blob, and distribute them through the PeerDAS gossip network. Receiving nodes would accept these fabricated columns, potentially affecting rollup state derivation.
 
-## Attack Scenario
+## Proof of Concept
 
-1. The Gloas fork activates on the Ethereum network without implementing data column inclusion proofs.
-2. An attacker crafts data columns with valid-looking formats but without verifiable inclusion in any committed blob.
-3. The attacker distributes these fabricated columns to nodes through the PeerDAS gossip network.
-4. Receiving nodes accept the columns because no inclusion proof verification step exists in the Gloas protocol.
-5. Downstream consumers relying on data availability guarantees receive incorrect or fabricated data, potentially affecting rollup state derivation.
+No proof of concept was conducted for this threat.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 3.5/10 (Low) |
-| BVSS Vector | `B:N/AV:N/AC:H/PR:N/UI:N/S:U/C:N/CI:N/I:M/II:M/A:N/AI:N` |
-| Scope | protocol |
+Downstream consumers relying on data availability guarantees could receive incorrect or fabricated data, potentially affecting rollup state derivation. Integrity impact is medium because accepting unproven data columns corrupts data availability guarantees. The threat is contingent on Gloas activation — there is no impact on the current live network.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 3.7/10 (Low)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N`
 
-The attack vector is network-based but complexity is high because Gloas must first be activated, making exploitation depend on a future protocol change. No privileges or user interaction are required. Integrity impact is medium at both node and chain levels because accepting unproven data columns could corrupt data availability guarantees. Confidentiality and availability are unaffected. The scope remains unchanged as the attack operates within the existing data availability trust boundary.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | N (Network) | Fabricated columns distributed through PeerDAS gossip network |
+| AC | H (High) | Gloas must first be activated; exploitation depends on a future protocol change |
+| PR | N (None) | No privileges required to submit data columns |
+| UI | N (None) | No user interaction needed |
+| S | U (Unchanged) | Attack operates within the data availability trust boundary |
+| C | N (None) | No confidentiality impact |
+| I | L (Low) | Unproven data columns could corrupt data availability guarantees |
+| A | N (None) | No availability impact |
 
-## Evidence
+## Recommendation
 
-### Source Code
-
-- **Component**: Gloas fork specification and related client code paths
-- **Finding**: Data column inclusion proof verification is absent from the current Gloas design. Code paths related to Gloas have been identified but remain in an unfinished state consistent with the fork's unscheduled status.
-
-## Mitigations
-
-The most important mitigation is that Gloas is currently unscheduled, providing ample time to address the design gap before any network impact. The Ethereum protocol development process requires extensive specification review, test coverage, and multi-client testing before any fork is activated. A data column inclusion proof mechanism must be implemented and validated as part of the Gloas specification before it can progress to a scheduled fork. Community review and formal analysis of the proof scheme should precede any activation decision.
+1. **Implement data column inclusion proof mechanism**: A cryptographic inclusion proof scheme must be designed and implemented as part of the Gloas specification before the fork progresses to a scheduled status.
+2. **Require formal analysis before activation**: Community review and formal analysis of the inclusion proof scheme should precede any activation decision.
+3. **Ensure multi-client test coverage**: Extensive specification review, consensus-spec-tests coverage, and multi-client testing must validate the inclusion proof mechanism before mainnet deployment.

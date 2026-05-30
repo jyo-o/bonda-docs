@@ -1,48 +1,59 @@
 # CEL-D11: Unbounded pendingSeenTracker Memory Growth via Known Account Addresses
 
 {% hint style="warning" %}
-**Severity**: High · **STRIDE**: D · **Status**: code_verified
+**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: code_verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The CAT mempool in celestia-core uses a pendingSeenTracker to track SeenTx messages from peers. While this tracker has a per-signer cap of 128 entries, there is no global cap on the number of distinct signers. This allows the perSigner map to grow without bound.
+The CAT mempool's `pendingSeenTracker` in celestia-core has a per-signer cap of 128 entries but no global cap on the number of distinct signers, allowing the `perSigner` map to grow without bound. An attacker can use real on-chain account addresses with future sequence numbers to create pending entries that persist indefinitely, eventually causing OOM on consensus nodes.
 
-The SeenTx handler in reactor.go accepts msg.Signer without signature verification, but internally queries the application state via querySequenceFromApplication to retrieve the expected sequence for the address. If the response sequence is zero or the query fails (which happens for new or non-existent accounts), the entry is rejected. This blocks mass injection of fake signer addresses.
+## Description
 
-However, an attacker can use real on-chain account addresses (which have sequence greater than zero) combined with future sequence numbers higher than expected. These combinations pass the validation check and create pending entries that persist indefinitely: there is no TTL, no eviction mechanism, and entries remain until the sequence actually catches up or 128 entries for the same signer push them out. Since mainnet has many known accounts with positive sequences, a single peer can recycle these addresses to inflate the perSigner map into the gigabyte range. The TODO comment at reactor.go line 425 explicitly acknowledges this problem.
+The `pendingSeenTracker` at `celestia-core/mempool/cat/pending.go` tracks `SeenTx` messages from peers using a `perSigner` map with `defaultPendingSeenPerSigner=128` entries per signer but no global signer count cap and no TTL.
 
-## Prerequisites
+```go
+// celestia-core/mempool/cat/reactor.go:397-437
+// @audit SeenTx handler accepts msg.Signer without signature verification
+// @audit but queries application state via querySequenceFromApplication
+// @audit Line 425 TODO: "add per-peer limits or something similar to pendingSeen to prevent overflowing"
+```
 
-- One P2P-connected node
-- A list of on-chain account addresses obtainable via chain scanning
-- No fees required
+The validation flow works as follows:
 
-## Attack Scenario
+1. `SeenTx` handler receives `msg.Signer` without signature verification
+2. `querySequenceFromApplication` (`reactor.go:824-837`) checks the expected sequence for the address
+3. If `resp.Sequence==0` or the query fails (non-existent accounts), the entry is rejected (`haveExpected=false`)
+4. If the address exists on-chain (sequence > 0) and the message uses a future sequence number, the entry passes validation and creates a pending entry
 
-1. The attacker collects a list of known on-chain account addresses with sequence greater than zero by scanning the chain.
-2. The attacker connects to a target consensus node via P2P.
-3. For each known signer address, the attacker sends a SeenTx message with a future sequence number.
-4. The target node queries the application state, confirms the address has a positive sequence, and creates a pending entry.
-5. The attacker repeats with many known addresses, each creating up to 128 slots in the perSigner map.
-6. With N known accounts, the map can reach N x 128 entries, inflating to gigabytes and eventually causing OOM.
+The attack leverages real on-chain account addresses (obtainable via chain scanning) with future sequence numbers higher than expected. These entries persist indefinitely: there is no TTL, no eviction mechanism, and entries remain until the sequence actually catches up or 128 entries for the same signer push them out. With N known accounts, the map can reach N x 128 entries.
+
+## Proof of Concept
+
+PR `celestia-core#3061` (DRAFT, 2026-05-22) adds per-peer cap of 10,000 and TTL of 2 minutes for eviction, but does not add a global signer count cap. Not yet merged.
 
 ## Impact
 
-Consensus node OOM crash leading to consensus participation halt and liveness degradation. The attack requires no fees and can be executed from a single P2P peer.
+Consensus node OOM crash leading to consensus participation halt and liveness degradation. The attack requires no fees and can be executed from a single P2P peer. With mainnet's many known accounts with positive sequences, a single peer can recycle these addresses to inflate the `perSigner` map into the gigabyte range.
 
-## Evidence
+### CVSS 3.1
 
-### Source Code
+**Score**: 7.5/10 (High)
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`
 
-- `celestia-core/mempool/cat/pending.go` -- perSigner map with defaultPendingSeenPerSigner=128, no global signer cap, no TTL
-- `celestia-core/mempool/cat/reactor.go:397-437` -- SeenTx handler: applies querySequenceFromApplication filter then calls pendingSeen.add. Line 425 TODO: "add per-peer limits or something similar to pendingSeen to prevent overflowing"
-- `celestia-core/mempool/cat/reactor.go:824-837` -- querySequenceFromApplication: returns haveExpected=false when resp.Sequence==0 or on error
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV (Attack Vector) | N (Network) | Attack is executed via P2P SeenTx messages over the network |
+| AC (Attack Complexity) | L (Low) | Only requires a list of known on-chain addresses (publicly available via chain scanning) and a P2P connection |
+| PR (Privileges Required) | N (None) | No privileges required; any P2P peer can send SeenTx messages |
+| UI (User Interaction) | N (None) | No user interaction required |
+| S (Scope) | U (Unchanged) | Impact is confined to the targeted consensus node |
+| C (Confidentiality) | N (None) | No confidentiality impact |
+| I (Integrity) | N (None) | No integrity impact; the attack targets availability only |
+| A (Availability) | H (High) | OOM crash halts consensus participation entirely |
 
-### PoC Testing
+## Recommendation
 
-- PR celestia-core#3061 (DRAFT, 2026-05-22): adds per-peer cap of 10,000 and TTL of 2 minutes for eviction, but does not add a global signer count cap. Not yet merged.
-
-## Mitigations
-
-PR #3061 (DRAFT, 2026-05-22) adds per-peer caps and TTL eviction but omits a global signer count cap. Until this PR is merged, there is no defense against this attack. Recommended additional fixes include adding a global cap on the number of distinct signers tracked.
+1. Add a global cap on the number of distinct signers tracked in the `perSigner` map (not addressed in PR #3061).
+2. Merge PR #3061 which adds per-peer caps (10,000) and TTL eviction (2 minutes) for pending entries.
+3. Add per-peer rate limits on `SeenTx` message ingestion to bound the injection rate from any single peer.

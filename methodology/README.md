@@ -22,11 +22,11 @@ Each DA protocol is decomposed into a Data Flow Diagram (DFD) with explicit trus
 
 See: [STRIDE for DA Layers](stride.md)
 
-### 2. BVSS 1.1 Scoring
+### 2. CVSS 3.1 Scoring
 
-Findings are scored using the BONDA Vulnerability Scoring System (BVSS 1.1), adapted from Halborn's blockchain-specific scoring framework. BVSS extends CVSS with chain-impact metrics that capture the cascading effects unique to blockchain systems — a bridge vulnerability does not merely affect one service but can propagate across every rollup depending on that DA layer.
+Findings are scored using CVSS 3.1 (Common Vulnerability Scoring System), the industry-standard framework used by NVD, major audit firms (Trail of Bits, ChainLight, Sigma Prime), and bug bounty platforms. Blockchain-specific context is captured in the metric rationale rather than custom metrics, ensuring scores are directly comparable across protocols and audit firms.
 
-See: [BVSS 1.1 Scoring](bvss.md)
+See: [CVSS 3.1 Scoring](cvss.md)
 
 ### 3. Multi-Source Verification
 

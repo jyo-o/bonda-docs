@@ -34,7 +34,7 @@ Terms are grouped by category. For deeper context, follow the cross-references t
 | **Information Disclosure** | Exposure of data to unauthorized parties. Examples include BLS private key leakage, unprotected gRPC endpoints, or unauthenticated API access revealing internal state. |
 | **Denial of Service** | Disrupting the availability of a system or service. DA-specific examples include blob flooding, mempool exhaustion, unbounded memory growth, and operator liveness failures. |
 | **Elevation of Privilege** | Gaining access or control beyond what is authorized. In DA layers, this includes multisig abuse, proxy upgrade hijacking, and role escalation through governance mechanisms. |
-| **BVSS** | BONDA Vulnerability Scoring System. A blockchain-adapted severity scoring framework that extends CVSS with chain-impact metrics to capture cascading effects across rollups and bridges. See [BVSS 1.1 Scoring](bvss.md). |
+| **CVSS** | Common Vulnerability Scoring System (version 3.1). The industry-standard severity scoring framework used by NVD, major audit firms, and bug bounty platforms. See [CVSS 3.1 Scoring](cvss.md). |
 | **DFD** | Data Flow Diagram. A visual representation of how data moves between components, processes, and data stores. DFDs are annotated with trust boundaries to identify where security transitions occur. |
 | **Trust Boundary** | A line in a DFD where data crosses between entities with different privilege levels. Threats are most likely to occur at trust boundaries, making them the primary focus of STRIDE analysis. |
 | **Attack Surface** | The sum of all points where an unauthorized actor can attempt to interact with a system. A larger attack surface generally means more potential entry points for exploitation. |

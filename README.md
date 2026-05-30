@@ -18,10 +18,10 @@ This documentation covers **61 verified threats** across four protocols, each wi
 
 | Protocol | Description | Threats | Highest Severity |
 |----------|-------------|---------|-----------------|
-| [**EigenDA**](eigenda/) | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 17 | High (7.0) |
-| [**Celestia**](celestia/) | Modular DA layer with CometBFT consensus and light client DAS | 19 | Critical |
-| [**Avail**](avail/) | Substrate-based DA chain with VectorX bridge to Ethereum | 14 | High (8.4) |
-| [**Ethereum / PeerDAS**](ethereum/) | Ethereum's upcoming DA scaling upgrade with multi-client architecture | 11 | Medium (5.3) |
+| [**EigenDA**](eigenda/) | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 17 | High (7.5) |
+| [**Celestia**](celestia/) | Modular DA layer with CometBFT consensus and light client DAS | 19 | High (8.7) |
+| [**Avail**](avail/) | Substrate-based DA chain with VectorX bridge to Ethereum | 14 | High (8.2) |
+| [**Ethereum / PeerDAS**](ethereum/) | Ethereum's upcoming DA scaling upgrade with multi-client architecture | 11 | Medium (6.5) |
 
 ---
 
@@ -47,7 +47,7 @@ All verification levels are explained in the [Verification Methodology](methodol
 | ID | Protocol | Finding |
 |----|----------|---------|
 | [CEL-E01](celestia/threats/cel-e01.md) | Celestia | SP1Blobstream bridge can be instantly upgraded by a 4-of-6 multisig with no timelock |
-| [G-CON-01](celestia/threats/g-con-01.md) | Celestia | Top 8 validators hold 35.77% of voting power; 6 are KYC-regulated entities subject to legal censorship orders |
+| [CEL-G01](celestia/threats/cel-g01.md) | Celestia | Top 8 validators hold 35.77% of voting power; 6 are KYC-regulated entities subject to legal censorship orders |
 
 ### High Severity
 
@@ -68,7 +68,7 @@ All verification levels are explained in the [Verification Methodology](methodol
 - [Ethereum / PeerDAS](ethereum/) — Multi-client divergence, KZG, and custody group threats
 
 ### By Topic
-- [Methodology](methodology/) — STRIDE framework, BVSS scoring, verification approach, terminology
+- [Methodology](methodology/) — STRIDE framework, CVSS scoring, verification approach, terminology
 - [Cross-DA Comparison](comparison/) — Side-by-side analysis across all four protocols
 - [Terminology](methodology/terminology.md) — Glossary of terms used throughout this documentation
 

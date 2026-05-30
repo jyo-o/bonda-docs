@@ -1,58 +1,63 @@
 # AVL-D02: Low Validator Utilization Concentrates Consensus Power
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **STRIDE**: D · **Scope**: chain · **Status**: Verified
+**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: Verified
 {% endhint %}
 
-## Overview
+## Summary
 
-Avail's mainnet supports up to 1,200 validator slots, but only 105 are currently active, representing just 8.75% utilization. This means the network's consensus security depends on a relatively small validator set compared to its designed capacity. The total staked amount is approximately 4.794 billion AVAIL, which is about 48% of the 10 billion total supply.
+Avail's mainnet supports up to 1,200 validator slots, but only 105 are currently active (8.75% utilization). The Nakamoto coefficient is approximately 34, meaning an attacker would need to compromise at least 34 validators to disrupt consensus. While the NPoS Phragmen election produces a very even stake distribution (1.20x max/min ratio), the small active set relative to capacity increases concentration risk.
 
-The Nakamoto coefficient for this validator set is approximately 34, meaning an attacker would need to compromise or collude with at least 34 validators to control 33.33% of the total stake and disrupt consensus. For a full Byzantine fault tolerance attack, 70 validators colluding would be needed to control the two-thirds majority required to seize finality.
+## Description
 
-On the positive side, Avail uses Nominated Proof-of-Stake with Phragmen election, which achieves a very even stake distribution across validators. The top validator holds only 50.79 million AVAIL (1.06% of total stake), and the bottom validator holds 42.4 million (0.88%). The ratio between the highest and lowest stake is just 1.20x, and the top 10 validators combined hold only 10.54% of total stake. This even distribution makes it significantly harder for any small group of validators to accumulate disproportionate influence.
+The validator set operates at low utilization with 105 of 1,200 available slots filled. Total staked amount is approximately 4.794 billion AVAIL (~48% of 10 billion total supply).
 
-## Prerequisites
+```
+// @audit — Validator set metrics (Era #688):
+//          Active validators: 105 / 1,200 slots (8.75% utilization)
+//          Nakamoto coefficient: ~34 (33.33% stake threshold)
+//          Full BFT attack: 70 validators (66.67% stake)
+//          Top validator: 50.79M AVAIL (1.06% of total stake)
+//          Bottom validator: 42.4M AVAIL (0.88%)
+//          Max/min stake ratio: 1.20x
+//          Top 10 validators: 10.54% of total stake
+```
 
-- Collusion or compromise of at least 34 validators to reach the 33.33% stake threshold
-- Alternatively, compromise of 70 validators to control two-thirds of stake for finality attacks
+The Phragmen election algorithm achieves remarkably even stake distribution, making it significantly harder for any small group to accumulate disproportionate influence. However, the small absolute number of active validators means fewer independent operators need to be compromised for a consensus attack.
 
-## Attack Scenario
+## Proof of Concept
 
-1. An attacker identifies and begins compromising validator keys or recruiting colluding validators. Due to the even Phragmen distribution, the attacker cannot focus on a few high-stake validators and must target many validators with similar stake levels.
-2. Once the attacker controls 34 or more validators (representing 33.33% of stake), they can begin blocking finality by refusing to vote on blocks. This prevents the network from reaching the two-thirds consensus needed for finalization.
-3. With 70 or more compromised validators (two-thirds of stake), the attacker could seize full control of finality, potentially censoring transactions, reorganizing blocks, or halting the chain entirely. However, the even stake distribution means this requires compromising a large number of independent operators.
-
-## Impact
-
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 5.3/10 (Medium) |
-| BVSS Vector | `BVSS:1.1/B:N/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/CI:N/II:N/AI:M` |
-| Scope | chain |
-
-### Scoring Rationale
-
-There is no direct financial impact from validator collusion alone (B:N). The attack operates at the network level (AV:N). Complexity is high because it requires coordinated collusion of 34 or more validators (AC:H). No special privileges are needed since validator credentials can be obtained by anyone who stakes (PR:N). The impact stays within the chain's finality scope (S:U). Availability impact is high because finality disruption is possible if the threshold is reached (A:H). Infrastructure availability impact is medium because the Phragmen election's even distribution (1.2x variance) limits stake concentration and makes practical collusion very difficult (AI:M).
-
-## Evidence
-
-### On-Chain Verification
+Direct calculation from Subscan Era #688 data confirmed all distribution metrics:
 
 - `Session.Validators` storage query returns 105 active validators
-- Subscan Era #688 stake distribution data was used to calculate the Nakamoto coefficient of approximately 34
-- Top validator holds 1.06% of total stake, confirming no single validator has outsized influence
-
-### Source Code
-
-- Avail uses NPoS with Phragmen election algorithm, which produces stake distributions with a maximum variance of 1.2x between the highest and lowest validator stakes
-
-### PoC Testing
-
-Direct calculation from Subscan Era #688 data confirmed all distribution metrics: 105 active validators, Nakamoto coefficient of 34, top validator at 1.06%, and max/min ratio of 1.20x.
+- Nakamoto coefficient of ~34 calculated from stake distribution data
+- Top validator holds 1.06% of total stake (50.79M AVAIL)
+- Bottom validator holds 0.88% (42.4M AVAIL)
+- Max/min ratio of 1.20x confirmed
 
 Reference: poc_onchain_verification.md section 10.5.
 
-## Mitigations
+## Impact
 
-Avail's NPoS Phragmen election algorithm enforces a very even stake distribution, with only 1.2x variance between the highest and lowest validator stakes. This makes stake concentration attacks impractical. The Nakamoto coefficient of 34 means an attacker would need to compromise roughly one-third of the entire active validator set, which represents a high practical barrier to collusion.
+An attacker controlling 34 or more validators (~33.33% of stake) could block finality by refusing to vote on blocks. With 70 or more compromised validators (~66.67% of stake), the attacker could seize full control of finality, potentially censoring transactions, reorganizing blocks, or halting the chain entirely. However, the even Phragmen distribution requires targeting many validators with similar stake levels rather than focusing on a few high-stake validators.
+
+### CVSS 3.1
+**Score**: 5.9/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H`
+
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | N (Network) | Attack operates at the network level through validator collusion |
+| AC | H (High) | Requires coordinated collusion of 34+ validators with even stake distribution |
+| PR | N (None) | Validator credentials can be obtained by anyone who stakes |
+| UI | N (None) | No user interaction required |
+| S | U (Unchanged) | Impact stays within the chain's finality scope |
+| C | N (None) | No confidentiality impact |
+| I | N (None) | No integrity impact from validator collusion alone |
+| A | H (High) | Finality disruption is possible if the 33.33% threshold is reached |
+
+## Recommendation
+
+1. **Incentivize validator set growth**: Implement mechanisms to attract more validators toward the 1,200 slot capacity, increasing the Nakamoto coefficient and the practical cost of collusion.
+2. **Monitor stake concentration metrics**: Continuously track the Nakamoto coefficient and flag any significant changes in validator set composition or stake distribution.
+3. **Implement validator diversity requirements**: Consider geographic or organizational diversity requirements to reduce the risk of coordinated compromise across the validator set.

@@ -1,59 +1,64 @@
 # EDA-D06: Relay Single Point of Failure on Mainnet
 
 {% hint style="warning" %}
-**Severity**: Medium (6.6/10) · **STRIDE**: D · **Status**: Verified
+**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: Verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The EigenDA mainnet currently operates with only a single Relay, creating a single point of failure for the primary blob read path. On-chain queries to the RelayRegistry contract (`0xD160e6...`) show that `nextRelayKey` equals 1, meaning only key 0 is registered. This relay is mapped to address `0xe8437B...` with URL `relay-0-mainnet-ethereum.eigenda.xyz`. Keys 1 through 5 all resolve to `0x0` (unregistered).
+The EigenDA mainnet operates with only a single Relay registered in the `RelayRegistry` contract (`0xD160e6...`), creating a single point of failure for the primary blob read path. The root cause is that `nextRelayKey` equals 1, meaning only relay key 0 is registered, and new relays can only be added by the contract owner via `onlyOwner`. If this single relay goes down, the primary data retrieval path for all clients is immediately disrupted, forcing a fallback to the degraded `GetChunks` validator direct retrieval path.
 
-New relays can only be added by the contract owner via the `onlyOwner` modifier, and no deletion function exists in the contract. If this single relay goes down, the primary data retrieval path for all clients is immediately disrupted.
+## Description
 
-A fallback mechanism exists through validator direct retrieval via `GetChunks`, which automatically activates after relay failure. However, this fallback offers degraded performance compared to the relay path and is reactive rather than preventive.
-
-## Prerequisites
-
-- Relay failure due to outage, network disruption, or targeted attack.
-
-## Attack Scenario
-
-1. An attacker targets the single mainnet Relay at `relay-0-mainnet-ethereum.eigenda.xyz` with a denial-of-service attack or exploits a vulnerability in the Relay software.
-2. The Relay becomes unavailable, disrupting the primary blob read path for all EigenDA clients.
-3. Clients automatically fall back to the `GetChunks` validator direct retrieval path.
-4. Performance degrades significantly as all read traffic shifts to the fallback path, which is not designed for primary use.
-
-## Impact
-
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 6.6/10 (Medium) |
-| BVSS Vector | `BVSS:1.1/B:N/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/CI:N/II:N/AI:M` |
-| Scope | Protocol |
-
-### Scoring Rationale
-
-Blockchain Impact (B) is None because there is no direct financial impact from a relay outage. Attack Vector (AV) is Network because the relay endpoint is publicly reachable. Attack Complexity (AC) is Low because only one relay exists on mainnet (confirmed on-chain with `nextRelayKey=1`), so any failure immediately impacts the read path. Availability impact (A) is High because this is a single point of failure for the primary read path. Availability Infrastructure impact (AI) is Medium because the `GetChunks` fallback exists, preventing a complete outage but resulting in degraded performance, and validators can retrieve data directly after relay failure through automatic switching.
-
-## Evidence
-
-### On-Chain Verification
+On-chain queries to the `RelayRegistry` contract confirm the single-relay configuration:
 
 - `nextRelayKey()` returns `1` at block 25101686, confirming only one relay is registered.
 - `relayKeyToAddress(0)` returns `0xe8437B66E834B7CdC90cC5D98B8DD6e636b37D7a`.
 - Keys 1 through 5 all return `0x0` (unregistered).
+
+The relay registry contract has an `onlyOwner` modifier for adding relays and no deletion function exists.
+
+**Source**: [`contracts/src/core/EigenDARelayRegistry.sol:20-23`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/core/EigenDARelayRegistry.sol#L20-L23) -- Registry contract with `onlyOwner` addition and no deletion function.
+
+A fallback mechanism exists through validator direct retrieval via `GetChunks`, which automatically activates after relay failure. However, this fallback offers degraded performance compared to the relay path and is reactive rather than preventive.
+
+## Proof of Concept
+
+### On-Chain Verification
+
+- `nextRelayKey()` returns `1` at block 25101686.
+- `relayKeyToAddress(0)` returns `0xe8437B66E834B7CdC90cC5D98B8DD6e636b37D7a`.
+- Keys 1 through 5 all return `0x0` (unregistered).
 - Contracts queried: RelayRegistry at `0xD160e6C1`.
 
-### Source Code
-
-- [`contracts/src/core/EigenDARelayRegistry.sol:20-23`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/core/EigenDARelayRegistry.sol#L20-L23) -- Registry contract with `onlyOwner` addition and no deletion function.
-
-### PoC Testing
+### Reproduction
 
 - `poc/01-*/evidence.yaml` and `poc/02-*/evidence.yaml` confirmed the single-relay configuration.
 
 **PoC References**: #01
 
-## Mitigations
+## Impact
 
-A validator fallback via `GetChunks` exists but only activates after relay failure. Adding additional relays to the RelayRegistry would eliminate the single point of failure. The contract owner can register new relays through the `onlyOwner`-gated function.
+A denial-of-service attack or outage targeting the single relay at `relay-0-mainnet-ethereum.eigenda.xyz` would immediately disrupt the primary blob read path for all EigenDA clients. While the `GetChunks` fallback exists, it provides degraded performance as all read traffic shifts to a path not designed for primary use. No authentication is required to target the relay, and any network-level disruption suffices. The impact extends to all rollups depending on EigenDA for data retrieval.
+
+### CVSS 3.1
+
+**Score**: 7.5/10 (High)
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`
+
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV (Attack Vector) | N (Network) | The relay endpoint is publicly reachable over the network |
+| AC (Attack Complexity) | L (Low) | Only one relay exists on mainnet (confirmed on-chain with `nextRelayKey=1`), so any failure immediately impacts the read path |
+| PR (Privileges Required) | N (None) | No privileges needed to target the relay with a denial-of-service attack |
+| UI (User Interaction) | N (None) | No user interaction required |
+| S (Scope) | U (Unchanged) | Impact is within the EigenDA read path |
+| C (Confidentiality) | N (None) | No data exposure from relay outage |
+| I (Integrity) | N (None) | No data integrity impact; data is not corrupted |
+| A (Availability) | H (High) | Single point of failure for the primary read path; fallback exists but with degraded performance |
+
+## Recommendation
+
+1. Register additional relays in the `RelayRegistry` to eliminate the single point of failure.
+2. Deploy relays across geographically distributed infrastructure to ensure resilience against regional outages.
+3. Consider implementing proactive health monitoring and automatic failover mechanisms rather than relying solely on the reactive `GetChunks` fallback.

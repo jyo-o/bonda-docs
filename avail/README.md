@@ -5,7 +5,7 @@
 
 Each threat listed below has its own dedicated page with full technical details, on-chain evidence, and attack scenarios. Click any threat ID to dive deeper.
 
-- Threats are scored using [BVSS 1.1](../methodology/bvss.md), a blockchain-specific vulnerability scoring system.
+- Threats are scored using [CVSS 3.1](../methodology/cvss.md), the industry-standard vulnerability scoring system.
 - Verification status indicates whether the threat was confirmed through on-chain probing, source code review, or mainnet fork testing. Learn more about our [verification methodology](../methodology/verification.md).
 {% endhint %}
 
@@ -54,23 +54,23 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 
 ## Threat Summary
 
-14 threats identified through on-chain verification, source code analysis, and Anvil mainnet fork testing. All threats are scored using BVSS 1.1.
+14 threats identified through on-chain verification, source code analysis, and Anvil mainnet fork testing. All threats are scored using CVSS 3.1.
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [AVL-E03](threats/avl-e03.md) | Deployer EOA retains admin role, can upgrade VectorX solo | High (8.4) | verified |
-| [AVL-D01](threats/avl-d01.md) | VectorX single relayer with no on-chain heartbeat or rate limit | Medium (6.6) | verified |
-| [AVL-T05](threats/avl-t05.md) | KZG trusted setup relies on Filecoin Powers of Tau ceremony | Medium (5.3) | unverified |
-| [AVL-D02](threats/avl-d02.md) | Only 105 of 1,200 validator slots are active | Medium (5.3) | verified |
-| [AVL-E04](threats/avl-e04.md) | Technical Committee can upgrade runtime with 5/7 consensus | Low (3.7) | verified |
-| [AVL-T01](threats/avl-t01.md) | VectorX upgradeable instantly by 4/7 multisig, no timelock | Low (2.5) | verified |
-| [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Low (1.8) | verified |
-| [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Low (1.8) | verified |
-| [AVL-T04](threats/avl-t04.md) | Guardian can inject commitments without ZK proof verification | Low (1.8) | verified |
-| [AVL-I01](threats/avl-i01.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (0.8) | unverified |
-| [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (0.5) | verified |
-| [AVL-R01](threats/avl-r01.md) | Slashing exists but has never been triggered in 688 eras | Low (0.3) | verified |
-| [AVL-T02](threats/avl-t02.md) | Bridge has 24h timelock, relatively safe upgrade path | Low (0.3) | verified |
+| [AVL-E03](threats/avl-e03.md) | Deployer EOA retains admin role, can upgrade VectorX solo | High (8.2) | verified |
+| [AVL-D01](threats/avl-d01.md) | VectorX single relayer with no on-chain heartbeat or rate limit | High (7.5) | verified |
+| [AVL-E04](threats/avl-e04.md) | Technical Committee can upgrade runtime with 5/7 consensus | Medium (6.7) | verified |
+| [AVL-D02](threats/avl-d02.md) | Only 105 of 1,200 validator slots are active | Medium (5.9) | verified |
+| [AVL-T05](threats/avl-t05.md) | KZG trusted setup relies on Filecoin Powers of Tau ceremony | Medium (5.9) | unverified |
+| [AVL-T01](threats/avl-t01.md) | VectorX upgradeable instantly by 4/7 multisig, no timelock | Medium (5.6) | verified |
+| [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Medium (4.0) | verified |
+| [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Medium (4.0) | verified |
+| [AVL-T04](threats/avl-t04.md) | Guardian can inject commitments without ZK proof verification | Medium (4.0) | verified |
+| [AVL-I01](threats/avl-i01.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | unverified |
+| [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (2.9) | verified |
+| [AVL-R01](threats/avl-r01.md) | Slashing exists but has never been triggered in 688 eras | Low (2.1) | verified |
+| [AVL-T02](threats/avl-t02.md) | Bridge has 24h timelock, relatively safe upgrade path | Low (1.8) | verified |
 | [AVL-S01](threats/avl-s01.md) | TimelockedUpgradeable contract name is misleading, contains no timelock | Informational (0.0) | verified |
 
 ## Key Findings

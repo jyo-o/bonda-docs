@@ -1,75 +1,57 @@
-# BVSS Scoring Comparison
+# CVSS 3.1 Scoring Comparison
 
-This page compares BVSS (Blockchain Vulnerability Severity Score) results across EigenDA, Avail, and Ethereum/PeerDAS. Celestia is excluded from BVSS comparisons because its threats were assessed using qualitative severity labels rather than numeric BVSS scoring.
+This page compares CVSS 3.1 scoring results across all four DA protocols assessed by BONDA.
 
 ## Scoring Methodology Note
 
-BVSS 1.1 (Halborn) uses the formula:
+CVSS 3.1 uses the standard formula defined by [FIRST](https://www.first.org/cvss/specification-document):
 
 ```
-Score = B + (10 - B) * AV * AC * PR * UI * S * ISS
+ISS = 1 - [(1-C)(1-I)(1-A)]
+Exploitability = 8.22 x AV x AC x PR x UI
+Score = min(Impact + Exploitability, 10) or min(1.08 x (Impact + Exploitability), 10) for Changed scope
 ```
 
-Where B = Base (blockchain-specific loss metric, e.g., fund theft) and ISS accounts for Confidentiality, Integrity, and Availability impact weighted by blockchain-specific impact modifiers (CI, II, AI).
+Scores can be verified using the [NIST CVSS Calculator](https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator).
 
-For DA-layer threats, B is almost always N (None) because DA layers do not directly custody funds. This means the maximum achievable score is bounded by the ISS component, and scores above 7.0 are rare.
-
-## Top 10 Threats by BVSS Score
+## Top 10 Threats by CVSS Score
 
 | Rank | Score | SID | DA Protocol | Severity | Description |
 |---|---|---|---|---|---|
-| 1 | 8.4 | AVL-E03 | Avail | High | Deployer EOA retains DEFAULT_ADMIN_ROLE, enabling solo VectorX upgrade |
-| 2 | 8.2 | ETH-E01 | Ethereum | High | Reconstruction failure mode mismatch between Lighthouse and Prysm |
-| 3 | 7.0 | EDA-T09 | EigenDA | High | Ejector role abuse can forcibly remove honest operators (33%/3 days) |
-| 4 | 6.6 | EDA-D06 | EigenDA | Medium | Relay single point of failure (1 relay on mainnet) |
-| 5 | 6.6 | AVL-D01 | Avail | Medium | VectorX single relayer SPOF with no on-chain heartbeat |
-| 6 | 6.5 | EDA-E03 | EigenDA | Medium | Operator stake concentration exceeds safety/liveness thresholds |
-| 7 | 5.9 | EDA-P02 | EigenDA | Medium | No DAS implementation, clients must trust quorum entirely |
-| 8 | 5.9 | EDA-P01 | EigenDA | Medium | Operator slashing not implemented, asymmetric incentives |
-| 9 | 5.3 | G-CON-03 | EigenDA | Medium | Operator infrastructure concentrated in few cloud providers |
-| 10 | 5.3 | EDA-D03 | EigenDA | Medium | Disperser V2 KZG compute surface exposed without authentication |
+| 1 | 8.7 | CEL-G01 | Celestia | High | KYC validator concentration enabling legal censorship (>1/3 threshold) |
+| 2 | 8.2 | AVL-E03 | Avail | High | Deployer EOA retains DEFAULT_ADMIN_ROLE, enabling solo VectorX upgrade |
+| 3 | 7.7 | CEL-E01 | Celestia | High | SP1Blobstream instant upgrade by 4-of-6 multisig, no timelock |
+| 4 | 7.5 | EDA-D06 | EigenDA | High | Relay single point of failure (1 relay on mainnet) |
+| 5 | 7.5 | AVL-D01 | Avail | High | VectorX single relayer SPOF with no on-chain heartbeat |
+| 6 | 7.5 | CEL-D11 | Celestia | High | Unbounded pendingSeenTracker memory growth via known accounts |
+| 7 | 7.5 | CEL-D13 | Celestia | High | Commitment computation before gas metering in CheckTx |
+| 8 | 7.5 | CEL-D17 | Celestia | High | TxCache key mismatch causing permanent cache leak |
+| 9 | 7.1 | EDA-T09 | EigenDA | High | Ejector role abuse can forcibly remove honest operators |
+| 10 | 6.7 | AVL-E04 | Avail | Medium | Technical Committee can upgrade runtime with 5/7 consensus |
 
-EigenDA dominates the top 10 (7 of 10 entries) because its threats target protocol-level design decisions (no slashing, no DAS, single relay) that have broad impact even when attack complexity is high.
+All four protocols are represented in the top 10. Celestia leads with 4 entries, reflecting both governance-level risks and implementation-level memory exhaustion vulnerabilities.
 
-The two highest-scoring threats (AVL-E03 at 8.4, ETH-E01 at 8.2) both involve Scope Change (S:C) in the BVSS vector, which amplifies the score by accounting for cross-system impact.
+The two highest-scoring threats (CEL-G01 at 8.7, AVL-E03 at 8.2) both involve Scope Change (S:C), which amplifies the score by accounting for cross-system impact cascading to dependent rollups and bridges.
 
-## Average BVSS Score per DA
+## Average CVSS Score per DA
 
 | DA Protocol | Average | Min | Max | Threat Count |
 |---|---|---|---|---|
-| EigenDA | 3.6 | 0.6 | 7.0 | 17 |
-| Ethereum / PeerDAS | 3.0 | 0.8 | 8.2 | 11 |
-| Avail | 2.8 | 0.0 | 8.4 | 14 |
-| Celestia | N/A | N/A | N/A | 19 (severity labels only) |
+| Celestia | 5.6 | 3.7 | 8.7 | 19 |
+| EigenDA | 5.1 | 1.8 | 7.5 | 17 |
+| Avail | 4.3 | 0.0 | 8.2 | 14 |
+| Ethereum / PeerDAS | 4.1 | 3.7 | 6.5 | 11 |
 
-EigenDA's higher average reflects more protocol-level design threats with lower attack complexity (e.g., EDA-D06 relay SPOF is AC:L). Avail's lower average is driven by many bridge-layer threats that require multisig key compromise (AC:H, AV:P), which heavily penalizes the BVSS score.
+Celestia's higher average reflects multiple OOM-class vulnerabilities with low attack complexity (AC:L) that score higher in CVSS. Avail's average is moderated by many bridge-layer threats requiring multisig compromise (AC:H, AV:P), which penalizes exploitability.
 
-## BVSS Severity Distribution
+## CVSS Severity Distribution
 
-| Severity | EigenDA | Avail | Ethereum | Total |
-|---|---|---|---|---|
-| Critical (9.0-10.0) | 0 | 0 | 0 | 0 |
-| High (7.0-8.9) | 1 | 1 | 1 | 3 |
-| Medium (4.0-6.9) | 6 | 3 | 1 | 10 |
-| Low (0.1-3.9) | 10 | 9 | 9 | 28 |
-| Informational (0.0) | 0 | 1 | 0 | 1 |
+| Severity | EigenDA | Celestia | Avail | Ethereum | Total |
+|---|---|---|---|---|---|
+| Critical (9.0-10.0) | 0 | 0 | 0 | 0 | 0 |
+| High (7.0-8.9) | 2 | 5 | 2 | 0 | 9 |
+| Medium (4.0-6.9) | 10 | 8 | 7 | 4 | 29 |
+| Low (0.1-3.9) | 5 | 6 | 4 | 7 | 22 |
+| Informational (0.0) | 0 | 0 | 1 | 0 | 1 |
 
-No threats reach BVSS Critical because the Base component (B) is N for all findings -- DA layers do not directly custody user funds. The theoretical maximum score with B:N is approximately 9.0, but practical scores are lower because most threats require elevated privileges or have high attack complexity.
-
-## Celestia Severity Note
-
-Celestia's 19 threats were assessed with qualitative severity labels:
-
-| Severity | Count |
-|---|---|
-| Critical | 2 |
-| High | 5 |
-| Medium | 5 |
-| Low | 4 |
-| Informational | 3 |
-
-The two Critical findings are:
-- **CEL-E01**: SP1Blobstream 4-of-6 multisig with no timelock, controlling the DA attestation bridge to Ethereum.
-- **G-CON-01**: KYC validator concentration enabling legal censorship via court orders against 6-8 regulated entities.
-
-These use expert judgment rather than the BVSS formula, so direct numeric comparison with other protocols is not meaningful. The qualitative assessment accounts for factors that BVSS does not fully capture, such as regulatory attack vectors and documentation integrity issues.
+No threats reach CVSS Critical (9.0+). This is consistent with the threat landscape: DA layers do not directly custody user funds, and most attacks require either multisig compromise (PR:H) or high complexity (AC:H), both of which cap the exploitability sub-score.

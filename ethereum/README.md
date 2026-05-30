@@ -2,7 +2,7 @@
 
 > **How to Read This Section**
 >
-> Each threat is identified by an SID like `ETH-S01` and linked to a detailed write-up. Severity scores use the Halborn BVSS 1.1 framework on a 0--10 scale. Status indicates verification depth: `verified` means confirmed through specification and documentation review, `code_verified` means confirmed by reading the actual source code, and `partial` means the threat is identified but not yet fully verified across all relevant implementations.
+> Each threat is identified by an SID like `ETH-S01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `verified` means confirmed through specification and documentation review, `code_verified` means confirmed by reading the actual source code, and `partial` means the threat is identified but not yet fully verified across all relevant implementations.
 
 ## Architecture
 
@@ -70,9 +70,9 @@ The Beacon Chain testing API endpoints lack JWT authentication enforcement in ce
 
 PeerDAS custody group assignment is deterministic: a validator's node ID directly determines which data columns it must store and serve. An attacker with sufficient computing resources could generate node IDs that concentrate custody on specific columns, potentially degrading the availability of those columns by flooding the corresponding custody groups with attacker-controlled nodes. The practical cost of this attack is bounded by the number of custody groups and the computational difficulty of ID grinding, but the deterministic assignment means the attack surface is structurally permanent.
 
-### ETH-E01: Reconstruction Failure Mode Mismatch -- Low (0.6)
+### ETH-E01: Reconstruction Failure Mode Mismatch -- Medium (5.4)
 
-This finding is a cross-client behavioral divergence between Lighthouse and Prysm in handling data column reconstruction failures. When reconstruction fails, Lighthouse discards all columns including previously verified ones, forcing a complete re-download. Prysm takes the opposite approach, marking reconstructed columns as verified without re-verifying them. Neither behavior is specified in the consensus-specs, meaning both clients are making independent design choices on an unspecified edge case. While the current BVSS score is low because the failure conditions are narrow, this divergence demonstrates the type of cross-client inconsistency that can emerge when multiple teams implement the same underspecified protocol.
+This finding is a cross-client behavioral divergence between Lighthouse and Prysm in handling data column reconstruction failures. When reconstruction fails, Lighthouse discards all columns including previously verified ones, forcing a complete re-download. Prysm takes the opposite approach, marking reconstructed columns as verified without re-verifying them. Neither behavior is specified in the consensus-specs, meaning both clients are making independent design choices on an unspecified edge case. This divergence demonstrates the type of cross-client inconsistency that can emerge when multiple teams implement the same underspecified protocol.
 
 ## Referenced Repositories
 

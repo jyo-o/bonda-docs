@@ -40,9 +40,9 @@ Governance and Concentration threats capture centralization risks in protocol go
 
 **Examples across DA layers:**
 
-- **G-CON-01**: Celestia's KYC-verified validator set creates a legal censorship vector — a single jurisdiction could compel coordinated censorship.
-- **G-CON-03**: EigenDA operator infrastructure concentrated among a small number of providers.
-- **G-OPS-01**: Information asymmetry across Celestia's governance surfaces (forum, on-chain, GitHub).
+- **CEL-G01**: Celestia's KYC-verified validator set creates a legal censorship vector — a single jurisdiction could compel coordinated censorship.
+- **EDA-G01**: EigenDA operator infrastructure concentrated among a small number of providers.
+- **CEL-G02**: Information asymmetry across Celestia's governance surfaces (forum, on-chain, GitHub).
 
 These threats are distinct from Elevation of Privilege because they do not involve unauthorized access. The concentration itself is the risk — entities operating within their granted authority can still cause systemic harm.
 
@@ -100,7 +100,7 @@ Each threat is assigned a structured identifier:
 - **CATEGORY**: STRIDE letter (S/T/R/I/D/E) or extension (P/G)
 - **NUMBER**: Sequential within that layer and category
 
-Governance/Concentration threats that span multiple protocols use the `G-` prefix (e.g., `G-CON-01`, `G-CON-03`).
+Governance/Concentration threats use the `G` category suffix within their protocol prefix (e.g., `CEL-G01`, `EDA-G01`).
 
 ---
 

@@ -1,50 +1,53 @@
 # ETH-T02: KZG Trusted Setup File Replacement
 
 {% hint style="info" %}
-**Severity**: Medium (4.2/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
+**Severity**: Medium (4.8/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The KZG trusted setup is a critical cryptographic parameter set used for blob commitment verification in Ethereum's data availability layer. If an attacker could replace the trusted setup file with a malicious version, they could forge valid-looking KZG proofs for arbitrary data, completely undermining the integrity of blob verification across the network.
+The KZG trusted setup is a critical cryptographic parameter set used for blob commitment verification. If an attacker could replace it with a malicious version, they could forge valid-looking KZG proofs for arbitrary data, undermining the integrity of blob verification. In go-ethereum, the trusted setup is protected by `go:embed` (compile-time embedding) and `sync.Once` (single initialization), making runtime replacement impossible and elevating this to a supply-chain attack requiring build environment compromise.
 
-In the go-ethereum client, the trusted setup file is protected by two mechanisms: `go:embed` and `sync.Once`. The `go:embed` directive embeds the trusted setup data directly into the compiled binary at build time, meaning there is no separate file to replace at runtime. The `sync.Once` primitive ensures the setup parameters are initialized exactly once and cannot be re-initialized during the process lifetime.
+## Description
 
-Because of these protections, an attacker would need to compromise the build environment or the binary distribution chain to inject a malicious trusted setup. This elevates the attack to a supply-chain compromise, which is significantly harder than runtime file replacement. The scope is changed because a successful compromise would affect all nodes running the tampered binary, crossing trust boundaries.
+The KZG trusted setup file is embedded using Go's `go:embed` directive, which includes the file contents in the binary at compile time. Initialization is protected by `sync.Once`, preventing any runtime re-initialization.
 
-## Prerequisites
+```go
+// @audit — trusted setup embedded at compile time, not replaceable at runtime
+// go-ethereum: KZG trusted setup uses go:embed directive
+// The setup file is baked into the binary during compilation.
+// sync.Once ensures parameters are initialized exactly once.
+// Runtime file replacement is impossible.
+// Attack requires compromise of build environment or distribution chain.
+```
 
-- Access to the build environment where go-ethereum binaries are compiled, or
-- Ability to compromise the binary distribution chain (e.g., release pipeline, package repositories)
-- The attack cannot be executed at runtime against a deployed node
+Because of these protections, an attacker would need to compromise the build environment or the binary distribution chain (release pipeline, package repositories) to inject a malicious trusted setup. A successful compromise would affect all nodes running the tampered binary, crossing trust boundaries.
 
-## Attack Scenario
+## Proof of Concept
 
-1. The attacker gains access to the go-ethereum build infrastructure or release pipeline.
-2. The attacker replaces the embedded KZG trusted setup file with a malicious version containing parameters they control.
-3. Binaries compiled with the tampered setup are distributed to node operators through normal update channels.
-4. Nodes running the compromised binary accept forged KZG proofs, allowing invalid blob data to be treated as valid.
-5. The attacker publishes blobs with forged commitments, undermining data availability guarantees for any rollup or application relying on the compromised nodes.
+No proof of concept was conducted for this threat.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 4.2/10 (Medium) |
-| BVSS Vector | `B:N/AV:P/AC:H/PR:R/UI:N/S:C/C:N/CI:N/I:H/II:H/A:N/AI:N` |
-| Scope | protocol |
+A successful supply-chain compromise would allow the attacker to forge KZG proofs, enabling invalid blob data to be treated as valid by all nodes running the tampered binary. This undermines the fundamental cryptographic guarantees of the data availability layer and affects any rollup or application relying on the compromised nodes. The scope is changed because a tampered binary affects trust assumptions across the entire network.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 4.8/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:C/C:N/I:H/A:N`
 
-The attack vector is physical/local since it requires access to the build environment, making the access vector restricted. Attack complexity is high due to the need for supply-chain compromise. Privileges are required as the attacker needs build system access. The scope is changed because a tampered binary affects trust assumptions across the entire network, not just the compromised build system. Integrity impact is high at both node and chain levels because forged KZG proofs would undermine the fundamental cryptographic guarantees of the data availability layer. Confidentiality and availability are unaffected.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | P (Physical) | Requires access to the build environment or distribution infrastructure |
+| AC | H (High) | Supply-chain compromise is a complex multi-step attack |
+| PR | L (Low) | Attacker needs build system access or distribution pipeline credentials |
+| UI | N (None) | No user interaction needed; tampered binaries are distributed via normal channels |
+| S | C (Changed) | Tampered binary crosses trust boundaries, affecting the entire network |
+| C | N (None) | No confidentiality impact |
+| I | H (High) | Forged KZG proofs undermine fundamental cryptographic guarantees |
+| A | N (None) | No availability impact |
 
-## Evidence
+## Recommendation
 
-### Source Code
-
-- **Repository**: go-ethereum (Geth execution client)
-- **Finding**: The KZG trusted setup file is embedded using Go's `go:embed` directive, which includes the file contents in the binary at compile time. Initialization is protected by `sync.Once`, preventing any runtime re-initialization. These two mechanisms together make runtime replacement of the trusted setup impossible.
-
-## Mitigations
-
-The `go:embed` mechanism ensures the trusted setup is immutable after compilation, eliminating runtime file replacement as an attack vector. The `sync.Once` guard prevents re-initialization even if an attacker gains code execution within the process. Beyond these code-level protections, the go-ethereum project uses reproducible builds and signed releases, allowing node operators to verify binary integrity. The KZG trusted setup itself was generated through a distributed ceremony with thousands of participants, ensuring that no single party can reconstruct the secret parameters.
+1. **Maintain `go:embed` and `sync.Once` protections**: Continue using compile-time embedding and single-initialization patterns to prevent runtime trusted setup replacement.
+2. **Use reproducible builds and signed releases**: The go-ethereum project should maintain reproducible builds and cryptographically signed releases so node operators can verify binary integrity before deployment.
+3. **Verify trusted setup provenance**: The KZG trusted setup was generated through a distributed ceremony with thousands of participants. Node operators should verify that their binaries contain the canonical trusted setup parameters matching the ceremony output.

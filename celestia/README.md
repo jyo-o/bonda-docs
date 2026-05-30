@@ -1,7 +1,7 @@
 # Celestia
 
 > **How to Read This Section**
-> This page gives you the full picture of Celestia's threat landscape in one place. Start with the architecture introduction to understand how Celestia works, then scan the threat summary table. Each threat ID links to a detailed write-up. Celestia threats use **severity labels** (Critical, High, Medium, Low, Informational) rather than numeric BVSS scores.
+> This page gives you the full picture of Celestia's threat landscape in one place. Start with the architecture introduction to understand how Celestia works, then scan the threat summary table. Each threat ID links to a detailed write-up. All threats are scored using [CVSS 3.1](../methodology/cvss.md).
 
 ## Architecture
 
@@ -42,25 +42,25 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [CEL-E01](threats/cel-e01.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | Critical | verified |
-| [G-CON-01](threats/g-con-01.md) | KYC Validator Concentration Enabling Legal Censorship | Critical | verified |
-| [CEL-T01](threats/cel-t01.md) | DAS-Only Safety Model After Fraud Proof Removal | High | verified |
-| [G-OPS-01](threats/g-ops-01.md) | Documentation vs Code Information Asymmetry | High | verified |
-| [CEL-D11](threats/cel-d11.md) | Unbounded Memory Growth in pendingSeenTracker | High | code_verified |
-| [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | High | code_verified |
-| [CEL-D17](threats/cel-d17.md) | TxCache Key Mismatch Causing Permanent Cache Leak | High | poc_verified |
-| [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium | code_verified |
-| [CEL-D03](threats/cel-d03.md) | Unbounded Memory Growth via Fake DataHash Injection | Medium | poc_verified |
-| [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium | code_verified |
-| [CEL-D12](threats/cel-d12.md) | Nil Pointer Panic in GetProposal During Block Sync | Medium | code_verified |
-| [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium | code_verified |
-| [CEL-D04](threats/cel-d04.md) | Evidence Subsystem Code Defects (Hash, Buffer, Expiry) | Low | code_verified |
-| [CEL-D10](threats/cel-d10.md) | Worst-Case Memory Reservation on Empty Namespace Query | Low | code_verified |
-| [CEL-D14](threats/cel-d14.md) | TxCache Bypass Forcing Full Recomputation by Proposer | Low | code_verified |
-| [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low | partial |
-| [CEL-D01](threats/cel-d01.md) | Zero-Cost Prevote-Nil Censorship by Validator Cartel | Informational | verified |
-| [CEL-P01](threats/cel-p01.md) | Flat 2% Slashing for Double Signing Without Correlation Penalty | Informational | verified |
-| [CEL-D05](threats/cel-d05.md) | Unlimited Response Size in ShrEx Protocol | Informational | code_verified |
+| [CEL-G01](threats/cel-g01.md) | KYC Validator Concentration Enabling Legal Censorship | High (8.7) | verified |
+| [CEL-E01](threats/cel-e01.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | High (7.7) | verified |
+| [CEL-D11](threats/cel-d11.md) | Unbounded Memory Growth in pendingSeenTracker | High (7.5) | code_verified |
+| [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | High (7.5) | code_verified |
+| [CEL-D17](threats/cel-d17.md) | TxCache Key Mismatch Causing Permanent Cache Leak | High (7.5) | poc_verified |
+| [CEL-T01](threats/cel-t01.md) | DAS-Only Safety Model After Fraud Proof Removal | Medium (6.5) | verified |
+| [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium (5.9) | code_verified |
+| [CEL-D12](threats/cel-d12.md) | Nil Pointer Panic in GetProposal During Block Sync | Medium (5.9) | code_verified |
+| [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium (5.9) | code_verified |
+| [CEL-D03](threats/cel-d03.md) | Unbounded Memory Growth via Fake DataHash Injection | Medium (5.3) | poc_verified |
+| [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium (5.3) | code_verified |
+| [CEL-G02](threats/cel-g02.md) | Documentation vs Code Information Asymmetry | Medium (5.3) | verified |
+| [CEL-D01](threats/cel-d01.md) | Zero-Cost Prevote-Nil Censorship by Validator Cartel | Medium (4.2) | verified |
+| [CEL-D04](threats/cel-d04.md) | Evidence Subsystem Code Defects (Hash, Buffer, Expiry) | Low (3.7) | code_verified |
+| [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.7) | partial |
+| [CEL-D10](threats/cel-d10.md) | Worst-Case Memory Reservation on Empty Namespace Query | Low (3.7) | code_verified |
+| [CEL-D14](threats/cel-d14.md) | TxCache Bypass Forcing Full Recomputation by Proposer | Low (3.7) | code_verified |
+| [CEL-D05](threats/cel-d05.md) | Unlimited Response Size in ShrEx Protocol | Low (3.7) | code_verified |
+| [CEL-P01](threats/cel-p01.md) | Flat 2% Slashing for Double Signing Without Correlation Penalty | Low (3.7) | verified |
 
 ## Key Findings
 
@@ -68,7 +68,7 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 
 The SP1Blobstream bridge contract on Ethereum is controlled by a 4-of-6 Gnosis Safe multisig. The problem is that the same multisig address holds three separate roles: guardian, timelock controller, and default admin. This means 4 signers can upgrade the bridge verifier and program keys instantly with no delay, no public review window, and no on-chain event emitted. Any rollup relying on SP1Blobstream for DA verification would have no warning before the bridge logic changes underneath them.
 
-### G-CON-01: Validator Set is Legally Concentrated (Critical)
+### CEL-G01: Validator Set is Legally Concentrated (High, CVSS 8.7)
 
 The top 8 validators control 35.77% of total voting power, which crosses the critical 33% threshold needed to censor transactions in CometBFT consensus. Six of those eight validators are KYC-regulated entities operating in US, EU, Swiss, or Hong Kong jurisdictions. This means a single coordinated legal order could compel enough validators to censor specific transactions without any validator acting maliciously. Anchorage Digital alone holds 11.08% of voting power. Because the validator cap is 100 and 94 slots are already filled, the set has limited room to diversify.
 

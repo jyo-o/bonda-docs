@@ -1,51 +1,53 @@
 # AVL-I01: Incomplete Block Reconstruction Limits DAS Security Guarantees
 
 {% hint style="info" %}
-**Severity**: Low (0.8/10) · **STRIDE**: I · **Scope**: chain · **Status**: Unverified
+**Severity**: Low (3.7/10) · **STRIDE**: I · **Status**: Unverified
 {% endhint %}
 
-## Overview
+## Summary
 
-Avail uses Data Availability Sampling (DAS) to allow light clients to verify that block data has been made available without downloading entire blocks. Observatory measurements show that DAS achieves 99.84% sampling confidence, demonstrating that the sampling mechanism itself is functioning correctly.
+Avail's Data Availability Sampling (DAS) achieves 99.84% sampling confidence, but the complementary block reconstruction protocol is still under development. Without a working reconstruction mechanism, sampled data cannot be reassembled into complete blocks when needed. Data recovery currently depends on approximately 40 full node peers, and if these go offline, blocks confirmed as "available" through DAS become practically irretrievable.
 
-However, DAS alone only proves that data was available at the time of sampling. The complementary mechanism, block reconstruction, which allows full blocks to be reassembled from the sampled pieces, is still under development. Without a working reconstruction protocol, there is no guarantee that sampled data can actually be recovered into complete blocks when needed.
+## Description
 
-Currently, data recovery depends on approximately 40 full node peers that store complete block data. If these full nodes were to go offline or become unavailable, there would be no fallback mechanism to reconstruct blocks from the sampled fragments alone. This means the security guarantee provided by DAS is currently theoretical rather than fully operational. This finding cannot be independently verified through code review because the reconstruction implementation is still in progress.
+DAS allows light clients to verify data availability without downloading entire blocks. Observatory measurements confirm the sampling mechanism itself functions correctly with 99.84% confidence. However, DAS alone only proves data was available at the time of sampling.
 
-## Prerequisites
+```
+// @audit — DAS security gap:
+//          DAS confidence: 99.84% (Observatory measurement)
+//          Block reconstruction protocol: under development, not production-ready
+//          Full node peers: ~40 (sole data recovery fallback)
+//          Gap: sampling proves availability but cannot guarantee recoverability
+//          without reconstruction or full node availability.
+```
 
-- A scenario where full nodes become unavailable or refuse to serve data
-- Absence of a working block reconstruction protocol
+The block reconstruction protocol, which would allow full blocks to be reassembled from sampled fragments alone, is not yet production-ready. This means the complete DAS security guarantee (availability implies recoverability) is currently theoretical rather than fully operational.
 
-## Attack Scenario
+## Proof of Concept
 
-1. An attacker or natural event causes a significant number of Avail's approximately 40 full nodes to go offline simultaneously, through a targeted DDoS attack, infrastructure failure, or coordinated shutdown.
-2. A light client that previously confirmed data availability through DAS sampling now needs to reconstruct the full block data for verification or dispute resolution purposes.
-3. Without the reconstruction protocol in place and with insufficient full nodes available to serve the data, the block cannot be recovered. The data that was confirmed as "available" through sampling becomes practically irretrievable, undermining the core security guarantee of the data availability layer.
+No proof of concept was conducted for this threat. The finding is based on Observatory metrics showing DAS confidence of 99.84% and Avail documentation confirming the block reconstruction protocol is under active development and not yet production-ready. Independent verification through code review is not possible because the implementation is still in progress.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 0.8/10 (Low) |
-| BVSS Vector | `BVSS:1.1/B:N/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N/CI:L/II:N/AI:N` |
-| Scope | chain |
+If a significant number of the approximately 40 full nodes go offline simultaneously (through DDoS, infrastructure failure, or coordinated shutdown), light clients that confirmed data availability through DAS would be unable to reconstruct full block data for verification or dispute resolution. Data confirmed as "available" through sampling becomes practically irretrievable, undermining the core security guarantee of the data availability layer.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 3.7/10 (Low)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N`
 
-There is no direct financial impact from this issue. The attack vector is network-based since it involves disrupting full node availability. Attack complexity is high because it requires a majority of the approximately 40 full nodes to be simultaneously unavailable, which is difficult to achieve in practice. No special privileges are required to attempt data reconstruction. The scope is limited to the DAS security guarantees. Confidentiality impact is low because some data may become inaccessible if recovery fails, and infrastructure confidentiality impact is similarly low for the same reason.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | N (Network) | Involves disrupting full node availability at the network level |
+| AC | H (High) | Requires a majority of ~40 full nodes to be simultaneously unavailable |
+| PR | N (None) | No special privileges required to attempt data reconstruction |
+| UI | N (None) | No user interaction required |
+| S | U (Unchanged) | Impact limited to the DAS security guarantees |
+| C | L (Low) | Some data may become inaccessible if recovery fails |
+| I | N (None) | No integrity impact |
+| A | N (None) | No direct availability impact on chain operations |
 
-## Evidence
+## Recommendation
 
-### On-Chain Verification
-
-- Observatory metric `avail_block_availability_samples` shows DAS confidence of 99.84%, confirming that sampling itself works correctly.
-- Approximately 40 full node peers observed in the network.
-
-### Source Code
-
-- Avail documentation confirms that the block reconstruction protocol is under active development and not yet production-ready.
-
-## Mitigations
-
-Multiple full nodes currently exist in the network, with approximately 40 peers observed, providing redundant data storage. DAS itself is fully operational and achieves high confidence levels. The reconstruction protocol is under active development, and once completed, it will close the gap between sampling confidence and data recoverability.
+1. **Prioritize block reconstruction protocol completion**: Accelerate development of the reconstruction protocol to close the gap between sampling confidence and data recoverability.
+2. **Increase full node redundancy**: Incentivize more full node operators to join the network, reducing the risk that a simultaneous outage makes data unrecoverable.
+3. **Implement full node health monitoring**: Deploy monitoring for the full node peer set to detect significant drops in available nodes before they impact data recoverability.

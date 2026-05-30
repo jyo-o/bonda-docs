@@ -35,7 +35,7 @@ One important architectural note: EigenDA does not implement Data Availability S
 |--------|-------|
 | Total threats identified | 17 |
 | Verification status | 12 verified, 4 code_verified, 1 partial |
-| Highest severity | High (BVSS 7.0) |
+| Highest severity | High (CVSS 7.5) |
 | Registered operators | 272 |
 | Dead operators (0% chunk serving) | 11 |
 | Relay instances on mainnet | 1 |
@@ -45,39 +45,39 @@ One important architectural note: EigenDA does not implement Data Availability S
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [EDA-T09](threats/eda-t09.md) | Ejector Role Abuse to Remove Honest Operators | High (7.0) | verified |
-| [EDA-D06](threats/eda-d06.md) | Relay Single Point of Failure (1 Mainnet Instance) | Medium (6.6) | verified |
+| [EDA-D06](threats/eda-d06.md) | Relay Single Point of Failure (1 Mainnet Instance) | High (7.5) | verified |
+| [EDA-T09](threats/eda-t09.md) | Ejector Role Abuse to Remove Honest Operators | High (7.1) | verified |
 | [EDA-E03](threats/eda-e03.md) | Operator Stake Concentration Exceeding Safety Thresholds | Medium (6.5) | verified |
-| [EDA-P01](threats/eda-p01.md) | Operator Slashing Not Implemented | Medium (5.9) | verified |
-| [EDA-P02](threats/eda-p02.md) | DAS Absent, Clients Fully Depend on Quorum Trust | Medium (5.9) | code_verified |
-| [EDA-D03](threats/eda-d03.md) | Disperser V2 KZG Compute Exposed Without Auth | Medium (5.3) | verified |
-| [G-CON-03](threats/g-con-03.md) | Operator Infrastructure Concentration | Medium (5.3) | verified |
-| [EDA-S03](threats/eda-s03.md) | Cross-chain Signature Replay | Low (3.7) | verified |
-| [EDA-I02](threats/eda-i02.md) | BLS Private Key Exposure Enables Signature Forgery | Low (2.8) | code_verified |
-| [EDA-E02](threats/eda-e02.md) | Single 3-of-4 Multisig Controls 8 Core Contracts | Low (2.7) | verified |
-| [EDA-D12](threats/eda-d12.md) | 11 Dead Operators, 0% Chunk Serving | Low (2.2) | verified |
-| [EDA-D07](threats/eda-d07.md) | GetBlob No Authentication | Low (2.0) | verified |
-| [EDA-E01](threats/eda-e01.md) | DisableAnchorSignatureVerification Flag Bypass | Low (1.9) | code_verified |
-| [EDA-T10](threats/eda-t10.md) | PutAttestation Unconditional Overwrite | Low (1.3) | partial |
-| [EDA-D02](threats/eda-d02.md) | Proxy Rate Limit Absence | Low (0.8) | code_verified |
-| [EDA-D10](threats/eda-d10.md) | Unauthenticated POST Bulk Requests to Proxy | Low (0.8) | code_verified |
-| [EDA-D04](threats/eda-d04.md) | Encoding Failure Transitions Blob to Failed | Low (0.6) | verified |
+| [EDA-P01](threats/eda-p01.md) | Operator Slashing Not Implemented | Medium (6.5) | verified |
+| [EDA-P02](threats/eda-p02.md) | DAS Absent, Clients Fully Depend on Quorum Trust | Medium (6.5) | code_verified |
+| [EDA-E02](threats/eda-e02.md) | Single 3-of-4 Multisig Controls 8 Core Contracts | Medium (6.3) | verified |
+| [EDA-D03](threats/eda-d03.md) | Disperser V2 KZG Compute Exposed Without Auth | Medium (5.9) | verified |
+| [EDA-G01](threats/eda-g01.md) | Operator Infrastructure Concentration | Medium (5.9) | verified |
+| [EDA-I02](threats/eda-i02.md) | BLS Private Key Exposure Enables Signature Forgery | Medium (5.6) | code_verified |
+| [EDA-D07](threats/eda-d07.md) | GetBlob No Authentication | Medium (5.3) | verified |
+| [EDA-D12](threats/eda-d12.md) | 11 Dead Operators, 0% Chunk Serving | Medium (5.3) | verified |
+| [EDA-E01](threats/eda-e01.md) | DisableAnchorSignatureVerification Flag Bypass | Medium (4.0) | code_verified |
+| [EDA-D02](threats/eda-d02.md) | Proxy Rate Limit Absence | Low (3.7) | code_verified |
+| [EDA-D10](threats/eda-d10.md) | Unauthenticated POST Bulk Requests to Proxy | Low (3.7) | code_verified |
+| [EDA-S03](threats/eda-s03.md) | Cross-chain Signature Replay | Low (3.5) | verified |
+| [EDA-D04](threats/eda-d04.md) | Encoding Failure Transitions Blob to Failed | Low (3.1) | verified |
+| [EDA-T10](threats/eda-t10.md) | PutAttestation Unconditional Overwrite | Low (1.8) | partial |
 
 ## Key Findings
 
-### EDA-T09: Ejector Role Abuse (High, BVSS 7.0)
+### EDA-T09: Ejector Role Abuse (High, CVSS 7.1)
 
 The EjectionManager contract allows a single EOA address to forcibly remove up to 33.33% of quorum stake within a 3-day rolling window. On-chain data shows 150 ejection transactions from just 2 EOA addresses over 16 months. This matters because ejection is currently the only enforcement mechanism in EigenDA, since slashing has not been implemented. A compromised or malicious ejector key could systematically remove honest operators from quorums, degrading data availability guarantees with no on-chain recourse for the ejected parties.
 
-### EDA-E03: Operator Stake Concentration (Medium, BVSS 6.5)
+### EDA-E03: Operator Stake Concentration (Medium, CVSS 6.5)
 
 On-chain verification confirmed that stake is dangerously concentrated. In quorum Q0 (ETH), the top 3 operators hold 39.8% of stake, exceeding the 33% safety threshold. In Q1 (EIGEN), the top 3 hold 35.6% and the top 5 hold 51.7%, breaching both the safety and liveness thresholds. In Q2 (Custom), a single entity (AltLayer) holds 52.6% alone. This means a Nakamoto coefficient of just 3: three colluding operators could compromise safety guarantees across the system.
 
-### EDA-D06: Relay Single Point of Failure (Medium, BVSS 6.6)
+### EDA-D06: Relay Single Point of Failure (High, CVSS 7.5)
 
 The on-chain RelayRegistry shows only one relay registered on mainnet. The Relay is the primary read path for blob retrieval, meaning all clients depend on this single instance to access stored data. If the Relay goes down, retrieval degrades to the slower operator-direct GetChunks fallback, where clients must contact individual operators and reconstruct blobs from chunks. This single point of failure creates an availability bottleneck for every consumer of EigenDA.
 
-### EDA-P01: Slashing Not Implemented (Medium, BVSS 5.9)
+### EDA-P01: Slashing Not Implemented (Medium, CVSS 6.5)
 
 No slash or freeze functions exist in EigenDA's core contracts. The EigenLayer AllocationManager returns zero operator sets for EigenDA, confirming that the slashing infrastructure is entirely absent. Operators earn restaking rewards but face no penalty for dishonest behavior such as failing to store chunks or producing false attestations. This incentive asymmetry directly contributes to the 11 dead operators observed in EDA-D12, who remain registered and collect rewards while serving 0% of their assigned chunks.
 

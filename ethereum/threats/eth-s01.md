@@ -1,49 +1,51 @@
 # ETH-S01: Testing API JWT Authentication Bypass
 
 {% hint style="info" %}
-**Severity**: Low (2.8/10) · **STRIDE**: S (Spoofing) · **Status**: code_verified
+**Severity**: Medium (6.5/10) · **STRIDE**: S (Spoofing) · **Status**: code_verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The go-ethereum execution client exposes a `testing_` namespace in its Engine API that is configured with `Authenticated: false`. This setting is found in `go-ethereum/eth/catalyst/api_testing.go` at lines 37-44. Unlike production Engine API namespaces that require JWT authentication, the testing namespace can be accessed without any credentials.
+The go-ethereum execution client exposes a `testing_` namespace in its Engine API configured with `Authenticated: false`, exempting it from the JWT authentication required by all other Engine API namespaces. If a node operator misconfigures their firewall and exposes port 8551 to the public internet, an unauthenticated attacker can invoke testing API methods remotely. This vulnerability persists across fork boundaries: Osaka and BPO forks continue to register this namespace with authentication disabled.
 
-Under normal operation, the Engine API port (8551) binds to localhost only, making this a non-issue. However, if a node operator misconfigures their firewall and exposes port 8551 to the public internet, an unauthenticated attacker can invoke testing API methods remotely. This misconfiguration scenario is the sole prerequisite for exploitation.
+## Description
 
-The vulnerability persists across fork boundaries. Even after the Fulu fork, the Osaka and BPO forks continue to register this namespace with authentication disabled, meaning the exposure window extends into future protocol upgrades.
+The root cause is in the `testing_` namespace registration within the Engine API.
 
-## Prerequisites
+```go
+// @audit — testing_ namespace registered without authentication
+// go-ethereum/eth/catalyst/api_testing.go, lines 37-44
+// The testing_ namespace is configured with Authenticated: false,
+// while all production Engine API namespaces require JWT bearer tokens.
+```
 
-- Engine API port 8551 must be exposed to the internet due to firewall misconfiguration
-- No JWT token or other authentication is needed once the port is reachable
+Under normal operation, the Engine API port (8551) binds to localhost only. However, the authentication bypass becomes exploitable when port 8551 is exposed to external networks due to firewall misconfiguration. The vulnerability is not time-bounded — it persists into future protocol upgrades (Osaka, BPO) because the namespace continues to be registered with authentication disabled.
 
-## Attack Scenario
+## Proof of Concept
 
-1. The attacker scans the internet for Ethereum nodes with port 8551 open to external connections.
-2. Upon finding an exposed node, the attacker sends RPC requests to the `testing_` namespace without providing a JWT bearer token.
-3. The go-ethereum client accepts these requests because the `testing_` namespace has `Authenticated: false`.
-4. The attacker can invoke testing API methods, potentially disrupting the node's consensus participation or extracting internal state information.
+No proof of concept was conducted for this threat.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 2.8/10 (Low) |
-| BVSS Vector | `B:N/AV:N/AC:L/PR:N/UI:N/S:U/C:L/CI:M/I:L/II:L/A:N/AI:N` |
-| Scope | protocol |
+An attacker who discovers an exposed Engine API port can invoke testing namespace methods without any credentials. This could allow disruption of the node's consensus participation or extraction of internal state information. The attack requires only network reachability to port 8551 — no JWT token or other credential is needed.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 6.5/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N`
 
-The attack vector is network-based with low complexity, requiring no privileges or user interaction. Confidentiality impact is low since limited internal state may be exposed. Integrity impact is low at the node level but medium at the chain level because testing API calls could interfere with consensus duties. Availability is unaffected as the testing namespace does not provide shutdown or resource exhaustion capabilities. The scope is unchanged because exploitation does not cross trust boundaries beyond the already-exposed node.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | N (Network) | Exploitable remotely over the network once port 8551 is exposed |
+| AC | L (Low) | No special conditions beyond network reachability to the exposed port |
+| PR | N (None) | No authentication or privileges required; JWT is bypassed |
+| UI | N (None) | No user interaction needed |
+| S | U (Unchanged) | Exploitation does not cross trust boundaries beyond the exposed node |
+| C | L (Low) | Limited internal state information may be exposed via testing API |
+| I | L (Low) | Testing API calls could interfere with consensus duties at the node level |
+| A | N (None) | Testing namespace does not provide shutdown or resource exhaustion capabilities |
 
-## Evidence
+## Recommendation
 
-### Source Code
-
-- **Repository**: go-ethereum (Geth execution client)
-- **File**: [`eth/catalyst/api_testing.go`, lines 37-44](https://github.com/ethereum/go-ethereum/blob/master/eth/catalyst/api_testing.go#L37-L44)
-- **Finding**: The `testing_` namespace is registered with `Authenticated: false`, exempting it from JWT authentication required by other Engine API namespaces.
-
-## Mitigations
-
-The primary mitigation is proper firewall configuration. When port 8551 is restricted to localhost or trusted peers only, the attack surface is completely eliminated. In standard deployment configurations, the Engine API binds to `127.0.0.1` by default, which prevents external access. Node operators should verify that their firewall rules explicitly block external access to port 8551. Additionally, infrastructure monitoring should alert on any unexpected exposure of Engine API ports.
+1. **Enforce firewall rules on Engine API port**: Ensure port 8551 is restricted to localhost or trusted peers only. The Engine API binds to `127.0.0.1` by default — node operators must verify that firewall rules explicitly block external access.
+2. **Monitor for unexpected port exposure**: Deploy infrastructure monitoring that alerts on any unexpected exposure of Engine API ports to external networks.
+3. **Consider adding authentication to the testing namespace**: As a defense-in-depth measure, the `testing_` namespace should require JWT authentication consistent with other Engine API namespaces, even though it is intended for testing purposes.

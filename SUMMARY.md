@@ -6,7 +6,7 @@
 
 * [Overview](methodology/README.md)
 * [STRIDE for DA Layers](methodology/stride.md)
-* [BVSS 1.1 Scoring](methodology/bvss.md)
+* [CVSS 3.1 Scoring](methodology/cvss.md)
 * [Verification Approach](methodology/verification.md)
 * [Terminology](methodology/terminology.md)
 
@@ -19,7 +19,7 @@
 * [EDA-P01: Slashing Not Implemented](eigenda/threats/eda-p01.md)
 * [EDA-P02: No DAS](eigenda/threats/eda-p02.md)
 * [EDA-D03: Disperser V2 KZG Unauthenticated](eigenda/threats/eda-d03.md)
-* [G-CON-03: Infrastructure Concentration](eigenda/threats/g-con-03.md)
+* [EDA-G01: Infrastructure Concentration](eigenda/threats/eda-g01.md)
 * [EDA-S03: Signature Replay](eigenda/threats/eda-s03.md)
 * [EDA-I02: BLS Key Exposure](eigenda/threats/eda-i02.md)
 * [EDA-E02: Single Multisig Controls 8 Contracts](eigenda/threats/eda-e02.md)
@@ -36,9 +36,9 @@
 
 * [Overview](celestia/README.md)
 * [CEL-E01: SP1Blobstream Instant Upgrade](celestia/threats/cel-e01.md)
-* [G-CON-01: KYC Validator Censorship](celestia/threats/g-con-01.md)
+* [CEL-G01: KYC Validator Censorship](celestia/threats/cel-g01.md)
 * [CEL-T01: DAS-only Safety Model](celestia/threats/cel-t01.md)
-* [G-OPS-01: Information Asymmetry](celestia/threats/g-ops-01.md)
+* [CEL-G02: Information Asymmetry](celestia/threats/cel-g02.md)
 * [CEL-D11: pendingSeenTracker Memory Growth](celestia/threats/cel-d11.md)
 * [CEL-D13: CheckTx Pre-gas Commitment](celestia/threats/cel-d13.md)
 * [CEL-D17: TxCache Key Mismatch OOM](celestia/threats/cel-d17.md)

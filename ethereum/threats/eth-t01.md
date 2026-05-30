@@ -1,48 +1,52 @@
 # ETH-T01: Blob Fee Denominator Fork-Dependent Formula
 
 {% hint style="info" %}
-**Severity**: Low (0.8/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
+**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The blob fee calculation in Ethereum uses a fork-dependent denominator (`updateFraction`) that changes across protocol upgrades. In the BPO2 fork, this value is set to 11,684,671. If a client implementation applies the wrong denominator for a given fork, blob fee calculations will diverge from consensus, potentially causing the node to reject valid blocks or accept invalid ones.
+The blob fee calculation in Ethereum uses a fork-dependent denominator (`updateFraction`) that changes across protocol upgrades. If a client implementation applies the wrong denominator for a given fork, blob fee calculations diverge from consensus, causing the node to reject valid blocks or accept invalid ones. This is a correctness concern mitigated by comprehensive consensus-spec-tests coverage.
 
-This is primarily a correctness concern rather than an active exploit vector. The risk lies in implementation errors during fork transitions where developers might use the wrong constant for the active fork. Such a mismatch would cause the affected node to fall out of consensus with the rest of the network.
+## Description
 
-The threat is well-covered by the existing consensus-spec-tests suite, which validates fee calculations across all fork boundaries. This test coverage significantly reduces the likelihood of a denominator mismatch reaching production.
+The `updateFraction` constant is set to 11,684,671 in BPO2. Different forks use different values, and the code path must correctly select the denominator based on the active fork.
 
-## Prerequisites
+```
+# @audit — fork-dependent denominator must match active fork
+# Blob fee = f(excess_blob_gas, updateFraction)
+# BPO2: updateFraction = 11,684,671
+# Each fork defines its own updateFraction value.
+# Using the wrong fork's constant causes consensus divergence.
+```
 
-- A client implementation bug that applies the wrong `updateFraction` for the active fork
-- The bug must survive the consensus-spec-tests validation pipeline
+The risk lies in implementation errors during fork transitions where developers might reference the `updateFraction` from a previous or future fork instead of the currently active one. Such a mismatch would cause the affected node to fall out of consensus with the rest of the network. The threat is a passive implementation defect rather than an actively exploitable vulnerability.
 
-## Attack Scenario
+## Proof of Concept
 
-1. A client developer introduces or modifies blob fee calculation code during a fork upgrade.
-2. The implementation incorrectly references the `updateFraction` from a previous or future fork instead of the currently active one.
-3. Nodes running the buggy client compute different blob base fees than the rest of the network.
-4. Affected nodes reject valid blocks or accept invalid ones, causing a consensus split among clients running the faulty version.
+No proof of concept was conducted for this threat.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 0.8/10 (Low) |
-| BVSS Vector | `B:N/AV:N/AC:H/PR:N/UI:N/S:U/C:N/CI:N/I:L/II:L/A:N/AI:N` |
-| Scope | protocol |
+Nodes running a buggy client would compute different blob base fees than the rest of the network, resulting in a consensus split among clients running the faulty version. Fee miscalculations would be detected quickly by consensus divergence monitoring. The deterministic nature of the fee calculation means any mismatch is immediately detectable.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 3.7/10 (Low)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N`
 
-The attack complexity is high because exploiting this requires an implementation bug that would need to bypass comprehensive test suites. No privileges or user interaction are required for the mismatch to occur, but the scenario is a passive implementation defect rather than an actively exploitable vulnerability. Integrity impact is low at both node and chain levels since fee miscalculations would be detected quickly by consensus divergence. Availability and confidentiality are unaffected.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | N (Network) | Miscalculation affects network consensus participation |
+| AC | H (High) | Requires an implementation bug that survives comprehensive test suites |
+| PR | N (None) | No privileges needed; defect is in client code |
+| UI | N (None) | No user interaction required |
+| S | U (Unchanged) | Scope limited to nodes running the faulty client |
+| C | N (None) | No confidentiality impact |
+| I | L (Low) | Fee miscalculation leads to consensus divergence at the node level |
+| A | N (None) | No availability impact; nodes simply fork off |
 
-## Evidence
+## Recommendation
 
-### Source Code
-
-- **Component**: Blob fee calculation logic across execution layer clients
-- **Finding**: The `updateFraction` constant is set to 11,684,671 in BPO2. Different forks use different values, and the code path must correctly select the denominator based on the active fork.
-
-## Mitigations
-
-The consensus-spec-tests suite provides comprehensive coverage for fork-specific fee calculation formulas. Each client implementation is validated against these reference tests before release. The deterministic nature of the fee calculation means any mismatch is immediately detectable through consensus divergence monitoring. Client teams maintain fork-aware test cases that explicitly verify denominator values at fork boundaries.
+1. **Maintain consensus-spec-tests coverage**: The consensus-spec-tests suite provides comprehensive coverage for fork-specific fee calculation formulas. Each client implementation must be validated against these reference tests before release.
+2. **Add fork-boundary-specific test cases**: Client teams should maintain test cases that explicitly verify denominator values at each fork transition point.
+3. **Deploy consensus divergence monitoring**: Use consensus divergence monitoring in production to detect any fee calculation mismatches immediately after fork activation.

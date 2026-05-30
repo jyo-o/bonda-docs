@@ -12,7 +12,7 @@ This section compares threat modeling results across all four Data Availability 
 | **Consensus** | Quorum-based BLS | CometBFT (94 validators) | NPoS BABE+GRANDPA (105 validators) | Beacon Chain PoS |
 | **DAS Support** | No | Yes (16 samples/block) | Yes (KZG-based) | Yes (PeerDAS, custody groups) |
 | **Bridge to Ethereum** | ServiceManager on-chain | SP1Blobstream | VectorX + SP1 | Native (no bridge needed) |
-| **Scoring Method** | BVSS 1.1 | Severity labels | BVSS 1.1 | BVSS 1.1 |
+| **Scoring Method** | CVSS 3.1 | CVSS 3.1 | CVSS 3.1 | CVSS 3.1 |
 | **Threats Found** | 17 | 19 | 14 | 11 |
 
 ---
@@ -21,16 +21,16 @@ This section compares threat modeling results across all four Data Availability 
 
 | Severity | EigenDA | Celestia | Avail | Ethereum | Total |
 |----------|:-------:|:--------:|:-----:|:--------:|:-----:|
-| **Critical** | 0 | 2 | 0 | 0 | **2** |
-| **High** | 1 | 5 | 1 | 1 | **8** |
-| **Medium** | 6 | 5 | 3 | 1 | **15** |
-| **Low** | 10 | 4 | 9 | 9 | **32** |
-| **Informational** | 0 | 3 | 1 | 0 | **4** |
+| **Critical (9.0-10.0)** | 0 | 0 | 0 | 0 | **0** |
+| **High (7.0-8.9)** | 2 | 5 | 2 | 0 | **9** |
+| **Medium (4.0-6.9)** | 10 | 8 | 7 | 4 | **29** |
+| **Low (0.1-3.9)** | 5 | 6 | 4 | 7 | **22** |
+| **Informational (0.0)** | 0 | 0 | 1 | 0 | **1** |
 | **Total** | **17** | **19** | **14** | **11** | **61** |
 
-Celestia has the highest concentration of Critical and High findings, driven by governance-layer structural issues such as the SP1Blobstream multisig without timelock and KYC validator concentration enabling legal censorship.
+No threats reach CVSS Critical (9.0+). This is consistent with the threat landscape: DA layers do not directly custody user funds, and most attacks require either multisig compromise (PR:H) or high complexity (AC:H), both of which cap the exploitability sub-score.
 
-EigenDA and Avail have more Low-severity findings because BVSS scoring accounts for attack complexity — many threats require multisig compromise or physical access, which significantly reduces exploitability scores.
+Celestia leads with 5 High-severity findings, driven by governance-layer structural issues (CEL-G01 at 8.7) and multiple memory exhaustion vulnerabilities with low attack complexity.
 
 ---
 
@@ -90,5 +90,5 @@ Learn more about verification levels in the [Verification Methodology](../method
 
 ## Deeper Analysis
 
-- [Scoring Comparison](scoring.md) — How BVSS scores compare across protocols with scored threats
+- [Scoring Comparison](scoring.md) — How CVSS 3.1 scores compare across all four DA protocols
 - [Common Patterns](common-patterns.md) — Recurring threat patterns that appear across multiple DA protocols

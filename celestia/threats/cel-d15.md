@@ -1,41 +1,63 @@
 # CEL-D15: Infinite Retry Loop Without Backoff in blob.Subscribe
 
 {% hint style="info" %}
-**Severity**: Medium · **STRIDE**: D · **Status**: code_verified
+**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: code_verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The Subscribe method in celestia-node's blob/service.go contains an infinite retry loop that runs without any backoff or sleep when the internal getAll call fails. The pattern is a simple for loop that calls getAll and breaks only on success. If getAll returns an error, the loop immediately retries without delay, consuming 100% of the CPU core.
+The `Subscribe` method in celestia-node's `blob/service.go` contains an infinite retry loop that runs without any backoff or sleep when the internal `getAll` call fails. If a malicious full node returns intermittent errors for data requests on a specific namespace, any light node with an active subscription to that namespace enters a tight busy-loop consuming 100% of a CPU core, preventing DAS sampling and other critical operations.
 
-Under normal conditions, getAll succeeds and the loop terminates quickly. However, if a malicious full node returns intermittent errors for data requests on a specific namespace, any light node with an active subscription to that namespace enters a tight busy-loop. The context cancellation is the only exit condition, and if the subscription is long-lived, the CPU burn continues indefinitely.
+## Description
 
-This CPU exhaustion prevents the light node from performing DAS sampling and other critical operations, effectively disabling its DA verification capability.
+The retry loop in the `Subscribe` method uses a bare `for` loop with no delay between iterations:
 
-## Prerequisites
+```go
+// celestia-node/blob/service.go
+// @audit Subscribe method contains the pattern:
+// for {
+//     blobs, err = s.getAll(ctx, header, []Namespace{ns})
+//     if err == nil { break }
+// }
+// @audit No sleep or backoff between retries — immediate retry on failure
+```
 
-- One malicious full node that can connect as a peer to the target light node
-- The target light node must have an active namespace subscription
+Under normal conditions, `getAll` succeeds and the loop terminates quickly. However, when a malicious full node returns intermittent errors:
 
-## Attack Scenario
+1. The light node has an active namespace subscription
+2. A malicious full node connects as a peer and is selected for data requests
+3. The malicious node returns intermittent errors for the subscribed namespace
+4. The `getAll` call fails and the loop immediately retries without any delay
+5. The tight loop consumes 100% of a CPU core
 
-1. A light node subscribes to blob updates for a specific namespace.
-2. A malicious full node connects as a peer and is selected for data requests.
-3. The malicious node returns intermittent errors for the subscribed namespace's data.
-4. The Subscribe method's getAll call fails and immediately retries without any delay.
-5. The tight loop consumes 100% of a CPU core on the light node.
-6. DAS sampling and other operations are starved of CPU time, disabling DA verification.
+The only exit condition is context cancellation. If the subscription is long-lived, the CPU burn continues indefinitely. This CPU exhaustion prevents the light node from performing DAS sampling and other critical operations, effectively disabling its DA verification capability.
+
+## Proof of Concept
+
+No proof of concept was conducted for this threat.
 
 ## Impact
 
 Light node CPU exhaustion leading to DAS sampling halt and loss of DA verification capability for that node. The attack persists until the subscription context is cancelled or the peer connection drops.
 
-## Evidence
+### CVSS 3.1
 
-### Source Code
+**Score**: 5.9/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H`
 
-- `celestia-node/blob/service.go` -- Subscribe method contains the pattern: for { blobs, err = s.getAll(ctx, header, []Namespace{ns}); if err == nil { break } } with no sleep or backoff between retries
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV (Attack Vector) | N (Network) | Malicious full node connects over the P2P network |
+| AC (Attack Complexity) | H (High) | Requires the malicious node to be selected as the data peer for the specific subscribed namespace |
+| PR (Privileges Required) | N (None) | No privileges required; any full node peer can return errors |
+| UI (User Interaction) | N (None) | No user interaction required |
+| S (Scope) | U (Unchanged) | Impact is confined to the targeted light node |
+| C (Confidentiality) | N (None) | No confidentiality impact |
+| I (Integrity) | N (None) | No integrity impact |
+| A (Availability) | H (High) | 100% CPU burn disables DAS sampling and all critical operations on the light node |
 
-## Mitigations
+## Recommendation
 
-Recommended fixes include adding exponential backoff between retries, setting a maximum retry count after which the subscription reports a permanent error, and inserting a minimum sleep interval (e.g., 100 ms) between retry attempts.
+1. Add exponential backoff between retries (e.g., starting at 100ms, doubling up to a maximum of 30 seconds).
+2. Set a maximum retry count after which the subscription reports a permanent error to the caller.
+3. Insert a minimum sleep interval (e.g., 100ms) between retry attempts as an immediate fix.

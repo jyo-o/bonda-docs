@@ -1,52 +1,58 @@
 # AVL-E01: ZK Verifier Route Manipulation via SP1VerifierGateway Multisig
 
 {% hint style="info" %}
-**Severity**: Low (1.8/10) · **STRIDE**: E · **Scope**: bridge · **Status**: Verified
+**Severity**: Medium (4.0/10) · **STRIDE**: E · **Status**: Verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The SP1VerifierGateway contract (0xCafEf00d348Adbd57c37d1B77e0619C6244C6878) controls which ZK verifier contracts are used to validate proofs on Avail's bridge. It determines whether a given zero-knowledge proof is accepted as valid. This contract is owned by a Gnosis Safe multisig with a 2-of-3 signing threshold.
+The SP1VerifierGateway contract (0xCafEf00d348Adbd57c37d1B77e0619C6244C6878) controls which ZK verifier contracts validate proofs on Avail's bridge. It is owned by a 2-of-3 Gnosis Safe multisig with key holder overlap: Owner #2 (0x72Ff...4f54) is the same individual as Owner #4 of the Governance Multisig. This overlap weakens the effective independence of the signing set, and only two compromised keys are needed to replace the verifier with a malicious contract.
 
-The vulnerability lies in the low threshold combined with key holder overlap. Owner #2 (0x72Ff...4f54) of the SP1VerifierGateway is the same person as owner #4 of the Governance Multisig. This means that one individual already holds signing power across multiple critical contracts. Only two signers need to be compromised to change the verifier route.
+## Description
 
-If an attacker compromises 2 of the 3 signing keys, they could replace the legitimate ZK verifier contract with a malicious one. This would allow fabricated zero-knowledge proofs to be accepted as valid, potentially enabling fraudulent bridge operations. The overlap between the SP1 and Governance multisig weakens the effective independence of the signing set.
+The SP1VerifierGateway determines whether zero-knowledge proofs submitted to the bridge are accepted as valid. Its ownership is controlled by a Gnosis Safe with a 2-of-3 signing threshold.
 
-## Prerequisites
+```
+// @audit — SP1VerifierGateway (0xCafE...6878):
+//          Threshold: 2-of-3 Gnosis Safe
+//          Owner #2 (0x72Ff...4f54) == Governance Multisig Owner #4
+//          Key holder overlap weakens effective signing independence.
+//          Only 2 keys needed to replace the ZK verifier contract.
+```
 
-- Compromise 2 of the 3 SP1VerifierGateway signer keys
-- Ability to deploy a malicious verifier contract on Ethereum
+The vulnerability lies in the low threshold combined with key holder overlap. One individual already holds signing power across multiple critical contracts, meaning an attacker who compromises that key is already 1/2 of the way to controlling the verifier route and 1/4 of the way to controlling governance.
 
-## Attack Scenario
+## Proof of Concept
 
-1. The attacker compromises 2 of the 3 SP1VerifierGateway signing keys, either through phishing, key theft, or social engineering. The overlapping key holder (0x72Ff...4f54) is a high-value target since they appear in multiple multisigs.
-2. Using the compromised keys, the attacker submits a transaction to the SP1VerifierGateway that replaces the legitimate ZK verifier contract address with a malicious verifier that accepts any proof as valid.
-3. With the malicious verifier in place, the attacker can submit fabricated proofs to the bridge. These false proofs pass verification, enabling unauthorized bridge operations such as withdrawing funds that were never deposited on the source chain.
+On-chain verification confirmed the multisig configuration and key holder overlap:
+
+- `cast call 0xCafE...6878 "getThreshold()(uint256)"` returns `2`, confirming the 2-of-3 threshold
+- `cast call 0xCafE...6878 "getOwners()(address[])"` returns 3 owner addresses
+- Owner #2 (0x72Ff26D9517324eEFA89A48B75c5df41132c4f54) was cross-verified as identical to Governance Multisig Owner #4
+
+Reference: poc_onchain_verification.md, section 4.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 1.8/10 (Low) |
-| BVSS Vector | `BVSS:1.1/B:N/AV:P/AC:H/PR:R/UI:N/S:U/C:N/I:H/A:N/CI:N/II:M/AI:N` |
-| Scope | bridge |
+If 2 of the 3 signing keys are compromised, the attacker could replace the legitimate ZK verifier contract with a malicious one that accepts any proof as valid. This would enable fabricated zero-knowledge proofs to be accepted by the bridge, potentially allowing unauthorized bridge operations such as withdrawing funds that were never deposited on the source chain. The overlapping key holder (0x72Ff...4f54) between the SP1 and Governance multisigs is a high-value target whose compromise cascades across both security domains.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 4.0/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N`
 
-There is no direct financial impact under normal conditions because the attack requires compromising multisig keys first. The attack vector is physical or social engineering-based, since 2 of the 3 keys must be compromised through direct targeting of the key holders. Attack complexity is high because it requires simultaneous compromise of two separate signer keys. The attacker needs multisig signer credentials to execute, and the scope is limited to the verifier route change function. Integrity impact is high because a successful verifier replacement would allow false proofs to be accepted. The infrastructure integrity impact is medium because the one overlapping member between the SP1 and Governance multisigs weakens the effective independence of the signing set.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | P (Physical) | 2 of 3 keys must be compromised through physical or social engineering targeting of key holders |
+| AC | H (High) | Requires simultaneous compromise of two separate signer keys |
+| PR | L (Low) | Attacker needs multisig signer credentials to execute |
+| UI | N (None) | No user interaction required |
+| S | U (Unchanged) | Impact limited to the verifier route change function |
+| C | N (None) | No confidentiality impact |
+| I | H (High) | Successful verifier replacement would allow false proofs to be accepted |
+| A | N (None) | No direct availability impact from verifier replacement |
 
-## Evidence
+## Recommendation
 
-### On-Chain Verification
-
-- `cast call 0xCafE...6878 "getThreshold()(uint256)"` returns `2`, confirming the 2-of-3 threshold.
-- `cast call 0xCafE...6878 "getOwners()(address[])"` returns 3 owner addresses.
-- Owner #2 (0x72Ff26D9517324eEFA89A48B75c5df41132c4f54) was cross-verified as identical to Governance Multisig owner #4.
-
-### PoC Testing
-
-- Documented in poc_onchain_verification.md, section 4.
-
-## Mitigations
-
-Verifier replacement is restricted exclusively to the SP1VerifierGateway multisig owners. The 2-of-3 threshold prevents any single compromised key from making changes unilaterally. However, the key holder overlap between the SP1 and Governance multisigs reduces the effective number of independent signers that an attacker would need to target.
+1. **Increase the SP1VerifierGateway multisig threshold**: Raise the threshold from 2-of-3 to at least 3-of-5 to require more key compromises for a successful attack.
+2. **Eliminate key holder overlap**: Ensure that SP1VerifierGateway signers are independent from Governance Multisig members to provide true separation of concerns.
+3. **Add a timelock to verifier changes**: Implement a delay between proposing and executing a verifier replacement, giving the community a window to detect suspicious changes.

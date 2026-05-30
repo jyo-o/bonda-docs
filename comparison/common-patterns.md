@@ -43,8 +43,8 @@ Beyond multisig structure, broader governance centralization appears across prot
 
 | Protocol | Threat ID | Issue |
 |---|---|---|
-| Celestia | G-CON-01 | Top 8 validators hold 35.77% (>1/3 threshold). 6 of 8 are KYC-regulated entities. Single court order could force prevote-nil censorship. max_validators=100 with 94 bonded (near saturation). |
-| Celestia | G-OPS-01 | Multiple documentation surfaces (fraud_proofs.md, CIP-019, docs.celestia.org) are 5+ weeks stale, claiming security properties (BEFP, 25% slashing) that no longer hold in code. |
+| Celestia | CEL-G01 | Top 8 validators hold 35.77% (>1/3 threshold). 6 of 8 are KYC-regulated entities. Single court order could force prevote-nil censorship. max_validators=100 with 94 bonded (near saturation). |
+| Celestia | CEL-G02 | Multiple documentation surfaces (fraud_proofs.md, CIP-019, docs.celestia.org) are 5+ weeks stale, claiming security properties (BEFP, 25% slashing) that no longer hold in code. |
 | EigenDA | EDA-E03 | Q0 top 3 operators hold 39.8% (>33% safety threshold). Q2 has AltLayer at 52.6% solo. Coinbase suspected to control 5 of top 4-8 in Q1. |
 | Avail | AVL-E03 | Deployer EOA (0xDEd0...E18e) retains DEFAULT_ADMIN_ROLE. Can solo grant TIMELOCK_ROLE to self and upgrade VectorX in 2 transactions. |
 | Avail | AVL-E04 | Technical Committee can upgrade runtime with 5/5 or 5/7 consensus. Actually used at block #1,095,300 for a bug fix. |

@@ -1,48 +1,56 @@
 # ETH-T04: Cell Index Bounds Check Asymmetry
 
 {% hint style="info" %}
-**Severity**: Low (0.8/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
+**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
 {% endhint %}
 
-## Overview
+## Summary
 
-The KZG cryptographic library used in Ethereum's data availability layer contains an asymmetry in cell index bounds checking between two related functions. The `recover_cells_and_kzg_proofs` function validates that the number of cells does not exceed `CELLS_PER_EXT_BLOB`, but `verify_cell_kzg_proof_batch` does not perform the equivalent check. This means that out-of-bounds cell indices could potentially be passed to the batch verification function without being rejected.
+The KZG cryptographic library contains an asymmetry in cell index bounds checking: `recover_cells_and_kzg_proofs` validates that the number of cells does not exceed `CELLS_PER_EXT_BLOB`, but `verify_cell_kzg_proof_batch` does not perform the equivalent check. Out-of-bounds cell indices could reach the batch verification function, potentially causing undefined behavior. This is a defense-in-depth gap rather than a directly exploitable vulnerability.
 
-With the Fulu fork, cell operations become the primary path for data availability verification, elevating the importance of consistent bounds checking across all cell-related functions. From a defense-in-depth perspective, every function that processes cell indices should independently validate its inputs rather than relying on upstream callers to enforce bounds.
+## Description
 
-In practice, the risk is low because `recover_cells_and_kzg_proofs` is typically called before batch verification, and upper-layer validation in client implementations filters out malformed inputs before they reach the KZG library. The asymmetry is a defense-in-depth gap rather than a directly exploitable vulnerability.
+The bounds check asymmetry exists between two related KZG library functions that both process cell indices.
 
-## Prerequisites
+```
+# @audit — bounds check present in recovery but missing in batch verification
+# recover_cells_and_kzg_proofs:
+#   validates num_cells <= CELLS_PER_EXT_BLOB  ← check present
+#
+# verify_cell_kzg_proof_batch:
+#   no equivalent bounds check on cell indices  ← check missing
+#
+# Asymmetry allows out-of-bounds indices if batch verification
+# is reached through a code path that skips recovery.
+```
 
-- Ability to craft inputs with out-of-bounds cell indices that bypass upper-layer validation
-- The crafted input must reach `verify_cell_kzg_proof_batch` without first passing through `recover_cells_and_kzg_proofs`
+In practice, the risk is low because `recover_cells_and_kzg_proofs` is typically called before batch verification, and upper-layer validation in client implementations filters out malformed inputs before they reach the KZG library. With the Fulu fork, cell operations become the primary path for data availability verification, elevating the importance of consistent bounds checking.
 
-## Attack Scenario
+## Proof of Concept
 
-1. The attacker constructs a data column sidecar containing cell indices that exceed `CELLS_PER_EXT_BLOB`.
-2. If the input reaches `verify_cell_kzg_proof_batch` through a code path that does not first call `recover_cells_and_kzg_proofs`, the bounds check is skipped.
-3. The batch verification function processes the out-of-bounds cell indices, potentially causing undefined behavior or incorrect verification results in the KZG library.
-4. Depending on the library implementation, this could result in accepting invalid proofs or triggering a crash in the client node.
+No proof of concept was conducted for this threat.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 0.8/10 (Low) |
-| BVSS Vector | `B:N/AV:N/AC:H/PR:N/UI:N/S:U/C:N/CI:N/I:L/II:L/A:N/AI:N` |
-| Scope | protocol |
+If out-of-bounds cell indices reach `verify_cell_kzg_proof_batch` through a code path that bypasses recovery, the result could be undefined behavior or incorrect verification results in the KZG library — potentially accepting invalid proofs or triggering a client crash. The practical exploitability is low because upper-layer client validation and typical call ordering (recovery before verification) provide defense.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 3.7/10 (Low)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N`
 
-The attack complexity is high because exploiting this asymmetry requires bypassing both upper-layer client validation and the typical call ordering where recovery precedes verification. No privileges or user interaction are needed. Integrity impact is low at both node and chain levels because the asymmetry is a missing redundant check rather than a primary validation gap. Confidentiality and availability are unaffected. The scope remains unchanged.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | N (Network) | Malformed data column sidecars can be sent over the network |
+| AC | H (High) | Must bypass both upper-layer validation and typical call ordering |
+| PR | N (None) | No privileges needed to submit crafted inputs |
+| UI | N (None) | No user interaction required |
+| S | U (Unchanged) | Scope limited to the processing node |
+| C | N (None) | No confidentiality impact |
+| I | L (Low) | Missing redundant check; primary validation exists in the recovery path |
+| A | N (None) | Crash possibility is speculative given existing upstream checks |
 
-## Evidence
+## Recommendation
 
-### Source Code
-
-- **Component**: KZG cryptographic library (consensus layer specification)
-- **Finding**: `recover_cells_and_kzg_proofs` includes a check for `num_cells > CELLS_PER_EXT_BLOB`, while `verify_cell_kzg_proof_batch` does not perform this same bounds validation. The asymmetry has been confirmed through code review.
-
-## Mitigations
-
-The `recover_cells_and_kzg_proofs` function performs the bounds check as a preceding step in the typical processing pipeline, catching out-of-bounds indices before they reach batch verification. Client implementations add additional upper-layer validation that filters malformed inputs before they reach the KZG library. As a defense-in-depth improvement, adding a consistent bounds check to `verify_cell_kzg_proof_batch` would close this gap without any performance cost.
+1. **Add bounds check to `verify_cell_kzg_proof_batch`**: Add a consistent `num_cells <= CELLS_PER_EXT_BLOB` validation to the batch verification function. This closes the defense-in-depth gap with no performance cost.
+2. **Enforce independent input validation**: Every function that processes cell indices should independently validate its inputs rather than relying on upstream callers to enforce bounds.
+3. **Maintain upper-layer client validation**: Client implementations should continue filtering malformed inputs before they reach the KZG library as an additional defense layer.

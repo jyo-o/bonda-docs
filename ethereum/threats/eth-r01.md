@@ -1,49 +1,54 @@
 # ETH-R01: Blob and Data Column Equivocation Detection Failure
 
 {% hint style="info" %}
-**Severity**: Low (1.1/10) · **STRIDE**: R (Repudiation) · **Status**: code_verified
+**Severity**: Medium (4.2/10) · **STRIDE**: R (Repudiation) · **Status**: code_verified
 {% endhint %}
 
-## Overview
+## Summary
 
-When a consensus layer client receives two blobs or data columns with the same slot and index but different content, the second message is silently ignored. No slashing evidence is generated and no equivocation record is preserved. This means a malicious block proposer can publish conflicting data for the same slot without being detected or penalized through the normal slashing mechanism.
+When a consensus layer client receives two blobs or data columns with the same slot and index but different content, the second message is silently ignored. No slashing evidence is generated and no equivocation record is preserved. A malicious block proposer can publish conflicting data for the same slot without detection or penalty, violating protocol accountability guarantees.
 
-Equivocation detection is important for maintaining protocol accountability. In a well-functioning protocol, any validator that publishes conflicting messages should be identifiable and subject to slashing penalties. The current behavior of simply ignoring the second message means that evidence of misbehavior is discarded rather than preserved for potential slashing proceedings.
+## Description
 
-With the Fulu fork making data columns the primary path for data availability, equivocation detection becomes more critical. A proposer who equivocates on data columns could cause different nodes to hold different versions of the data for the same slot, potentially leading to inconsistent state derivation by downstream consumers.
+The gossip validation logic in consensus layer clients marks duplicate slot-index pairs as IGNORE without comparing content.
 
-## Prerequisites
+```
+# @audit — duplicate blob/column silently ignored, no equivocation detection
+# Consensus layer gossip validation:
+# When blob_sidecar or data_column_sidecar arrives for a
+# (slot, index) pair that has already been seen:
+#   → message marked as IGNORE
+#   → no content comparison performed
+#   → no equivocation evidence generated or forwarded for slashing
+```
 
-- The attacker must be a block proposer with the ability to publish blobs or data columns for a given slot
-- The attacker must be able to distribute conflicting versions to different parts of the network before the first version propagates fully
+With the Fulu fork making data columns the primary path for data availability, equivocation detection becomes more critical. A proposer who equivocates on data columns could cause different nodes to hold different versions of the data for the same slot, potentially leading to inconsistent state derivation by downstream consumers. This behavior contrasts with existing block equivocation slashing mechanisms.
 
-## Attack Scenario
+## Proof of Concept
 
-1. A malicious block proposer creates two different versions of a blob or data column for the same slot and index.
-2. The proposer distributes version A to one subset of the network and version B to another subset.
-3. Nodes that receive version A first will silently ignore version B when it arrives, and vice versa.
-4. Neither group of nodes generates slashing evidence because the second message is treated as a duplicate and discarded.
-5. The proposer successfully equivocates without penalty, and different parts of the network hold different data for the same slot.
+No proof of concept was conducted for this threat.
 
 ## Impact
 
-| Metric | Value |
-|--------|-------|
-| BVSS Score | 1.1/10 (Low) |
-| BVSS Vector | `B:N/AV:N/AC:H/PR:R/UI:N/S:U/C:N/CI:N/I:L/II:L/A:L/AI:L` |
-| Scope | protocol |
+A malicious proposer can distribute version A of a blob/column to one part of the network and version B to another. Neither group generates slashing evidence because the second message is discarded. The proposer equivocates without penalty, and different parts of the network hold different data for the same slot. This undermines protocol accountability and can cause some nodes to operate on inconsistent data, potentially affecting downstream state derivation.
 
-### Scoring Rationale
+### CVSS 3.1
+**Score**: 4.2/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L`
 
-The attack vector is network-based but complexity is high because the attacker must be a validator with proposer duties and must time the equivocation to reach different network partitions. Privileges are required since only block proposers can publish blobs and data columns. Integrity impact is low at both node and chain levels because the equivocation does not corrupt committed data but does undermine accountability. Availability impact is low because conflicting data versions may cause some nodes to operate on stale or inconsistent data. The scope remains unchanged.
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV | N (Network) | Conflicting messages distributed over the network |
+| AC | H (High) | Attacker must be a validator with proposer duties and time the equivocation across network partitions |
+| PR | L (Low) | Only block proposers can publish blobs and data columns |
+| UI | N (None) | No user interaction needed |
+| S | U (Unchanged) | Attack operates within the consensus accountability boundary |
+| C | N (None) | No confidentiality impact |
+| I | L (Low) | Equivocation does not corrupt committed data but undermines accountability |
+| A | L (Low) | Conflicting data versions may cause some nodes to operate on inconsistent data |
 
-## Evidence
+## Recommendation
 
-### Source Code
-
-- **Component**: Consensus layer client gossip validation logic
-- **Finding**: When a blob sidecar or data column sidecar arrives for a slot and index pair that has already been seen, the message is marked as IGNORE. No comparison of the content is performed, and no equivocation evidence is generated or forwarded for slashing.
-
-## Mitigations
-
-Currently, the only handling is IGNORE processing for duplicate slot-index pairs. A slashing evidence generation mechanism for blob and data column equivocation has not been implemented. To address this gap, clients could compare the content hash of incoming messages against previously seen messages for the same slot-index pair. If a mismatch is detected, the node should preserve both messages as slashing evidence and broadcast an equivocation proof to the network. This would bring blob and data column equivocation detection in line with existing block equivocation slashing mechanisms.
+1. **Implement content-hash comparison for duplicate slot-index pairs**: When a blob or data column arrives for an already-seen (slot, index) pair, compare the content hash against the previously seen message instead of silently ignoring.
+2. **Generate and broadcast equivocation evidence**: If a content mismatch is detected, preserve both messages as slashing evidence and broadcast an equivocation proof to the network.
+3. **Align with existing block equivocation slashing**: Bring blob and data column equivocation detection in line with existing block equivocation slashing mechanisms to maintain consistent protocol accountability.
