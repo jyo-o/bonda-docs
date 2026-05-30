@@ -34,7 +34,7 @@ The degradation path is:
 
 ## Proof of Concept
 
-On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#4-slashing-absence-verification-eda-p01) for full commands and results.
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#id-4.-slashing-absence-verification-eda-p01) for full commands and results.
 
 - Zero slash or freeze functions found across all EigenDA core contracts
 - `AllocationManager.getOperatorSetCount()` returns 0 for the EigenDA AVS

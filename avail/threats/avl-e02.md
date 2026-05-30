@@ -27,7 +27,7 @@ The practical consequence is that the three multisigs do not provide truly indep
 
 ## Proof of Concept
 
-On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#3-governance-multisig-cross-analysis-avl-e02) for full commands and results.
+On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#id-3.-governance-multisig-cross-analysis-avl-e02) for full commands and results.
 
 - Pauser Multisig `getOwners()` returns 5 owners, 4 of which are identical to Governance Multisig members
 - Address 0x72Ff...4f54 confirmed present in all three multisigs through cross-referencing owner lists

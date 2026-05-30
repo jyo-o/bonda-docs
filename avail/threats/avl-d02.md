@@ -27,7 +27,7 @@ The Phragmen election algorithm achieves remarkably even stake distribution, mak
 
 ## Proof of Concept
 
-On-chain state and Subscan Era #688 data were analyzed. See [Verification Evidence](../evidence.md#6-avail-chain-verification) for full commands and results.
+On-chain state and Subscan Era #688 data were analyzed. See [Verification Evidence](../evidence.md#id-6.-avail-chain-verification) for full commands and results.
 
 - `Session.Validators` storage query returns 105 active validators out of 1,200 slots
 - Nakamoto coefficient of ~34 calculated from stake distribution; max/min stake ratio of 1.20x confirms Phragmen equalization

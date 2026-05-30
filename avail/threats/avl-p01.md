@@ -27,7 +27,7 @@ The gap between implemented infrastructure and actual enforcement may reflect co
 
 ## Proof of Concept
 
-On-chain state was queried via Avail Substrate RPC. See [Verification Evidence](../evidence.md#6-avail-chain-verification) for full commands and results.
+On-chain state was queried via Avail Substrate RPC. See [Verification Evidence](../evidence.md#id-6.-avail-chain-verification) for full commands and results.
 
 - `ActiveEra` storage returns 688 after SCALE decoding — 688 eras of operation with zero slashing events
 - `UnappliedSlashes` for era 688 returns null — no pending or historical slashes

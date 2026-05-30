@@ -30,7 +30,7 @@ The geographic and provider diversity is insufficient for a protocol-critical in
 
 ## Proof of Concept
 
-Infrastructure analysis of 78 operator host classes was conducted via ASN aggregation. See [Verification Evidence](../evidence.md#6-infrastructure-concentration-analysis-eda-g01) for full data.
+Infrastructure analysis of 78 operator host classes was conducted via ASN aggregation. See [Verification Evidence](../evidence.md#id-6.-infrastructure-concentration-analysis-eda-g01) for full data.
 
 - 72 raw IPs resolved and mapped to ASN providers via ipinfo.io
 - Q0: AWS hosts 21.78% of stake, top 5 providers host 82.7% cumulatively

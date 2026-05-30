@@ -48,7 +48,7 @@ The attack flow is:
 
 ## Proof of Concept
 
-On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#1-ejector-role-parameters-eda-t09) for full commands and results.
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#id-1.-ejector-role-parameters-eda-t09) for full commands and results.
 
 - `rateLimitWindow` = 259,200 seconds (3 days), `ejectableStakePercent` = 3,333 (33.33%)
 - 3 active ejector addresses confirmed, 2 of which are EOAs responsible for 100% of ejection activity

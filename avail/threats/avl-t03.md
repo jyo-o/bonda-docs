@@ -26,7 +26,7 @@ The Bridge contract is protected by a TimelockController that enforces a 24-hour
 
 ## Proof of Concept
 
-On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#5-bridge-and-token-verification) for full commands and results.
+On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#id-5.-bridge-and-token-verification) for full commands and results.
 
 - Token `owner()` reverts — confirms the AVAIL token contract is immutable with no admin
 - `totalSupply()` returns ~791 million AVAIL; mint/burn authority is restricted to the Bridge proxy contract only

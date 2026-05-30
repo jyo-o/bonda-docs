@@ -55,7 +55,7 @@ Additionally, 17 contracts total were identified, with 12 being EIP-1967 proxies
 
 ## Proof of Concept
 
-On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#2-governance-multisig-configuration-eda-e02) for full commands and results.
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#id-2.-governance-multisig-configuration-eda-e02) for full commands and results.
 
 - `getThreshold()` returns 3, `getOwners()` returns 4 signers — all EOAs with no ENS names
 - `owner()` called on all 8 core contracts returns `0x002721B4`

@@ -26,7 +26,7 @@ The deployer at 0xDEd0000E...E18e is a regular externally owned account rather t
 
 ## Proof of Concept
 
-On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#4-deployer-admin-role-verification-avl-e03) for full commands and results.
+On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../evidence.md#id-4.-deployer-admin-role-verification-avl-e03) for full commands and results.
 
 - `hasRole(DEFAULT_ADMIN_ROLE, 0xDEd...)` returns `true` — deployer still holds admin
 - `getRoleAdmin(TIMELOCK_ROLE)` returns `0x00` (DEFAULT_ADMIN_ROLE) — confirms the deployer can grant itself TIMELOCK_ROLE

@@ -33,7 +33,7 @@ A fallback mechanism exists through validator direct retrieval via `GetChunks`, 
 
 ## Proof of Concept
 
-On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#5-relay-registry-single-point-of-failure-eda-d06) for full commands and results.
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#id-5.-relay-registry-single-point-of-failure-eda-d06) for full commands and results.
 
 No exploit reproduction was conducted beyond on-chain state verification.
 

@@ -27,7 +27,7 @@ This finding is directly connected to EDA-P01. Without economic penalties from s
 
 ## Proof of Concept
 
-A 24-hour prober measurement was conducted across 79 operators. See [Verification Evidence](../evidence.md#7-dead-operator-measurement-eda-d12) for full data.
+A 24-hour prober measurement was conducted across 79 operators. See [Verification Evidence](../evidence.md#id-7.-dead-operator-measurement-eda-d12) for full data.
 
 - Prober detected 11 dead operators (0.0% chunk-serving success rate)
 - DataAPI signing-info shows only 3 dead operators, revealing an 8-operator gap

@@ -32,7 +32,7 @@ A previous relayer at 0x3243...2D was rotated out, confirming that relayer chang
 
 ## Proof of Concept
 
-Anvil mainnet fork PoC and on-chain state verification were conducted. See [Verification Evidence](../evidence.md#1-vectorx-single-relayer-verification-avl-d01) for full commands and results.
+Anvil mainnet fork PoC and on-chain state verification were conducted. See [Verification Evidence](../evidence.md#id-1.-vectorx-single-relayer-verification-avl-d01) for full commands and results.
 
 - Anvil fork confirmed single relayer access control, absence of staleness detection, and guardian ZK bypass as the intended fallback
 - `approvedRelayers(0x27BF...)` returns `true` with `checkRelayer` enabled — sole approved relayer is an EOA (nonce 2632, balance 0.82 ETH)

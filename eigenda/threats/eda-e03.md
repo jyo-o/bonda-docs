@@ -39,7 +39,7 @@ The attack path requires collusion among 3 operators to sign invalid DA certific
 
 ## Proof of Concept
 
-On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#3-operator-stake-distribution-eda-e03) for full commands and results.
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#id-3.-operator-stake-distribution-eda-e03) for full commands and results.
 
 - Q0 top 3 operators hold 39.8% of stake, exceeding the 33% safety threshold
 - Q1 top 3 operators hold 35.6% of stake, also exceeding the 33% safety threshold
