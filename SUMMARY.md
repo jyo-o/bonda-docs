@@ -61,17 +61,12 @@
 * [AVL-E03: Deployer Retains Admin Role](avail/threats/avl-e03.md)
 * [AVL-D01: Single Relayer SPOF](avail/threats/avl-d01.md)
 * [AVL-D02: Low Validator Utilization](avail/threats/avl-d02.md)
-* [AVL-T05: KZG Trusted Setup](avail/threats/avl-t05.md)
-* [AVL-E04: Technical Committee Upgrade](avail/threats/avl-e04.md)
 * [AVL-T01: VectorX Instant Upgrade](avail/threats/avl-t01.md)
 * [AVL-E01: SP1 Verifier Multisig](avail/threats/avl-e01.md)
 * [AVL-T03: Unlimited Token Minting](avail/threats/avl-t03.md)
-* [AVL-T04: Guardian ZK Proof Bypass](avail/threats/avl-t04.md)
 * [AVL-P02: Incomplete Block Reconstruction](avail/threats/avl-p02.md)
 * [AVL-E02: Multisig Key Overlap](avail/threats/avl-e02.md)
 * [AVL-P01: Slashing Never Triggered](avail/threats/avl-p01.md)
-* [AVL-T02: Bridge 24h Timelock](avail/threats/avl-t02.md)
-* [AVL-S01: Misleading Contract Name](avail/threats/avl-s01.md)
 * [PoC Evidence](avail/poc-evidence.md)
 
 ## Ethereum / PeerDAS

@@ -42,9 +42,9 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 
 | Metric | Value |
 |--------|-------|
-| Total threats identified | 14 |
-| Verified | 12 |
-| Unverified | 2 |
+| Total threats identified | 9 |
+| Verified | 8 |
+| Unverified | 1 |
 | Highest severity | High — 8.4, deployer retains admin role on VectorX |
 | Active validators | 105 out of 1,200 max |
 | Nakamoto coefficient | ~34 validators to control 33% of stake |
@@ -54,24 +54,19 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 
 ## Threat Summary
 
-14 threats identified through on-chain verification, source code analysis, and Anvil mainnet fork testing. All threats are scored using CVSS 3.1.
+9 threats identified through on-chain verification, source code analysis, and Anvil mainnet fork testing. All threats are scored using CVSS 3.1.
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
 | [AVL-E03](threats/avl-e03.md) | Deployer EOA retains admin role, can upgrade VectorX solo | High (8.2) | verified |
 | [AVL-D01](threats/avl-d01.md) | VectorX single relayer with no on-chain heartbeat or rate limit | High (7.5) | verified |
-| [AVL-E04](threats/avl-e04.md) | Technical Committee can upgrade runtime with 5/7 consensus | Medium (6.7) | verified |
 | [AVL-D02](threats/avl-d02.md) | Only 105 of 1,200 validator slots are active | Medium (5.9) | verified |
-| [AVL-T05](threats/avl-t05.md) | KZG trusted setup relies on Filecoin Powers of Tau ceremony | Medium (5.9) | unverified |
 | [AVL-T01](threats/avl-t01.md) | VectorX upgradeable instantly by 4/7 multisig, no timelock | Medium (5.6) | verified |
 | [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Medium (4.0) | verified |
 | [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Medium (4.0) | verified |
-| [AVL-T04](threats/avl-t04.md) | Guardian can inject commitments without ZK proof verification | Medium (4.0) | verified |
 | [AVL-P02](threats/avl-p02.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | unverified |
 | [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (2.9) | verified |
 | [AVL-P01](threats/avl-p01.md) | Slashing exists but has never been triggered in 688 eras | Low (2.1) | verified |
-| [AVL-T02](threats/avl-t02.md) | Bridge has 24h timelock, relatively safe upgrade path | Low (1.8) | verified |
-| [AVL-S01](threats/avl-s01.md) | TimelockedUpgradeable contract name is misleading, contains no timelock | Informational (0.0) | verified |
 
 ## Key Findings
 
@@ -99,8 +94,3 @@ Avail supports up to 1,200 validators but only 105 are currently active, using j
 
 Three separate multisig wallets govern different parts of the system: Governance, Pauser, and SP1 Verifier. However, these are not truly independent. Four of the five Pauser multisig owners are the same people as Governance multisig owners, and one address appears in all three multisigs. This means compromising the Governance multisig effectively compromises the Pauser and partially compromises the SP1 verifier control as well.
 
-### VectorX Contract Name Implies Timelock That Does Not Exist
-
-**AVL-S01** | Informational (0.0)
-
-VectorX inherits from a contract called `TimelockedUpgradeable`, which suggests upgrades are delayed by a timelock. In reality, this contract contains no delay logic, no queue-and-execute pattern, and no waiting period. The `onlyTimelock` modifier simply checks if the caller has the right role. This naming creates a false sense of security for anyone reviewing the code. The Bridge contract, by contrast, does have a real 24-hour timelock enforced by a separate TimelockController.

@@ -47,7 +47,6 @@ Beyond multisig structure, broader governance centralization appears across prot
 | Celestia | CEL-G02 | Multiple documentation surfaces (fraud_proofs.md, CIP-019, docs.celestia.org) are 5+ weeks stale, claiming security properties (BEFP, 25% slashing) that no longer hold in code. |
 | EigenDA | EDA-E03 | Q0 top 3 operators hold 39.8% (>33% safety threshold). Q2 has AltLayer at 52.6% solo. Coinbase suspected to control 5 of top 4-8 in Q1. |
 | Avail | AVL-E03 | Deployer EOA (0xDEd0...E18e) retains DEFAULT_ADMIN_ROLE. Can solo grant TIMELOCK_ROLE to self and upgrade VectorX in 2 transactions. |
-| Avail | AVL-E04 | Technical Committee can upgrade runtime with 5/5 or 5/7 consensus. Actually used at block #1,095,300 for a bug fix. |
 
 ## Pattern 4: Missing or Dormant Slashing
 
@@ -78,7 +77,6 @@ Two protocols share exposure to KZG trusted setup assumptions.
 
 | Protocol | Threat ID | Setup Ceremony | Risk |
 |---|---|---|---|
-| Avail | AVL-T05 | Filecoin Powers of Tau (challenge_19, BLS12-381) | 1-of-N honest participant assumption. If all participants were dishonest, validity proofs could be forged. |
 | Ethereum | ETH-T02 | Ethereum KZG ceremony | Setup file is go:embed + sync.Once protected (runtime replacement impossible). Risk is limited to build-time supply chain compromise. |
 
 Both rely on the 1-of-N honest participant assumption, but Ethereum's implementation is more hardened against runtime tampering.
