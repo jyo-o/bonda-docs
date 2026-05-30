@@ -55,7 +55,7 @@ All verification levels are explained in the [Verification Methodology](methodol
 |----|----------|---------|
 | [AVL-E03](avail/threats/avl-e03.md) | Avail | Deployer EOA still holds admin role on VectorX, enabling solo bridge upgrade in 2 transactions |
 | [EDA-T09](eigenda/threats/eda-t09.md) | EigenDA | Single EOA can eject up to 33% of operator stake within a 3-day window |
-| [CEL-T01](celestia/threats/cel-t01.md) | Celestia | Fraud proofs were removed but documentation still claims they exist |
+| [CEL-P01](celestia/threats/cel-p01.md) | Celestia | DAS-only safety model after fraud proof removal |
 
 ---
 

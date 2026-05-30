@@ -1,7 +1,7 @@
-# CEL-T01: Stale Documentation Misrepresents the DAS-only Security Model
+# CEL-P01: DAS-Only Safety Model After Fraud Proof Removal
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: T · **Status**: verified
+**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary

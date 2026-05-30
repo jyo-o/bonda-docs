@@ -1,7 +1,7 @@
 # CEL-G01: KYC Validator Concentration Enabling Legal Censorship
 
 {% hint style="warning" %}
-**Severity**: High (8.7/10) · **STRIDE**: D · **Status**: verified
+**Severity**: High (8.7/10) · **STRIDE**: G · **Status**: verified
 {% endhint %}
 
 ## Summary

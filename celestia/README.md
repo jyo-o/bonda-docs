@@ -47,7 +47,7 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 | [CEL-D11](threats/cel-d11.md) | Unbounded Memory Growth in pendingSeenTracker | High (7.5) | code_verified |
 | [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | High (7.5) | code_verified |
 | [CEL-D17](threats/cel-d17.md) | TxCache Key Mismatch Causing Permanent Cache Leak | High (7.5) | poc_verified |
-| [CEL-T01](threats/cel-t01.md) | DAS-Only Safety Model After Fraud Proof Removal | Medium (6.5) | verified |
+| [CEL-P01](threats/cel-p01.md) | DAS-Only Safety Model After Fraud Proof Removal | Medium (6.5) | verified |
 | [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium (5.9) | code_verified |
 | [CEL-D12](threats/cel-d12.md) | Nil Pointer Panic in GetProposal During Block Sync | Medium (5.9) | code_verified |
 | [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium (5.9) | code_verified |

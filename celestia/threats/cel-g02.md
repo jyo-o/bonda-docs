@@ -1,7 +1,7 @@
 # CEL-G02: Structural Documentation Drift Between Code and Public Surfaces
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **STRIDE**: T · **Status**: verified
+**Severity**: Medium (5.3/10) · **STRIDE**: G · **Status**: verified
 {% endhint %}
 
 ## Summary

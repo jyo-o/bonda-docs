@@ -27,7 +27,7 @@ Scores can be verified using the [NIST CVSS Calculator](https://nvd.nist.gov/vul
 | 7 | 7.5 | CEL-D13 | Celestia | High | Commitment computation before gas metering in CheckTx |
 | 8 | 7.5 | CEL-D17 | Celestia | High | TxCache key mismatch causing permanent cache leak |
 | 9 | 7.1 | EDA-T09 | EigenDA | High | Ejector role abuse can forcibly remove honest operators |
-| 10 | 6.5 | CEL-T01 | Celestia | Medium | DAS-only safety model after fraud proof removal |
+| 10 | 6.5 | CEL-P01 | Celestia | Medium | DAS-only safety model after fraud proof removal |
 
 All four protocols are represented in the top 10. Celestia leads with 5 entries, reflecting both governance-level risks and implementation-level memory exhaustion vulnerabilities.
 

@@ -37,7 +37,7 @@
 * [Overview](celestia/README.md)
 * [CEL-E01: SP1Blobstream Instant Upgrade](celestia/threats/cel-e01.md)
 * [CEL-G01: KYC Validator Censorship](celestia/threats/cel-g01.md)
-* [CEL-T01: DAS-only Safety Model](celestia/threats/cel-t01.md)
+* [CEL-P01: DAS-only Safety Model](celestia/threats/cel-p01.md)
 * [CEL-G02: Information Asymmetry](celestia/threats/cel-g02.md)
 * [CEL-D11: pendingSeenTracker Memory Growth](celestia/threats/cel-d11.md)
 * [CEL-D13: CheckTx Pre-gas Commitment](celestia/threats/cel-d13.md)

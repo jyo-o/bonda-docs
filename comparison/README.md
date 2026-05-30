@@ -56,10 +56,10 @@ Learn more about verification levels in the [Verification Methodology](../method
 | Category | EigenDA | Celestia | Avail | Ethereum | Total | What It Covers |
 |----------|:-------:|:--------:|:-----:|:--------:|:-----:|----------------|
 | **Denial of Service** | 7 | 13 | 2 | 2 | **24** | Availability attacks, resource exhaustion, liveness failures |
-| **Tampering** | 2 | 1 | 2 | 5 | **10** | Data integrity violations, upgrade path abuse |
+| **Tampering** | 2 | 0 | 2 | 5 | **9** | Data integrity violations, upgrade path abuse |
 | **Elevation of Privilege** | 3 | 1 | 3 | 1 | **8** | Governance abuse, role escalation, multisig concentration |
 | **Spoofing** | 1 | 1 | 0 | 2 | **4** | Identity forgery, signature replay |
-| **Protocol Design** | 2 | 0 | 2 | 0 | **4** | Structural gaps in the protocol specification |
+| **Protocol Design** | 2 | 1 | 2 | 0 | **5** | Structural gaps in the protocol specification |
 | **Governance** | 1 | 2 | 0 | 0 | **3** | Validator concentration, information asymmetry |
 | **Information Disclosure** | 1 | 0 | 0 | 0 | **1** | Key exposure, unauthenticated data access |
 | **Repudiation** | 0 | 0 | 0 | 1 | **1** | Missing audit trails, undetectable misbehavior |
