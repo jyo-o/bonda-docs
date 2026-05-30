@@ -6,7 +6,11 @@
 
 ## Summary
 
-A 24-hour prober measurement of 79 EigenDA operators revealed that 11 operators (13.9%) are completely dead, returning a 0% success rate on chunk retrieval via `GetChunks`, while continuing to sign BLS attestations. The root cause is the absence of a slashing mechanism (EDA-P01) that would economically penalize non-serving behavior. These operators are free-riding candidates: collecting rewards from BLS attestation signing without fulfilling data availability obligations. The current 13.9% non-response rate remains below the Reed-Solomon erasure coding reconstruction threshold of 22%, but further degradation would erode this safety margin.
+A 24-hour prober measurement of 79 EigenDA operators revealed that 11 operators (13.9%) are completely dead. These operators return a 0% success rate on chunk retrieval via `GetChunks`, yet continue to sign BLS attestations.
+
+The root cause is the absence of a slashing mechanism (EDA-P01) that would economically penalize non-serving behavior. These operators are free-riding candidates: collecting rewards from BLS attestation signing without fulfilling data availability obligations.
+
+The current 13.9% non-response rate remains below the Reed-Solomon erasure coding reconstruction threshold of 22%, but further degradation would erode this safety margin.
 
 ## Description
 
@@ -17,25 +21,25 @@ Prober measurement results across 79 operators:
 - 66 operators: healthy
 - Dead operators include recognizable entities: chorus.one, swell-eigenda, attestant.io
 
-The signing-info comparison reveals:
-- 1h/24h signing-info shows 3 dead operators
-- This creates an 8-operator gap between signing activity and chunk serving, consistent with the free-rider hypothesis: these operators sign BLS attestations (appearing active) but do not store or serve data chunks.
+The signing-info comparison reveals a gap between attestation activity and actual data serving. The 1h/24h signing-info shows only 3 dead operators, while the prober detected 11 non-responsive operators. This creates an 8-operator gap between signing activity and chunk serving, consistent with the free-rider hypothesis. These operators sign BLS attestations to appear active but do not store or serve data chunks.
 
-This is directly connected to EDA-P01 (no slashing): without economic penalties, there is no disincentive for this behavior. As more operators adopt this strategy, the dead operator count could grow to exceed the 22% Reed-Solomon reconstruction threshold.
+This finding is directly connected to EDA-P01. Without economic penalties from slashing, there is no disincentive for this behavior. As more operators adopt this strategy, the dead operator count could grow to exceed the 22% Reed-Solomon reconstruction threshold.
 
 ## Proof of Concept
 
-### Results
+A 24-hour prober measurement was conducted across 79 operators. See [Verification Evidence](../evidence.md#7-dead-operator-measurement-eda-d12) for full data.
 
-- Prober DB 24-hour measurement: 79 operators probed, 11 dead (0.0% success), 1 at 46.2%, 34 at 100%.
-- Signing-info 1h/24h shows 3 dead operators, indicating an 8-operator gap between signing activity and chunk serving.
-- `poc/14-*/evidence.yaml` confirmed the dead operator counts and behavior.
-
-**PoC References**: #12
+- Prober detected 11 dead operators (0.0% chunk-serving success rate)
+- DataAPI signing-info shows only 3 dead operators, revealing an 8-operator gap
+- The gap indicates operators signing BLS attestations without serving data chunks
 
 ## Impact
 
-13.9% of operators (11/79) are non-responsive to chunk retrieval requests while continuing to sign BLS attestations. This degrades data availability quality and creates free-riding incentives for other operators. The current rate is below the 22% Reed-Solomon erasure coding threshold, so the system operates within its fault tolerance bounds. However, without slashing (EDA-P01), the dead operator count may continue to increase. If it exceeds 22%, data recovery becomes unreliable and the fundamental DA guarantee is weakened. No special privileges or authentication are needed to free-ride; any registered operator can adopt this behavior.
+11 out of 79 operators (13.9%) are non-responsive to chunk retrieval requests while continuing to sign BLS attestations. This degrades data availability quality and creates free-riding incentives for other operators.
+
+The current rate is below the 22% Reed-Solomon erasure coding threshold, so the system operates within its fault tolerance bounds. However, without slashing (EDA-P01), the dead operator count may continue to increase. If it exceeds 22%, data recovery becomes unreliable and the fundamental DA guarantee is weakened.
+
+No special privileges or authentication are needed to free-ride. Any registered operator can adopt this behavior.
 
 ### CVSS 3.1
 

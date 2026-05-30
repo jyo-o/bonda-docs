@@ -26,6 +26,7 @@
 * [EDA-D07: GetBlob No Authentication](eigenda/threats/eda-d07.md)
 * [EDA-E01: Anchor Verification Bypass](eigenda/threats/eda-e01.md)
 * [EDA-D02: Proxy Rate Limit Absence](eigenda/threats/eda-d02.md)
+* [Verification Evidence](eigenda/evidence.md)
 * [Monitoring](eigenda/monitoring.md)
 
 ## Celestia

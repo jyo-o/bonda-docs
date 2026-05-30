@@ -6,7 +6,9 @@
 
 ## Summary
 
-EigenDA has no slashing mechanism for dishonest or non-performing operators. All EigenDA core contracts contain zero slash or freeze functions, zero slash-related events, and the EigenLayer `AllocationManager` shows `getOperatorSetCount=0` for the EigenDA AVS. The root cause is that slashing integration with EigenLayer has not been activated. This creates an incentive asymmetry where operators receive rewards but face no economic penalty for free-riding (signing BLS attestations without storing or serving data chunks), directly enabling the 8 free-rider candidates observed in EDA-D12.
+EigenDA has no slashing mechanism for dishonest or non-performing operators. A comprehensive search across all EigenDA core contracts found zero slash or freeze functions, zero slash-related events, and the EigenLayer `AllocationManager` returns `getOperatorSetCount=0` for the EigenDA AVS.
+
+The root cause is that slashing integration with EigenLayer has not been activated. This creates an incentive asymmetry where operators receive rewards but face no economic penalty for free-riding. Operators can sign BLS attestations without storing or serving data chunks, which directly enables the 8 free-rider candidates observed in EDA-D12.
 
 ## Description
 
@@ -21,9 +23,7 @@ A comprehensive search across all EigenDA core contracts found:
 
 Meanwhile, rewards are fully wired: a `rewardsInitiator` EOA distributes rewards to operators.
 
-**Source**: [`contracts/src/core/`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/core/) -- No slash or freeze functions found across the entire core contract directory.
-
-This finding is directly connected to the 8 free-rider candidate operators identified in PoC #02 (EDA-D12) and the dead operator observations. Without slashing, ejection by the two authorized EOA addresses is the only recourse against misbehaving operators.
+This finding is directly connected to the 8 free-rider candidate operators identified in EDA-D12 and the dead operator observations. Without slashing, ejection by the two authorized EOA addresses is the only recourse against misbehaving operators.
 
 The degradation path is:
 1. Operators sign BLS attestations to earn rewards but do not store or serve data chunks.
@@ -34,25 +34,18 @@ The degradation path is:
 
 ## Proof of Concept
 
-### On-Chain Verification
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#4-slashing-absence-verification-eda-p01) for full commands and results.
 
-- All EigenDA core Solidity contracts contain zero slash/freeze functions or events.
-- `AllocationManager.getOperatorSetCount()` returns 0 for the EigenDA AVS.
-- All quorum strategies return empty arrays.
-- `ServiceManager.slasher()` and `ServiceManager.allocationManager()` both revert.
-- Zero slash events over 500,000 blocks (approximately 70 days).
-- Rewards are wired through a `rewardsInitiator` EOA.
-
-### Reproduction
-
-- `poc/33-slashing-absence/evidence.yaml` confirmed all findings.
-- AllocationManager on-chain state verified.
-
-**PoC References**: #30
+- Zero slash or freeze functions found across all EigenDA core contracts
+- `AllocationManager.getOperatorSetCount()` returns 0 for the EigenDA AVS
+- `ServiceManager.slasher()` and `ServiceManager.allocationManager()` both revert
+- Zero slashing events over 500,000 blocks (approximately 70 days)
 
 ## Impact
 
-Without slashing, operators face zero economic penalty for free-riding behavior. This creates a rational incentive to sign attestations without actually storing data, degrading the network's data availability guarantees over time. The 8 free-rider candidates already observed in EDA-D12 demonstrate this is not theoretical. As the proportion of non-serving operators grows, the system approaches the Reed-Solomon erasure coding reconstruction threshold. No authentication is needed to exploit this; any registered operator can free-ride. KZG proofs and erasure coding provide partial mitigation but cannot fully compensate for widespread non-serving behavior.
+Without slashing, operators face zero economic penalty for free-riding behavior. This creates a rational incentive to sign attestations without actually storing data, degrading the network's data availability guarantees over time.
+
+The 8 free-rider candidates already observed in EDA-D12 demonstrate this is not theoretical. As the proportion of non-serving operators grows, the system approaches the Reed-Solomon erasure coding reconstruction threshold. No authentication is needed to exploit this; any registered operator can free-ride. KZG proofs and erasure coding provide partial mitigation but cannot fully compensate for widespread non-serving behavior.
 
 ### CVSS 3.1
 

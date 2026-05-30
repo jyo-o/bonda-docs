@@ -6,18 +6,38 @@
 
 ## Summary
 
-The `EjectionManager` contract grants a single EOA (`0x864247...`) the power to force-eject operators representing up to 33.33% of a quorum's total stake within any 3-day window. The root cause is that the active ejector is a single private key rather than a multisig, despite the contract owner being the core multisig (`0x002721...`). If this key is compromised, an attacker could systematically remove honest operators, manipulating quorum composition to push it below the 55% confirmation threshold and undermine data availability guarantees.
+The `EjectionManager` contract grants a single EOA (`0x864247...`) the power to force-eject operators representing up to 33.33% of a quorum's total stake within any 3-day window. The root cause is that the active ejector is a single private key rather than a multisig, despite the contract owner being the core multisig (`0x002721...`).
+
+If this key is compromised, an attacker could systematically remove honest operators, manipulating quorum composition to push it below the 55% confirmation threshold and undermine data availability guarantees.
 
 ## Description
 
-The `EjectionManager` contract (`0x130d8E...`) is owned by the multisig (`0x002721...`), but delegates ejection authority to a single EOA. The ejection parameters are configured as follows:
+The `EjectionManager` contract (`0x130d8E...`) is owned by the multisig (`0x002721...`), but delegates ejection authority to a single EOA. The on-chain parameters are:
 
 - `rateLimitWindow` = 259,200 seconds (3 days)
 - `ejectableStakePercent` = 3,333 (33.33%)
 
 This means the ejector can remove up to one-third of a quorum's stake in a rolling 3-day window. On-chain data shows 528 ejection events total, with a peak of 178 events in August 2024. Two active ejector EOAs have collectively been responsible for 150 ejection calls over 16 months, accounting for 100% of all ejection activity.
 
-**Source**: [`contracts/src/periphery/ejection/EigenDAEjectionManager.sol`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/periphery/ejection/EigenDAEjectionManager.sol) -- Ejection manager contract with rate limiting parameters.
+```solidity
+// contracts/src/periphery/ejection/EigenDAEjectionManager.sol
+// @audit Ejection manager with rate limiting — ejector is a single EOA, not a multisig
+contract EigenDAEjectionManager is ImmutableEigenDAEjectionsStorage, IEigenDASemVer {
+    // ...
+    modifier onlyEjector(address sender) {
+        _onlyEjector(sender);
+        _;
+    }
+
+    function setDelay(uint64 delay) external onlyOwner(msg.sender) {
+        EigenDAEjectionLib.setDelay(delay);
+    }
+
+    function setCooldown(uint64 cooldown) external onlyOwner(msg.sender) {
+        EigenDAEjectionLib.setCooldown(cooldown);
+    }
+}
+```
 
 The attack flow is:
 
@@ -28,26 +48,17 @@ The attack flow is:
 
 ## Proof of Concept
 
-### On-Chain Verification
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#1-ejector-role-parameters-eda-t09) for full commands and results.
 
-- `EjectionManager.owner()` returns `0x002721B4` at block 25101686.
-- `RegistryCoordinator.ejector()` returns `0x130d8EA0`.
-- Active ejector is `0x8642` (EOA), with `isEjector=true`.
-- `rateLimitWindow` = 259,200 seconds (3 days).
-- `ejectableStakePercent` = 3,333 (33.33%).
-- 528 total ejection events observed, peaking at 178 in 2024-08.
-- 2 active ejector EOAs called 150 ejections over 16 months (100% of all ejection activity).
-
-### Reproduction
-
-- `poc/06-*/evidence.yaml` confirmed ejection parameters and activity.
-- Blockscout shows 150 ejection events as the primary source (Dune query 7461036 tracks `OperatorStakeUpdate`, not ejections).
-
-**PoC References**: #05, #28
+- `rateLimitWindow` = 259,200 seconds (3 days), `ejectableStakePercent` = 3,333 (33.33%)
+- 3 active ejector addresses confirmed, 2 of which are EOAs responsible for 100% of ejection activity
+- 150 `ejectOperators` calls observed over 16 months via Blockscout transaction history
 
 ## Impact
 
-Compromise of the ejector EOA allows an attacker to force-remove up to 33.33% of a quorum's total stake within a 3-day window. This can shift quorum composition enough to prevent the remaining operators from reaching the 55% confirmation threshold, disrupting data availability for all dependent rollups. The attack requires only a single private key compromise (no multisig coordination), making it a concentrated point of failure. The `EjectionCooldown` rate limit provides some ceiling on the damage rate but does not prevent the attack.
+Compromise of the ejector EOA allows an attacker to force-remove up to 33.33% of a quorum's total stake within a 3-day window. This can shift quorum composition enough to prevent the remaining operators from reaching the 55% confirmation threshold, disrupting data availability for all dependent rollups.
+
+The attack requires only a single private key compromise with no multisig coordination, making it a concentrated point of failure. The `EjectionCooldown` rate limit provides some ceiling on the damage rate but does not prevent the attack.
 
 ### CVSS 3.1
 

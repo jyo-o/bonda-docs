@@ -6,21 +6,58 @@
 
 ## Summary
 
-The EigenDA Disperser accepts dispersal requests without anchor signatures on mainnet. The `TolerateMissingAnchorSignature` flag is a `cli.BoolTFlag` with a default value of `true`, meaning the server tolerates missing anchor signatures by default. The root cause is that the anchor signature mechanism, introduced following the Sigma Prime audit (EDA2-02 Critical, EDA2-11 Medium, EDA2-18 Medium, all resolved), remains non-enforced in production. An attacker could replay a valid dispersal request from one chain on a different chain or EigenDA deployment, bypassing the chain-binding protection that anchor signatures are designed to provide.
+The EigenDA Disperser accepts dispersal requests without anchor signatures on mainnet. The `TolerateMissingAnchorSignature` flag defaults to `true`, meaning the server tolerates missing anchor signatures by default.
+
+The root cause is that the anchor signature mechanism, introduced following the Sigma Prime audit (EDA2-02 Critical, EDA2-11 Medium, EDA2-18 Medium, all resolved), remains non-enforced in production. An attacker could replay a valid dispersal request from one chain on a different chain or EigenDA deployment, bypassing the chain-binding protection that anchor signatures are designed to provide.
 
 ## Description
 
-The anchor signature non-enforcement exists at two independent layers:
+The anchor signature non-enforcement exists at two independent layers.
 
-**Server configuration** -- `TolerateMissingAnchorSignature` is a `cli.BoolTFlag` (default `true`), allowing requests that omit the anchor signature to proceed without error. A separate flag, `DisableAnchorSignatureVerification`, is a `cli.BoolFlag` (default `false`).
+**Server configuration** -- The Disperser has two relevant flags. `TolerateMissingAnchorSignature` defaults to `true`, allowing requests that omit the anchor signature to proceed without error. `DisableAnchorSignatureVerification` defaults to `false`.
 
-**Source**: [`disperser/cmd/apiserver/flags/flags.go`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/cmd/apiserver/flags/flags.go) -- `TolerateMissingAnchorSignature` is `cli.BoolTFlag` (default `true`).
+```go
+// disperser/server_config.go
+// @audit TolerateMissingAnchorSignature defaults to true
+// TODO (litt3): this field should eventually be set to false, and then removed,
+// once all clients have updated to a version that includes anchor signatures.
+TolerateMissingAnchorSignature bool
 
-**Protocol buffer definition** -- `disperser_v2.proto` defines `DisperseBlobRequest.anchor_signature` as field 5, which is implicit-optional. The proto definition itself permits omission of the field.
+// @audit DisableAnchorSignatureVerification defaults to false
+DisableAnchorSignatureVerification bool
+```
 
-**Source**: [`api/proto/disperser/v2/disperser_v2.proto:68-81`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/api/proto/disperser/v2/disperser_v2.proto#L68-L81) -- `anchor_signature` is field 5, implicit-optional.
+The anchor validation function reflects this layered bypass. When `DisableAnchorSignatureVerification` is true, all verification is skipped entirely. When the anchor signature is missing but `TolerateMissingAnchorSignature` is true, the request proceeds silently.
 
-**Anchor signature check logic**: [`disperser/apiserver/disperse_blob_v2.go:289-291`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/disperse_blob_v2.go#L289-L291)
+```go
+// disperser/apiserver/disperse_blob_v2.go:280-300
+// @audit Anchor validation can be entirely skipped or tolerate missing signatures
+func (s *DispersalServerV2) validateAnchorSignature(
+    req *pb.DisperseBlobRequest,
+    blobHeader *corev2.BlobHeader,
+) error {
+    if s.serverConfig.DisableAnchorSignatureVerification {
+        return nil
+    }
+    anchorSignature := req.GetAnchorSignature()
+    if len(anchorSignature) == 0 {
+        if s.serverConfig.TolerateMissingAnchorSignature {
+            return nil
+        }
+        return errors.New("anchor signature is required but not provided")
+    }
+}
+```
+
+**Protocol buffer definition** -- The proto definition itself permits omission of the anchor signature field because proto3 makes all fields implicit-optional.
+
+```protobuf
+// api/proto/disperser/v2/disperser_v2.proto:68-81
+// @audit anchor_signature (field 5) is implicit-optional — proto3 allows omission
+bytes anchor_signature = 5;
+uint32 disperser_id = 6;
+bytes chain_id = 7;
+```
 
 No anchor-related errors appear in proxy operation logs, consistent with the tolerate mode being active in production.
 
@@ -30,17 +67,15 @@ No anchor-related errors appear in proxy operation logs, consistent with the tol
 
 ## Proof of Concept
 
-### Reproduction
+A live test was conducted on 2026-05-24 against the mainnet Disperser.
 
-- Live test (2026-05-24): Ephemeral wallet sent `DisperseBlob` request without anchor signature. Response was `gRPC Internal (no reservation found)`, which is a payment-related rejection, not an anchor verification error. This proves `TolerateMissingAnchorSignature=true` is active in the production Disperser.
-- PoC repository: [eigenda-anchor-sig-poc](https://github.com/jyo-o/eigenda-anchor-sig-poc) (private).
-- `poc/12-*/evidence.yaml` confirmed code-level findings.
-
-**PoC References**: #10, #anchor-sig
+An ephemeral wallet sent a `DisperseBlob` request without an anchor signature. The server responded with `gRPC Internal (no reservation found)`, which is a payment-related rejection, not an anchor verification error. This confirms that `TolerateMissingAnchorSignature=true` is active in the production Disperser.
 
 ## Impact
 
-Cross-chain replay is possible because the chain-binding protection that anchor signatures provide is not enforced. An attacker can capture a valid dispersal request from one chain and replay it on a different chain or EigenDA deployment. The request will not be rejected for missing anchor data (confirmed by live testing). However, on-chain BLS verification still applies as a secondary defense layer, and the attacker needs a valid ECDSA signature for the dispersal request. Payment validation may also block the replayed request if no reservation exists on the target chain.
+Cross-chain replay is possible because the chain-binding protection that anchor signatures provide is not enforced. An attacker can capture a valid dispersal request from one chain and replay it on a different chain or EigenDA deployment. The request will not be rejected for missing anchor data, as confirmed by live testing.
+
+However, on-chain BLS verification still applies as a secondary defense layer, and the attacker needs a valid ECDSA signature for the dispersal request. Payment validation may also block the replayed request if no reservation exists on the target chain.
 
 ### CVSS 3.1
 

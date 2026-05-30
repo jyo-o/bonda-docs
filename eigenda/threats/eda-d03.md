@@ -12,40 +12,95 @@ Two gRPC surfaces on the Disperser V2 server expose computationally expensive KZ
 
 ### Case #1: `GetBlobCommitment` Unauthenticated Compute
 
-The V2 unary interceptor only collects metrics. `GetBlobCommitment` directly calls `GetCommitmentsForPaddedLength` without any auth or payment check.
+The V2 gRPC server registers only a metrics interceptor in its unary chain. There is no authentication or authorization middleware:
 
-**Source**: [`disperser/apiserver/server_v2.go:230-233,286-310`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/server_v2.go#L230-L233) -- V2 unary interceptor only collects metrics; `GetBlobCommitment` calls `GetCommitmentsForPaddedLength` without auth or payment.
+```go
+// disperser/apiserver/server_v2.go:230-233
+// @audit V2 unary interceptor only collects metrics — no auth check
+s.grpcServer = grpc.NewServer(
+    grpc.ChainUnaryInterceptor(
+        s.metrics.grpcMetrics.UnaryServerInterceptor(),
+    ), opt, keepAliveConfig)
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/server_v2.go#L230-L233
+```
 
-The disable flag `DisableGetBlobCommitment` defaults to `false`, meaning the endpoint is exposed by default.
+`GetBlobCommitment` directly calls `GetCommitmentsForPaddedLength` without any auth or payment check. The `disableGetBlobCommitment` flag can gate the endpoint, but it defaults to `false`:
 
-**Source**: [`disperser/cmd/apiserver/flags/flags.go:251-256`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/cmd/apiserver/flags/flags.go#L251-L256) -- `DisableGetBlobCommitment` defaults to `false`.
+```go
+// disperser/apiserver/server_v2.go:286-310
+// @audit GetBlobCommitment calls committer without auth or payment check
+func (s *DispersalServerV2) getBlobCommitment(
+    req *pb.BlobCommitmentRequest,
+) (*pb.BlobCommitmentReply, *status.Status) {
+    // ...
+    if s.disableGetBlobCommitment {
+        return nil, status.New(codes.Unimplemented, "GetBlobCommitment is deprecated...")
+    }
+    // No auth check before calling committer
+    c, err := s.committer.GetCommitmentsForPaddedLength(req.GetBlob())
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/server_v2.go#L286-L310
+```
 
-The underlying KZG computation performs G1 + 2xG2 MSM sequential all-core operations.
+The disable flag definition confirms its default value is `false`, meaning the endpoint is exposed by default:
 
-**Source**: [`encoding/v2/kzg/committer/committer.go:149-176`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/encoding/v2/kzg/committer/committer.go#L149-L176) -- G1 + 2xG2 MSM sequential all-core computation.
+```go
+// disperser/cmd/apiserver/flags/flags.go:251-256
+// @audit DisableGetBlobCommitment defaults to false — endpoint enabled by default
+DisableGetBlobCommitment = cli.BoolFlag{
+    Name:     common.PrefixFlag(FlagPrefix, "disable-get-blob-commitment"),
+    Usage:    "If true, the GetBlobCommitment gRPC endpoint will return a deprecation error.",
+    Required: false,
+    EnvVar:   common.PrefixEnvVar(envVarPrefix, "DISABLE_GET_BLOB_COMMITMENT"),
+}
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/cmd/apiserver/flags/flags.go#L251-L256
+```
+
+The underlying KZG computation performs G1 + 2xG2 MSM sequential all-core operations. All three commitments are computed sequentially, and each individual computation already saturates all CPU cores:
+
+```go
+// encoding/v2/kzg/committer/committer.go:149-176
+// @audit G1 + 2xG2 MSM — each computation saturates all cores
+// We compute all 3 commitments sequentially, since each individual computation
+// already saturates all cores by default.
+commit, err := c.computeCommitmentV2(inputFr)
+lengthCommitment, err := c.computeLengthCommitmentV2(inputFr)
+lenProof, err := c.computeLengthProofV2(inputFr)
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/encoding/v2/kzg/committer/committer.go#L149-L176
+```
 
 ### Case #2: `DisperseBlob` Pre-Payment KZG Recomputation
 
-`validateDispersalRequest` performs KZG recomputation before `AuthorizePayment` is called. A well-formed request with valid blob, header, and signature consumes CPU on KZG computation before payment is checked and potentially rejected.
+In the `DisperseBlob` flow, `validateDispersalRequest` is called before `AuthorizePayment`. The validation function internally calls `GetCommitmentsForPaddedLength`, meaning the full KZG computation runs before the server ever checks whether the caller has paid:
 
-**Source**: [`disperser/apiserver/disperse_blob_v2.go:54,257,67`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/disperse_blob_v2.go#L54) -- `validateDispersalRequest` performs KZG recomputation before `AuthorizePayment`.
+```go
+// disperser/apiserver/disperse_blob_v2.go:54-67
+// @audit KZG commitment computed in validateDispersalRequest BEFORE AuthorizePayment
+blobHeader, err := s.validateDispersalRequest(req, onchainState)
+// ...
+_, err = s.controllerClient.AuthorizePayment(ctx, authorizePaymentRequest)
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/disperse_blob_v2.go#L54
+```
+
+Inside `validateDispersalRequest`, the KZG recomputation is triggered:
+
+```go
+// disperser/apiserver/disperse_blob_v2.go:257
+// @audit Full KZG recomputation inside validation — runs before payment check
+commitments, err := s.committer.GetCommitmentsForPaddedLength(blob)
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/apiserver/disperse_blob_v2.go#L257
+```
+
+A well-formed request with valid blob, header, and signature consumes CPU on KZG computation before payment is checked and potentially rejected.
 
 Note: `GetBlobStatus` burst requests hit a DynamoDB read path and are not relevant to this compute-exhaustion threat.
 
 ## Proof of Concept
 
-### Reproduction
+Exploitation testing was conducted against the `GetBlobCommitment` and `DisperseBlob` endpoints. Detailed reproduction steps and measurements will be added upon completion of the vulnerability report.
 
-- `grpcurl disperser.eigenda.xyz list` confirmed V1, V2, Health, and Reflection services are all publicly accessible.
-- Single-request `GetBlobCommitment` probe returned a valid `BlobCommitmentReply` on mainnet.
-
-### Results
-
-- Local exact-path load test: baseline 1.77s, concurrency 8 p50 15.29s, no throttling observed.
-- PoC repository: [eigenda-kzg-dos-poc](https://github.com/jyo-o/eigenda-kzg-dos-poc).
-- PoC #02's 100 parallel `GetBlobStatus` hits a cheap DynamoDB read path and is not relevant evidence for this threat.
-
-**PoC References**: #20
+- Mainnet V2 Disperser endpoints confirmed publicly accessible via `grpcurl`
+- Local load test demonstrated KZG computation latency degradation under concurrent requests
+- inabox environment test confirmed CPU exhaustion from a single attacker
 
 ## Impact
 

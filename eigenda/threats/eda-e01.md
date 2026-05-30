@@ -6,36 +6,50 @@
 
 ## Summary
 
-The EigenDA Disperser has a configuration flag `DisableAnchorSignatureVerification` that, when set to `true`, completely bypasses anchor signature verification. While this flag defaults to `false`, a related flag `TolerateMissingAnchorSignature` defaults to `true`, allowing requests that omit anchor signatures to proceed. The root cause is the existence of a flag that can disable a critical security control introduced following the Sigma Prime audit. Server configuration access would allow an attacker to silently disable anchor verification with no external indication.
+The EigenDA Disperser has a configuration flag `DisableAnchorSignatureVerification` that, when set to `true`, completely bypasses anchor signature verification. While this flag defaults to `false`, a related flag `TolerateMissingAnchorSignature` defaults to `true`, allowing requests that omit anchor signatures to proceed.
+
+The root cause is the existence of a flag that can disable a critical security control introduced following the Sigma Prime audit. Server configuration access would allow an attacker to silently disable anchor verification with no external indication.
 
 ## Description
 
-Two configuration flags control anchor signature behavior:
+Two configuration flags control anchor signature behavior in the Disperser's `ServerConfig` struct:
 
-**`DisableAnchorSignatureVerification`** -- `cli.BoolFlag` with default `false`. When set to `true`, completely bypasses all anchor signature verification.
+```go
+// disperser/server_config.go
+// @audit DisableAnchorSignatureVerification can bypass all anchor verification
+type ServerConfig struct {
+    // ...
+    // Whether to tolerate requests without an anchor signature.
+    // Default: true (for backwards compatibility with old client code during migration)
+    // TODO (litt3): this field should eventually be set to false, and then removed
+    TolerateMissingAnchorSignature bool
 
-**Source**: [`disperser/server_config.go:50-58`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/server_config.go#L50-L58) -- Server configuration struct with `DisableAnchorSignatureVerification` field.
+    // Whether to disable anchor signature verification entirely.
+    // If true, anchor signatures will not be verified even if present.
+    // Default: false
+    // TODO (litt3): This is a temporary flag to allow a second LayrLabs disperser
+    DisableAnchorSignatureVerification bool
+}
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/server_config.go
+```
 
-**`TolerateMissingAnchorSignature`** -- `cli.BoolTFlag` with default `true`. Allows dispersal requests that omit the anchor signature to proceed without error.
+`DisableAnchorSignatureVerification` is registered as a `cli.BoolFlag`, which means it defaults to `false`. When set to `true`, it completely bypasses all anchor signature verification.
 
-**Source**: [`disperser/cmd/apiserver/flags/flags.go`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/disperser/cmd/apiserver/flags/flags.go) -- Both flags defined here.
+`TolerateMissingAnchorSignature` is registered as a `cli.BoolTFlag`, which means it defaults to `true`. This allows dispersal requests that omit the anchor signature to proceed without error.
 
 The combination of these two flags weakens the anchor signature protection introduced following the Sigma Prime audit findings (EDA2-02, EDA2-11, EDA2-18). No anchor-related errors or warnings appear in mainnet proxy logs, suggesting that anchor verification is either being skipped or operating in tolerate mode. The disperser-side configuration cannot be directly verified from outside the infrastructure.
 
 ## Proof of Concept
 
-### Reproduction
+No exploit reproduction was conducted. This finding is based on source code analysis of the EigenDA codebase at commit `ec2ce8ab`.
 
-- Code confirms `DisableAnchorSignatureVerification` defaults to `false`.
-- Mainnet disperser settings cannot be directly verified; only code path was inspected.
-- EigenDA-Proxy logs show no anchor-related errors, consistent with tolerate mode.
-- `poc/12-*/evidence.yaml` confirmed the finding.
-
-**PoC References**: #10
+`DisableAnchorSignatureVerification` is registered as `cli.BoolFlag` (defaults to `false`). `TolerateMissingAnchorSignature` is registered as `cli.BoolTFlag` (defaults to `true`). Mainnet disperser settings cannot be directly verified from outside the infrastructure, but proxy logs show no anchor-related errors, consistent with tolerate mode being active.
 
 ## Impact
 
-An attacker with access to the Disperser server's environment variables or configuration can set `DisableAnchorSignatureVerification` to `true`, completely bypassing anchor signature verification. This would enable cross-chain replay attacks (related to EDA-S03) by removing the chain-binding protection. The attack requires server administrator privileges (physical access or environment variable injection), making it a targeted insider or supply-chain attack vector. Other verification layers such as BLS signature verification remain active, limiting the blast radius.
+An attacker with access to the Disperser server's environment variables or configuration can set `DisableAnchorSignatureVerification` to `true`, completely bypassing anchor signature verification. This would enable cross-chain replay attacks (related to EDA-S03) by removing the chain-binding protection.
+
+The attack requires server administrator privileges, either through physical access or environment variable injection. This makes it a targeted insider or supply-chain attack vector. Other verification layers such as BLS signature verification remain active, limiting the blast radius.
 
 ### CVSS 3.1
 

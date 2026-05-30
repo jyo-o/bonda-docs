@@ -10,31 +10,35 @@ The Relay's `GetBlob` endpoint has no authentication requirement, and the rate l
 
 ## Description
 
-The `GetBlob` endpoint exhibits two deficiencies:
+The `GetBlob` endpoint exhibits two deficiencies.
 
-**No authentication**: Mainnet testing confirmed that `GetBlob` accepts unauthenticated access, returning `NotFound` (not `Unauthorized`) for non-existent blob keys.
+**No authentication.** Mainnet testing confirmed that `GetBlob` accepts unauthenticated access. Calling the endpoint without credentials returns `NotFound` for non-existent blob keys, not `Unauthorized`. This means the server does not check caller identity at all.
 
-**Global-only rate limiting**: The rate limiter has no per-client field, only global limits.
+**Global-only rate limiting.** The `BlobRateLimiter` struct contains only global operation and bandwidth limiters. There is no per-client map, client identifier field, or any mechanism to distinguish between callers:
 
-**Source**: [`relay/limiter/blob_rate_limiter.go`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/relay/limiter/blob_rate_limiter.go) -- Rate limiter has no per-client field, only global limits.
+```go
+// relay/limiter/blob_rate_limiter.go
+// @audit No per-client map or client identifier — rate limiting is purely global
+type BlobRateLimiter struct {
+    config             *Config
+    opLimiter          *rate.Limiter      // global operation limiter
+    bandwidthLimiter   *rate.Limiter      // global bandwidth limiter
+    operationsInFlight int
+    relayMetrics       *metrics.RelayMetrics
+    lock               sync.Mutex
+}
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/relay/limiter/blob_rate_limiter.go
+```
 
-In contrast, `GetChunks` requires operator authentication and returns `InvalidArgument` when called without credentials, revealing an asymmetric authentication policy between the two retrieval endpoints.
+In contrast, `GetChunks` requires operator authentication and returns `InvalidArgument` when called without credentials. This creates an asymmetric authentication policy between the two retrieval endpoints.
 
 ## Proof of Concept
 
-### Reproduction
+Exploitation testing was conducted against the Relay `GetBlob` endpoint. Detailed reproduction steps and measurements will be added upon completion of the vulnerability report.
 
-- `grpcurl relay-0-mainnet-ethereum.eigenda.xyz:443 GetBlob` returned `NotFound` (not `Unauthorized`), confirming unauthenticated access.
-- `grpcurl GetChunks` returned `InvalidArgument` (auth required), confirming asymmetric authentication policies.
-- `grpcurl` without auth headers achieved 50/50 retrieval success rate.
-
-### Results
-
-- Prober observed 31 rate-limit 429 errors over 7 days, reduced to 0 in a subsequent 24-hour window.
-- 8 failures out of 122,745 total retrieval probes.
-- `poc/08-*/evidence.yaml` confirmed the finding.
-
-**PoC References**: #07
+- Mainnet relay confirmed to accept unauthenticated `GetBlob` requests (returns `NotFound`, not `Unauthorized`)
+- `GetChunks` requires operator authentication (returns `InvalidArgument`), confirming asymmetric access policies
+- Prober observed 31 rate-limit 429 errors over a 7-day period
 
 ## Impact
 

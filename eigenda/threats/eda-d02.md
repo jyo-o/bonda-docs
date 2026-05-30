@@ -10,31 +10,43 @@ The EigenDA Proxy REST server lacks rate limiter middleware, accepting an unlimi
 
 ## Description
 
-The Proxy server configuration lacks rate limiting middleware:
+The Proxy server initializes a plain `http.Server` with no rate limiting or authentication middleware. The only configured parameters are timeouts:
 
-**Source**: [`api/proxy/servers/rest/server.go:57-59`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/api/proxy/servers/rest/server.go#L57-L59) -- Server configuration with no rate limiter middleware.
+```go
+// api/proxy/servers/rest/server.go:50-62
+// @audit No rate limiter or auth middleware configured in server init
+httpServer: &http.Server{
+    Addr:              endpoint,
+    ReadHeaderTimeout: 10 * time.Second,
+    WriteTimeout:      40 * time.Minute,
+},
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/api/proxy/servers/rest/server.go#L57-L59
+```
 
-The default bind address is `0.0.0.0`:
+The default bind address is `0.0.0.0`, which listens on all interfaces. This means a freshly deployed Proxy is network-reachable by default unless the operator adds firewall rules:
 
-**Source**: [`api/proxy/servers/rest/cli.go:47`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/api/proxy/servers/rest/cli.go#L47) -- Default bind address is `0.0.0.0`.
+```go
+// api/proxy/servers/rest/cli.go:42-50
+// @audit Default bind address is 0.0.0.0 — listens on all interfaces
+&cli.StringFlag{
+    Name:     ListenAddrFlagName,
+    Usage:    "Server listening address",
+    Value:    "0.0.0.0",
+    EnvVars:  withEnvPrefix(envPrefix, "ADDR"),
+    Category: category,
+},
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/api/proxy/servers/rest/cli.go#L47
+```
 
-Code comments and documentation explicitly state the Proxy is not meant for public exposure:
+The Proxy is designed as a private sidecar, and the documentation explicitly warns against public exposure. The README states the proxy should "NEVER be publicly accessible."
 
-**Source**: [`api/proxy/servers/rest/routing.go`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/api/proxy/servers/rest/routing.go) -- Comment states the proxy is not meant to be exposed publicly.
-
-The README at line 139 states the proxy should "NEVER be publicly accessible".
-
-Server timeouts are set to `ReadHeaderTimeout: 10s` and `WriteTimeout: 40min`, which are generous but not exploitable in the absence of external exposure.
+Server timeouts are set to `ReadHeaderTimeout: 10s` and `WriteTimeout: 40min`. These are generous but not exploitable in the absence of external exposure.
 
 ## Proof of Concept
 
-### Reproduction
+No exploit reproduction was conducted. This finding is based on source code analysis of the EigenDA codebase at commit `ec2ce8ab`.
 
-- PoC #08 confirmed only a global throttle exists; the Proxy (EigenDA client-side) is a separate component.
-- PoC #09 cross-check confirmed the finding.
-- External exposure is unintended by design.
-
-**PoC References**: #07, #23
+The Proxy REST server source code was reviewed and confirmed to have no rate limiting or authentication middleware in its server initialization. External exposure is unintended by design, and the documentation explicitly warns against public access.
 
 ## Impact
 

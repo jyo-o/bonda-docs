@@ -16,26 +16,29 @@ On-chain queries to the `RelayRegistry` contract confirm the single-relay config
 - `relayKeyToAddress(0)` returns `0xe8437B66E834B7CdC90cC5D98B8DD6e636b37D7a`.
 - Keys 1 through 5 all return `0x0` (unregistered).
 
-The relay registry contract has an `onlyOwner` modifier for adding relays and no deletion function exists.
+The relay registry contract restricts relay addition to the contract owner. Once a relay is added, there is no function to remove or replace it:
 
-**Source**: [`contracts/src/core/EigenDARelayRegistry.sol:20-23`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/core/EigenDARelayRegistry.sol#L20-L23) -- Registry contract with `onlyOwner` addition and no deletion function.
+```solidity
+// contracts/src/core/EigenDARelayRegistry.sol:20-23
+// @audit onlyOwner addition with no deletion function — registered relays are permanent
+function addRelayInfo(EigenDATypesV2.RelayInfo memory relayInfo) external onlyOwner returns (uint32) {
+    relayKeyToInfo[nextRelayKey] = relayInfo;
+    emit RelayAdded(relayInfo.relayAddress, nextRelayKey, relayInfo.relayURL);
+    return nextRelayKey++;
+}
+// https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/core/EigenDARelayRegistry.sol#L20-L23
+```
 
 A fallback mechanism exists through validator direct retrieval via `GetChunks`, which automatically activates after relay failure. However, this fallback offers degraded performance compared to the relay path and is reactive rather than preventive.
 
 ## Proof of Concept
 
-### On-Chain Verification
+On-chain state was queried at block 25101686. See [Verification Evidence](../evidence.md#5-relay-registry-single-point-of-failure-eda-d06) for full commands and results.
 
-- `nextRelayKey()` returns `1` at block 25101686.
-- `relayKeyToAddress(0)` returns `0xe8437B66E834B7CdC90cC5D98B8DD6e636b37D7a`.
-- Keys 1 through 5 all return `0x0` (unregistered).
-- Contracts queried: RelayRegistry at `0xD160e6C1`.
+No exploit reproduction was conducted beyond on-chain state verification.
 
-### Reproduction
-
-- `poc/01-*/evidence.yaml` and `poc/02-*/evidence.yaml` confirmed the single-relay configuration.
-
-**PoC References**: #01
+- `nextRelayKey()` returns `1`, confirming only one relay is registered
+- `relayKeyToAddress(0)` returns `0xe8437B...`, keys 1 through 5 all return `0x0`
 
 ## Impact
 

@@ -6,34 +6,51 @@
 
 ## Summary
 
-EigenDA does not implement Data Availability Sampling (DAS), as explicitly stated in its specification. The client retrieval path contains no sampling interface, and on-chain certificate verification checks only BLS aggregate signatures and a 55% stake threshold. The root cause is a conscious architectural decision not to adopt DAS, unlike Celestia (namespaced Merkle trees with random sampling) or Ethereum PeerDAS (column sampling). Clients cannot independently verify that data was actually made available by operators and must trust that the quorum honestly stored the data they attested to.
+EigenDA does not implement Data Availability Sampling (DAS), as explicitly stated in its specification (`docs/spec/src/introduction.md:27`). The client retrieval path contains no sampling interface, and on-chain certificate verification checks only BLS aggregate signatures and a 55% stake threshold.
+
+The root cause is a conscious architectural decision not to adopt DAS, unlike Celestia's namespaced Merkle trees with random sampling or Ethereum PeerDAS's column sampling. Clients cannot independently verify that data was actually made available by operators and must trust that the quorum honestly stored the data they attested to.
 
 ## Description
 
-The absence of DAS manifests at multiple levels:
+The absence of DAS manifests at multiple levels.
 
 **On-chain verification** -- Certificate verification in `EigenDACertVerificationLib.sol` checks only BLS aggregate signatures and the 55% stake threshold. No sampling-based verification exists.
 
-**Source**: [`EigenDACertVerificationLib.sol:232-246`](https://github.com/Layr-Labs/eigenda/blob/ec2ce8ab/contracts/src/integrations/cert/libraries/EigenDACertVerificationLib.sol#L232-L246) -- Certificate verification checks only BLS aggregate signatures and 55% stake threshold.
+```solidity
+// contracts/src/integrations/cert/libraries/EigenDACertVerificationLib.sol:232-246
+// @audit Certificate verification checks only BLS signatures and 55% threshold
+(DATypesV1.QuorumStakeTotals memory quorumStakeTotals,) = signatureVerifier.checkSignatures(
+    batchHashRoot, signedQuorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature
+);
 
-**Specification** -- `docs/spec/src/introduction.md:27` explicitly states DAS is not used.
+confirmedQuorumsBitmap = 0;
+for (uint256 i = 0; i < signedQuorumNumbers.length; i++) {
+    if (
+        quorumStakeTotals.signedStakeForQuorum[i] * THRESHOLD_DENOMINATOR
+            >= quorumStakeTotals.totalStakeForQuorum[i] * securityThresholds.confirmationThreshold
+    ) {
+        confirmedQuorumsBitmap = BitmapUtils.setBit(confirmedQuorumsBitmap, uint8(signedQuorumNumbers[i]));
+    }
+}
+```
+
+**Specification** -- The EigenDA spec explicitly states DAS is not used.
 
 **Code search** -- A search for sampling interfaces across the codebase returns zero results.
 
-The client-side random shuffle used during retrieval is for load balancing purposes only, not cryptographic sampling. This means operators can sign BLS attestations claiming they received data without actually storing it, and there is no sampling mechanism for clients to detect this dishonesty. The 8 free-rider candidate operators identified in PoC #02 illustrate this direct attack scenario.
+The client-side random shuffle used during retrieval is for load balancing purposes only, not cryptographic sampling. This means operators can sign BLS attestations claiming they received data without actually storing it, and there is no sampling mechanism for clients to detect this dishonesty. The 8 free-rider candidate operators identified in EDA-D12 illustrate this direct attack scenario.
 
 ## Proof of Concept
 
-### Reproduction
+No exploit reproduction was conducted. This finding is based on source code analysis of the EigenDA codebase at commit `ec2ce8ab` and the EigenDA specification.
 
-- `poc/34-das-absence/evidence.yaml` confirmed the absence of sampling interfaces.
-- Verified from specification and code, not from mainnet measurement.
-
-**PoC References**: #31
+The EigenDA spec explicitly states DAS is not used. A codebase search for sampling interfaces returns zero results. Certificate verification checks only BLS aggregate signatures and a 55% stake threshold.
 
 ## Impact
 
-Without DAS, clients are entirely dependent on quorum trust for data availability guarantees. Operators can sign BLS attestations confirming data receipt but discard the actual data. The aggregate BLS signature meets the 55% stake threshold, producing a valid certificate. On-chain verification passes because it only checks signatures and stake thresholds, not actual data availability. When a client later attempts to retrieve the data, the request fails. KZG opening proofs via `ValidateBatchV2` provide partial verification capability for individual chunks but are not a sampling-based mechanism. The attack requires operator collusion and no additional authentication.
+Without DAS, clients are entirely dependent on quorum trust for data availability guarantees. Operators can sign BLS attestations confirming data receipt but discard the actual data. The aggregate BLS signature meets the 55% stake threshold, producing a valid certificate.
+
+On-chain verification passes because it only checks signatures and stake thresholds, not actual data availability. When a client later attempts to retrieve the data, the request fails. KZG opening proofs via `ValidateBatchV2` provide partial verification capability for individual chunks but are not a sampling-based mechanism. The attack requires operator collusion and no additional authentication.
 
 ### CVSS 3.1
 
