@@ -6,37 +6,65 @@ BONDA backs every finding with primary-source evidence. This page explains the v
 
 ## Verification Levels
 
-Every threat receives one of four verification levels. Higher levels include all evidence from lower levels.
+The key question behind every level: **where did you actually look?**
 
-```mermaid
-graph TB
-    L4["<b>Level 4 — Verified</b><br/>On-chain + live probe + PoC + source code"]
-    L3["<b>Level 3 — PoC Verified</b><br/>Working exploit in controlled environment"]
-    L2["<b>Level 2 — Code Verified</b><br/>Vulnerable path traced in source code"]
-    L1["<b>Level 1 — Partial</b><br/>Some evidence, acknowledged gaps"]
-    L0["<b>Level 0 — Unverified</b><br/>Design analysis only, no primary-source confirmation"]
+| | `code_verified` | `verified` |
+|---|---|---|
+| **What you looked at** | Source code on GitHub | Live mainnet contracts and endpoints |
+| **What you did** | Read and traced the vulnerable code path | Ran `cast call`, `grpcurl`, or RPC queries against production |
+| **What you know** | The vulnerability **exists in code** | The vulnerability **is live in production right now** |
 
-    L4 --- L3
-    L3 --- L2
-    L2 --- L1
-    L1 --- L0
+{% hint style="info" %}
+**The core distinction is static vs. dynamic analysis.** Reading source code tells you a vulnerability *could* exist. Querying mainnet tells you it *does* exist at this moment.
+{% endhint %}
 
-    style L4 fill:#1a7f37,color:#fff,stroke:#1a7f37
-    style L3 fill:#2da44e,color:#fff,stroke:#2da44e
-    style L2 fill:#57ab5a,color:#fff,stroke:#57ab5a
-    style L1 fill:#8ddb8c,color:#1a1a1a,stroke:#8ddb8c
-    style L0 fill:#d4d4d4,color:#1a1a1a,stroke:#b0b0b0
+### Side-by-Side Example
+
+**code_verified** — EDA-E01 (Anchor Signature Bypass):
+```
+Found DisableAnchorSignatureVerification flag in flags.go:251.
+Default is false, but setting it to true skips all anchor checks.
+→ The bypass path EXISTS in the code. Whether any live server 
+  has this flag enabled is unknown.
 ```
 
-### Level Definitions
+**verified** — AVL-E03 (Deployer Admin Role):
+```
+cast call 0x02993... "hasRole(bytes32,address)" <ADMIN> <deployer>
+→ Returns: true
 
-| Level | Label | What It Means | Example |
-|:-----:|-------|---------------|---------|
-| **4** | `verified` | The threat has been confirmed against production infrastructure. Evidence includes on-chain state, live probes, source code, and often a PoC. | Queried `hasRole()` on mainnet, confirmed unauthenticated gRPC access, traced the code path, ran a fork test. |
-| **3** | `poc_verified` | A working Proof of Concept demonstrates the attack mechanism in a controlled environment such as an Anvil mainnet fork. Live mainnet exploitation was not performed. | Forked mainnet with Anvil, executed the upgrade path, confirmed state change in the fork. |
-| **2** | `code_verified` | The vulnerable code path has been traced at a pinned commit with file paths and line numbers. No live exploitation or PoC was run. | Located the flag default in `flags.go:251`, confirmed no authentication middleware in the handler chain. |
-| **1** | `partial` | Some evidence supports the finding, but environmental factors or defense boundaries prevent full confirmation. Gaps are documented. | Documentation describes a feature, but the relevant code is in a private repository and cannot be audited. |
-| **0** | `unverified` | The threat is identified through design analysis or documentation review but lacks primary-source confirmation. These are known risk areas that could not be independently tested. | A cryptographic trusted setup assumption where the ceremony data is not publicly auditable. |
+The deployer wallet HAS admin access RIGHT NOW on mainnet.
+This is not theoretical — it is a live, exploitable state.
+```
+
+---
+
+### All Five Levels
+
+```mermaid
+flowchart LR
+    U["🔘 unverified<br/>Design analysis only"]
+    P["🟡 partial<br/>Some evidence,<br/>gaps remain"]
+    C["🟢 code_verified<br/>Found in source code<br/><i>static analysis</i>"]
+    PC["🟢 poc_verified<br/>PoC reproduced it<br/><i>controlled environment</i>"]
+    V["✅ verified<br/>Confirmed on mainnet<br/><i>dynamic analysis</i>"]
+
+    U --> P --> C --> PC --> V
+
+    style U fill:#d4d4d4,color:#1a1a1a,stroke:#b0b0b0
+    style P fill:#8ddb8c,color:#1a1a1a,stroke:#8ddb8c
+    style C fill:#57ab5a,color:#fff,stroke:#57ab5a
+    style PC fill:#2da44e,color:#fff,stroke:#2da44e
+    style V fill:#1a7f37,color:#fff,stroke:#1a7f37
+```
+
+| Level | Label | Where You Looked | What You Did | Real Example |
+|:-----:|-------|-----------------|--------------|--------------|
+| ✅ | `verified` | **Live mainnet** | `cast call`, `grpcurl`, RPC query against deployed contracts or endpoints | Queried `hasRole()` on Ethereum mainnet, got `true` — deployer still has admin |
+| 🟢 | `poc_verified` | **Anvil fork** | Ran a PoC script on a local mainnet fork that reproduced the attack | Forked mainnet with Anvil, called `upgradeTo(malicious)`, confirmed state change |
+| 🟢 | `code_verified` | **GitHub source** | Traced the vulnerable code path at a pinned commit, recorded file and line | Found `flags.go:251` default, confirmed no auth middleware in handler chain |
+| 🟡 | `partial` | **Mixed** | Some evidence exists, but access limitations block full confirmation | Docs describe a feature, but the code is in a private repo and cannot be audited |
+| 🔘 | `unverified` | **Docs only** | Design-level analysis or documentation review, no code or mainnet access | KZG trusted setup ceremony — the ceremony data is not publicly auditable |
 
 ### Distribution Across Protocols
 
