@@ -40,18 +40,13 @@ All verification levels are explained in the [Verification Methodology](methodol
 
 ## Notable Findings
 
-### Critical Severity
-
-| ID | Protocol | Finding |
-|----|----------|---------|
-| [CEL-E01](celestia/threats/cel-e01.md) | Celestia | SP1Blobstream bridge can be instantly upgraded by a 4-of-6 multisig with no timelock |
-| [CEL-G01](celestia/threats/cel-g01.md) | Celestia | Top 8 validators hold 35.77% of voting power; 6 are KYC-regulated entities subject to legal censorship orders |
-
 ### High Severity
 
 | ID | Protocol | Finding |
 |----|----------|---------|
+| [CEL-G01](celestia/threats/cel-g01.md) | Celestia | Top 8 validators hold 35.77% of voting power; 6 are KYC-regulated entities subject to legal censorship orders |
 | [AVL-E03](avail/threats/avl-e03.md) | Avail | Deployer EOA still holds admin role on VectorX, enabling solo bridge upgrade in 2 transactions |
+| [CEL-E01](celestia/threats/cel-e01.md) | Celestia | SP1Blobstream bridge can be instantly upgraded by a 4-of-6 multisig with no timelock |
 | [EDA-T09](eigenda/threats/eda-t09.md) | EigenDA | Single EOA can eject up to 33% of operator stake within a 3-day window |
 | [CEL-P01](celestia/threats/cel-p01.md) | Celestia | DAS-only safety model after fraud proof removal |
 
