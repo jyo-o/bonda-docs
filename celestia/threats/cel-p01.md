@@ -6,11 +6,21 @@
 
 ## Summary
 
-Since the transition to the shwap protocol, Bad Encoding Fraud Proofs (BEFPs) never functioned. PR #4934 formally removed BEFP code as dead code on 2026-04-14, deleting 2,398 lines. However, official documentation (`fraud_proofs.md` and CIP-019) continues to describe BEFPs as part of the security model, creating a documentation-reality gap that can lead rollup builders to design systems with incorrect security assumptions about Celestia's data correctness guarantees.
+Since the transition to the shwap protocol, Bad Encoding Fraud Proofs (BEFPs) never functioned. PR #4934 formally removed BEFP code as dead code on 2026-04-14, deleting 2,398 lines. The remaining DAS-only model has two compounding weaknesses: light nodes cannot verify data correctness without fraud proofs, and the collective availability guarantee is unrealized because light nodes do not share sampling results with each other. Official documentation continues to describe BEFPs as part of the security model, creating a gap between documented and actual security properties.
 
 ## Description
 
 The current light node security model relies exclusively on DAS with 16 random samples (`DefaultSampleAmount=16` at `celestia-node/share/availability/light/options.go:10`), which verifies data availability only. There is no mechanism for light nodes to verify data correctness (encoding validity).
+
+**Collective DAS Guarantee is Unrealized**
+
+The theoretical security of DAS depends on collective sampling: many independent light nodes each sample random shares, and the union of all samples covers enough of the data square to guarantee availability with high probability. This guarantee requires that when any single node fails to retrieve a sample, the result propagates to the network so other nodes can reject the block.
+
+In practice, Celestia light nodes operate in isolation. Each node independently requests 16 samples, makes a local availability judgment, and has no mechanism to share that result with other light nodes. If node A detects unavailability while node B successfully retrieves all 16 samples, node B has no way to learn about node A's failure. The network-level DAS guarantee — where the failure of any single node to retrieve data triggers collective block rejection — is not implemented.
+
+This reduces the effective security from collective DAS (exponentially decreasing failure probability across N nodes) to individual local sampling (each node's independent ~99% confidence with 25% withholding). As demonstrated in CEL-S01, this isolation enables targeted selective disclosure attacks where Sybil peers can deceive individual nodes without triggering any network-wide alarm.
+
+BEFPs previously served as an indirect coordination mechanism: if a full node detected invalid encoding, it could generate a fraud proof that propagated to all light nodes, causing collective block rejection. With BEFPs removed, no inter-node observation path remains for either correctness or availability failures.
 
 **Stale Documentation Surfaces**
 
@@ -45,7 +55,7 @@ No proof of concept was conducted for this threat. The documentation-reality gap
 
 ## Impact
 
-Downstream security model contamination affecting any rollup builder or researcher who relies on stale documentation. A rollup designed with the assumption that BEFPs provide encoding correctness verification would have a blind spot in its security model. The documentation-reality gap is currently active and referenceable. While the underlying BFT-break scenario is unrealistic, the practical harm path is: stale documentation leads to rollup mis-design leads to undetected encoding errors at runtime.
+The DAS-only model has two layers of degradation. First, light nodes cannot verify data correctness because no fraud proof mechanism exists after the BEFP removal. Second, even the availability guarantee is weaker than the theoretical model because light nodes do not share sampling results with each other, reducing collective DAS to isolated local checks. A rollup builder relying on stale documentation would assume both correctness verification via fraud proofs and strong collective availability guarantees, neither of which currently holds. The practical harm path is: stale documentation leads to rollup mis-design leads to undetected encoding errors or selective unavailability at runtime.
 
 ### CVSS 3.1
 
@@ -68,4 +78,5 @@ Downstream security model contamination affecting any rollup builder or research
 1. Update `fraud_proofs.md` to document the BEFP removal and accurately describe the current DAS-only security model.
 2. Correct CIP-019's claim that the security model is unchanged, adding a note about the BEFP removal and its implications.
 3. Document clearly in light node guides that DAS guarantees availability only, not data correctness (encoding validity).
-4. Add a recommendation for independent correctness verification in the rollup integration guide, so downstream builders do not rely solely on Celestia for encoding validation.
+4. Implement a sampling result gossip protocol so that light nodes can share availability failures, restoring the collective DAS security guarantee.
+5. Add a recommendation for independent correctness verification in the rollup integration guide, so downstream builders do not rely solely on Celestia for encoding validation.
