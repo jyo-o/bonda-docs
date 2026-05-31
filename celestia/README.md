@@ -52,7 +52,7 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 | [CEL-D03](threats/cel-d03.md) | Unbounded Memory Growth via Fake DataHash Injection | Medium (5.3) | poc_verified |
 | [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium (5.3) | verified |
 | [CEL-G02](threats/cel-g02.md) | Documentation vs Code Information Asymmetry | Medium (5.3) | verified |
-| [CEL-D04](threats/cel-d04.md) | Evidence Subsystem Code Defects (Hash, Buffer, Expiry) | Low (3.7) | verified |
+| [CEL-D05](threats/cel-d05.md) | ShrEx Client-side Unbounded Response Size | Low (3.7) | verified |
 | [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.7) | verified |
 
 ## Key Findings

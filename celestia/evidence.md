@@ -69,7 +69,7 @@ Etherscan proxy at `0x7Cf3876F681Dbb6EdA8f6FfC45D66b996Df08fAe` shows zero user-
 
 ---
 
-## 2. Validator Set and Slashing Parameters (CEL-G01, CEL-G02, CEL-D04)
+## 2. Validator Set and Slashing Parameters (CEL-G01, CEL-G02)
 
 ### Slashing Parameters
 
@@ -112,18 +112,6 @@ Mainnet staking data as of 2026-05-24:
 | KYC entities in top 8 | 6 of 8 |
 
 Data cross-verified across three independent endpoints: publicnode, polkachu, pops.one.
-
-### Consensus Parameters (CEL-D04)
-
-```bash
-# Evidence expiry parameters
-# celestia-rest.publicnode.com/cosmos/consensus/v1/params at height 11,172,730
-# max_age_num_blocks: 242,640
-# max_age_duration: 1,213,200s (337 hours)
-# unbonding_time: 1,213,200s (14 days)
-```
-
-At 6 seconds per block, 242,640 blocks equals approximately 404 hours (17 days), exceeding the 14-day unbonding period by about 3 days. The AND logic in `IsEvidenceExpired` means evidence remains valid until both conditions expire, creating a 3-day gap.
 
 ---
 

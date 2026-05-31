@@ -67,7 +67,7 @@ Because validators act under legal obligation, there is no economic deterrent or
 
 ## Proof of Concept
 
-No exploit reproduction was conducted. Evidence is based on on-chain staking data cross-verified across three independent endpoints as of 2026-05-24. See [Verification Evidence](../evidence.md#id-2.-validator-set-and-slashing-parameters-cel-g01-cel-g02-cel-d04) for full parameter data.
+No exploit reproduction was conducted. Evidence is based on on-chain staking data cross-verified across three independent endpoints as of 2026-05-24. See [Verification Evidence](../evidence.md#id-2.-validator-set-and-slashing-parameters-cel-g01-cel-g02) for full parameter data.
 
 ## Impact
 

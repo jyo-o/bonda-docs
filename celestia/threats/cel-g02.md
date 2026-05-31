@@ -34,7 +34,7 @@ The practical consequence is that an L2 builder reading the slashing documentati
 
 ## Proof of Concept
 
-Mainnet slashing parameters were confirmed via `celestia-rest.publicnode.com`. See [Verification Evidence](../evidence.md#id-2.-validator-set-and-slashing-parameters-cel-g01-cel-g02-cel-d04) for full parameter data. The actual values directly contradict the documented values of "25% of 5,000 blocks" on `docs.celestia.org`.
+Mainnet slashing parameters were confirmed via `celestia-rest.publicnode.com`. See [Verification Evidence](../evidence.md#id-2.-validator-set-and-slashing-parameters-cel-g01-cel-g02) for full parameter data. The actual values directly contradict the documented values of "25% of 5,000 blocks" on `docs.celestia.org`.
 
 ## Impact
 

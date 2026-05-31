@@ -42,7 +42,7 @@
 * [CEL-D03: blacklistedHashes Memory Growth](celestia/threats/cel-d03.md)
 * [CEL-D06: Peer Blacklisting Disabled](celestia/threats/cel-d06.md)
 * [CEL-D15: blob.Subscribe Infinite Retry](celestia/threats/cel-d15.md)
-* [CEL-D04: Evidence Subsystem Defects](celestia/threats/cel-d04.md)
+* [CEL-D05: ShrEx Unbounded Response Size](celestia/threats/cel-d05.md)
 * [CEL-S01: DAS Selective Disclosure](celestia/threats/cel-s01.md)
 * [Attack Chains](celestia/attack-chains.md)
 * [Verification Evidence](celestia/evidence.md)
