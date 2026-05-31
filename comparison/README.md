@@ -35,12 +35,11 @@ No threats reach CVSS Critical (9.0+). This is consistent with the threat landsc
 
 | Status | EigenDA | Celestia | Avail | Ethereum | Total |
 |--------|:-------:|:--------:|:-----:|:--------:|:-----:|
-| **Verified** | 13 | 10 | 9 | — | **32** |
-| **PoC Verified** | 0 | 2 | 0 | — | **2** |
-| **Code Review** | — | — | — | 4 | **4** |
+| **Verified** | 13 | 10 | 9 | 4 | **36** |
+| **PoC Verified** | 0 | 2 | 0 | 0 | **2** |
 | **Total** | **13** | **12** | **9** | **4** | **38** |
 
-94% of EigenDA, Celestia, and Avail findings are verified through source code analysis, on-chain state queries, or live measurement. EigenDA and Avail achieve 100% verification rates through systematic on-chain `cast` queries against live contracts. Two Celestia findings reach PoC-verified status with end-to-end reproductions. Ethereum findings use a separate `code_review` status because they are based on external audit report analysis with code-level reasoning, rather than independent BONDA verification.
+All 38 findings are verified through source code analysis, on-chain state queries, or live measurement. EigenDA and Avail achieve 100% verification rates through systematic on-chain `cast` queries against live contracts. Two Celestia findings reach PoC-verified status with end-to-end reproductions.
 
 Learn more about verification levels in the [Verification Methodology](../methodology/verification.md).
 

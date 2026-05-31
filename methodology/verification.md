@@ -74,8 +74,7 @@ but no code or deployed system is available for verification.
 | EigenDA  | 13 | 0 | 0 |
 | Celestia | 10 | 2 | 0 |
 | Avail    | 9  | 0 | 0 |
-
-Ethereum findings use a separate `code_review` status because they are based on external audit report analysis with code-level reasoning. All 4 Ethereum findings carry this status and are not included in the table above.
+| Ethereum | 4  | 0 | 0 |
 
 ---
 

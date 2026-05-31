@@ -1,7 +1,7 @@
 # ETH-R02: Prysm DataColumnsByRange Rate Limit Bypass
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **STRIDE**: D (DoS) · **Status**: code\_review
+**Severity**: Medium (5.3/10) · **STRIDE**: D (DoS) · **Status**: verified
 {% endhint %}
 
 ## Summary

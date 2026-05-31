@@ -2,7 +2,7 @@
 
 > **How to Read This Section**
 >
-> Each threat is identified by an SID like `ETH-R01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `code_review` means the finding is based on external audit report analysis with code-level reasoning.
+> Each threat is identified by an SID like `ETH-R01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `verified` means the vulnerability was confirmed through source code analysis at a pinned commit.
 
 ## Architecture
 
@@ -41,10 +41,10 @@ Data integrity in PeerDAS relies on KZG commitments, a cryptographic proof schem
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [ETH-R02](threats/eth-r02.md) | Prysm DataColumnsByRange Rate Limit Bypass | Medium (5.3) | code\_review |
-| [ETH-R01](threats/eth-r01.md) | c-kzg-4844 load\_trusted\_setup Missing Subgroup Check | Low (3.8) | code\_review |
-| [ETH-R03](threats/eth-r03.md) | Prysm DataColumnsByRoot Incorrect Timeout | Low (3.7) | code\_review |
-| [ETH-R04](threats/eth-r04.md) | c-kzg-4844 Go Binding Thread Safety | Low (3.4) | code\_review |
+| [ETH-R02](threats/eth-r02.md) | Prysm DataColumnsByRange Rate Limit Bypass | Medium (5.3) | verified |
+| [ETH-R01](threats/eth-r01.md) | c-kzg-4844 load\_trusted\_setup Missing Subgroup Check | Low (3.8) | verified |
+| [ETH-R03](threats/eth-r03.md) | Prysm DataColumnsByRoot Incorrect Timeout | Low (3.7) | verified |
+| [ETH-R04](threats/eth-r04.md) | c-kzg-4844 Go Binding Thread Safety | Low (3.4) | verified |
 
 ## Key Findings
 

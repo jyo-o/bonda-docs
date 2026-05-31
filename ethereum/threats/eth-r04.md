@@ -1,7 +1,7 @@
 # ETH-R04: c-kzg-4844 Go Binding Thread Safety
 
 {% hint style="info" %}
-**Severity**: Low (3.4/10) · **STRIDE**: R · **Status**: code\_review
+**Severity**: Low (3.4/10) · **STRIDE**: R · **Status**: verified
 {% endhint %}
 
 ## Summary
