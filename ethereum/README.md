@@ -2,7 +2,7 @@
 
 > **How to Read This Section**
 >
-> Each threat is identified by an SID like `ETH-S01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `verified` means confirmed through source code analysis, specification review, or on-chain queries; `poc_verified` means the attack was reproduced in a controlled environment; and `unverified` means the implementation does not yet exist for verification.
+> Each threat is identified by an SID like `ETH-R01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale where applicable. Some findings are classified as Defense-in-Depth or Informational without a CVSS score. Status indicates verification depth: `code_review` means the finding is based on external audit report analysis with code-level reasoning.
 
 ## Architecture
 
@@ -28,56 +28,42 @@ Data integrity in PeerDAS relies on KZG commitments, a cryptographic proof schem
 | Lighthouse | Rust-based consensus client by Sigma Prime; implements PeerDAS spec independently | Implementation -- verified against spec |
 | Prysm | Go-based consensus client by Prysmatic Labs; implements PeerDAS spec independently | Implementation -- verified against spec |
 | go-ethereum | Primary execution client; handles blob transactions, fee market, and blobpool | Implementation -- verified against spec |
-| Blobpool | Transaction pool within go-ethereum that manages pending blob-carrying transactions | Subsystem -- bounded by per-account and global limits |
+| c-kzg-4844 | KZG commitment library used by all clients for blob/column proof generation and verification | Cryptographic library -- shared dependency |
 
 ## Key Numbers
 
-- **11** threats identified across the Ethereum DA stack
-- **9** verified through specification review and source code analysis
-- **2** unverified, target implementation does not yet exist
-- **Medium (5.3)** is the highest severity found
-- **6** source code repositories analyzed
-- **1** multi-client behavioral divergence discovered (ETH-E01: Lighthouse vs Prysm)
-
-> **Note on Multi-Client Analysis**
->
-> The Ethereum section is the only part of BONDA that performs cross-client divergence analysis. Because PeerDAS is implemented independently by multiple teams, threats can emerge not just from specification gaps but from differences in how separate codebases handle the same edge cases. ETH-E01 is a direct result of this analysis approach.
+- **4** threats identified across the Ethereum DA stack
+- **1** Medium severity finding (ETH-R02: rate limit bypass)
+- **1** Informational finding (ETH-R03: incorrect timeout)
+- **2** Defense-in-Depth findings (ETH-R01: subgroup check, ETH-R04: thread safety)
+- **2** source code repositories analyzed (c-kzg-4844, Prysm)
 
 ## Threat Summary
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [ETH-S01](threats/eth-s01.md) | Testing API JWT Authentication Missing | Medium (5.3) | verified |
-| [ETH-S02](threats/eth-s02.md) | Custody Group Node ID Grinding | Medium (5.3) | verified |
-| [ETH-T01](threats/eth-t01.md) | Blob Fee Denominator Fork Dependency | Low (3.7) | verified |
-| [ETH-T02](threats/eth-t02.md) | KZG Trusted Setup File Replacement | Low (2.5) | verified |
-| [ETH-T03](threats/eth-t03.md) | Data Column Inclusion Proof Omission | Low (2.5) | unverified |
-| [ETH-T04](threats/eth-t04.md) | Cell Index Bounds Check Asymmetry | Low (1.3) | verified |
-| [ETH-T05](threats/eth-t05.md) | Column Proof Verification Gap | Low (1.3) | unverified |
-| [ETH-R01](threats/eth-r01.md) | Blob/DataColumn Equivocation Detection Failure | Low (0.8) | verified |
-| [ETH-D01](threats/eth-d01.md) | Per-Account Blobpool Exhaustion | Low (0.8) | verified |
-| [ETH-D02](threats/eth-d02.md) | Verified Column Discard on Reconstruction Failure | Low (0.6) | verified |
-| [ETH-E01](threats/eth-e01.md) | Reconstruction Failure Mode Mismatch (Lighthouse vs Prysm) | Low (0.6) | verified |
+| [ETH-R01](threats/eth-r01.md) | c-kzg-4844 load\_trusted\_setup Missing Subgroup Check | Defense-in-Depth | code\_review |
+| [ETH-R02](threats/eth-r02.md) | Prysm DataColumnsByRange Rate Limit Bypass | Medium (5.3) | code\_review |
+| [ETH-R03](threats/eth-r03.md) | Prysm DataColumnsByRoot Incorrect Timeout | Informational | code\_review |
+| [ETH-R04](threats/eth-r04.md) | c-kzg-4844 Go Binding Thread Safety | Defense-in-Depth | code\_review |
 
 ## Key Findings
 
-### ETH-S01: Testing API JWT Authentication Missing -- Medium (5.3)
+### ETH-R01: c-kzg-4844 Missing Subgroup Check -- Defense-in-Depth
 
-The Beacon Chain testing API endpoints lack JWT authentication enforcement in certain configurations. These endpoints expose internal state and control surfaces intended only for development and testing. If a node operator inadvertently leaves the testing API accessible in a production environment, an attacker on the same network could invoke privileged operations without authentication. The severity reflects the realistic deployment scenario where testing APIs are disabled by default but occasionally left enabled during debugging.
+The `load_trusted_setup` function deserializes G1/G2 points without performing subgroup membership checks, while the runtime input path in the same codebase does perform this check. This validation asymmetry means a supply chain attack injecting tampered setup bytes could theoretically break pairing equation soundness, allowing forged proofs to be accepted. Since the setup is embedded at build time, this is not remotely triggerable but represents a defense-in-depth gap.
 
-### ETH-S02: Custody Group Node ID Grinding -- Medium (5.3)
+### ETH-R02: Prysm DataColumnsByRange Rate Limit Bypass -- Medium (5.3)
 
-PeerDAS custody group assignment is deterministic: a validator's node ID directly determines which data columns it must store and serve. An attacker with sufficient computing resources could generate node IDs that concentrate custody on specific columns, potentially degrading the availability of those columns by flooding the corresponding custody groups with attacker-controlled nodes. The practical cost of this attack is bounded by the number of custody groups and the computational difficulty of ID grinding, but the deterministic assignment means the attack surface is structurally permanent.
+Prysm's `DataColumnsByRange` RPC handler charges a constant cost of 1 to the rate limiter regardless of request size, while the equivalent `DataColumnsByRoot` handler correctly charges the actual number of columns. An unauthenticated P2P peer can exploit this asymmetry to amplify DB lookup and I/O workload on the target node, potentially degrading attestation and sync performance. The leaky bucket provides post-hoc throttling, bounding the impact to initial uncharged work amplification.
 
-### ETH-E01: Reconstruction Failure Mode Mismatch -- Medium (5.4)
+### ETH-R04: c-kzg-4844 Go Binding Thread Safety -- Defense-in-Depth
 
-This finding is a cross-client behavioral divergence between Lighthouse and Prysm in handling data column reconstruction failures. When reconstruction fails, Lighthouse discards all columns including previously verified ones, forcing a complete re-download. Prysm takes the opposite approach, marking reconstructed columns as verified without re-verifying them. Neither behavior is specified in the consensus-specs, meaning both clients are making independent design choices on an unspecified edge case. This divergence demonstrates the type of cross-client inconsistency that can emerge when multiple teams implement the same underspecified protocol.
+The c-kzg Go binding uses package-level globals without synchronization primitives, creating data race conditions under concurrent access. While standard usage loads the setup once at startup, the API contract gap means concurrent Load/verify/Free calls can theoretically cause undefined behavior, double initialization, or use-after-free. This is a formal Go memory model violation classified as a robustness improvement.
 
 ## Referenced Repositories
 
-- [go-ethereum](https://github.com/ethereum/go-ethereum) -- Execution layer client
-- [lighthouse](https://github.com/sigp/lighthouse) -- Rust consensus client (Sigma Prime)
 - [prysm](https://github.com/prysmaticlabs/prysm) -- Go consensus client (Prysmatic Labs)
-- [consensus-specs](https://github.com/ethereum/consensus-specs) -- Ethereum consensus specifications
 - [c-kzg-4844](https://github.com/ethereum/c-kzg-4844) -- KZG commitment library
+- [consensus-specs](https://github.com/ethereum/consensus-specs) -- Ethereum consensus specifications
 - [EIPs](https://github.com/ethereum/EIPs) -- Ethereum Improvement Proposals (EIP-4844, EIP-7594)
