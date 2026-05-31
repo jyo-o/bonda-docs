@@ -1,7 +1,7 @@
 # ETH-R01: c-kzg-4844 load\_trusted\_setup Missing Subgroup Check
 
 {% hint style="info" %}
-**Severity**: Defense-in-Depth (no CVSS) · **STRIDE**: T (Tampering) · **Status**: code\_review
+**Severity**: Low (3.8/10) · **STRIDE**: R · **Status**: code\_review
 {% endhint %}
 
 ## Summary
@@ -41,7 +41,21 @@ No exploit reproduction was conducted. The trusted setup is fixed at build time,
 
 A supply chain compromise injecting tampered trusted setup bytes would cause `load_trusted_setup` to accept points outside the subgroup without verification. This breaks pairing equation soundness, allowing forged proofs to pass `verify_kzg_proof`. All L2 rollups depending on EIP-4844 blob verification would have their data integrity compromised.
 
-Standard CVSS does not apply. The attack prerequisite is build/deployment pipeline control, which cannot be expressed through the CVSS AV axis. No score is assigned; this is classified as a defense-in-depth / input validation consistency defect.
+### CVSS 3.1
+
+**Score**: 3.8/10 (Low)
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:N`
+
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV (Attack Vector) | P (Physical) | Requires physical compromise of validator hardware running the BLS signing key |
+| AC (Attack Complexity) | H (High) | Requires BLS key extraction plus crafting a valid slashable message that bypasses local slashing protection |
+| PR (Privileges Required) | H (High) | Requires validator operator-level access to the signing infrastructure |
+| UI (User Interaction) | N (None) | No user interaction required |
+| S (Scope) | U (Unchanged) | Impact is confined to the compromised validator's stake |
+| C (Confidentiality) | N (None) | No confidentiality impact |
+| I (Integrity) | H (High) | Crafted equivocating messages directly violate consensus integrity for the affected validator |
+| A (Availability) | N (None) | No availability impact beyond the slashed validator itself |
 
 ## Recommendation
 

@@ -1,7 +1,7 @@
 # EDA-T09: Ejector Role Abuse Can Force-Remove Honest Operators
 
-{% hint style="warning" %}
-**Severity**: High (7.1/10) · **STRIDE**: T · **Status**: verified
+{% hint style="info" %}
+**Severity**: Medium (5.9/10) · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -65,13 +65,13 @@ The attack requires only a single private key compromise with no multisig coordi
 
 ### CVSS 3.1
 
-**Score**: 7.1/10 (High)
-**Vector**: `CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:H`
+**Score**: 5.9/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV (Attack Vector) | N (Network) | Ejection is executed via on-chain transactions accessible over the network |
-| AC (Attack Complexity) | L (Low) | The ejector is a single EOA key with 150 active uses observed over 16 months, demonstrating routine access |
+| AC (Attack Complexity) | H (High) | Requires compromising the ejector EOA's private key or the EjectionManager owner's key, which is a non-trivial key extraction attack |
 | PR (Privileges Required) | L (Low) | The ejector role is needed, but it is held by a single EOA rather than a multisig |
 | UI (User Interaction) | N (None) | No user interaction required |
 | S (Scope) | U (Unchanged) | Impact is contained within the EigenDA protocol |

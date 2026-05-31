@@ -1,7 +1,7 @@
 # AVL-E03: Deployer EOA Retains Admin Role Enabling Solo VectorX Upgrade
 
 {% hint style="warning" %}
-**Severity**: High (8.2/10) · **STRIDE**: E · **Status**: verified
+**Severity**: High (7.7/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -37,14 +37,14 @@ On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../e
 If the deployer's private key is compromised, an attacker gains full unilateral control over the VectorX bridge contract. The attacker can replace the entire VectorX implementation with arbitrary code in two transactions (grantRole + upgradeTo), enabling false attestations, fund theft from the bridge, or a complete bridge halt. No multisig approval, no timelock delay, and no community detection window exists for this path.
 
 ### CVSS 3.1
-**Score**: 8.2/10 (High)  
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:N/I:H/A:H`
+**Score**: 7.7/10 (High)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:C/C:N/I:H/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV | N (Network) | Attack is executed via direct calls on the Ethereum network |
 | AC | H (High) | Requires compromising the deployer's private key |
-| PR | L (Low) | Attacker needs the deployer's specific credentials (single EOA key) |
+| PR | H (High) | Requires deployer key access, which constitutes significant administrative control over the contract upgrade mechanism |
 | UI | N (None) | No user interaction required |
 | S | C (Changed) | Impact extends beyond VectorX to the entire bridge ecosystem and dependent L2s |
 | C | N (None) | No confidentiality impact |

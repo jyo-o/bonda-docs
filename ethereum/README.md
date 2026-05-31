@@ -2,7 +2,7 @@
 
 > **How to Read This Section**
 >
-> Each threat is identified by an SID like `ETH-R01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale where applicable. Some findings are classified as Defense-in-Depth or Informational without a CVSS score. Status indicates verification depth: `code_review` means the finding is based on external audit report analysis with code-level reasoning.
+> Each threat is identified by an SID like `ETH-R01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `code_review` means the finding is based on external audit report analysis with code-level reasoning.
 
 ## Architecture
 
@@ -34,32 +34,31 @@ Data integrity in PeerDAS relies on KZG commitments, a cryptographic proof schem
 
 - **4** threats identified across the Ethereum DA stack
 - **1** Medium severity finding (ETH-R02: rate limit bypass)
-- **1** Informational finding (ETH-R03: incorrect timeout)
-- **2** Defense-in-Depth findings (ETH-R01: subgroup check, ETH-R04: thread safety)
+- **3** Low severity findings (ETH-R01: subgroup check, ETH-R03: incorrect timeout, ETH-R04: thread safety)
 - **2** source code repositories analyzed (c-kzg-4844, Prysm)
 
 ## Threat Summary
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [ETH-R01](threats/eth-r01.md) | c-kzg-4844 load\_trusted\_setup Missing Subgroup Check | Defense-in-Depth | code\_review |
 | [ETH-R02](threats/eth-r02.md) | Prysm DataColumnsByRange Rate Limit Bypass | Medium (5.3) | code\_review |
-| [ETH-R03](threats/eth-r03.md) | Prysm DataColumnsByRoot Incorrect Timeout | Informational | code\_review |
-| [ETH-R04](threats/eth-r04.md) | c-kzg-4844 Go Binding Thread Safety | Defense-in-Depth | code\_review |
+| [ETH-R01](threats/eth-r01.md) | c-kzg-4844 load\_trusted\_setup Missing Subgroup Check | Low (3.8) | code\_review |
+| [ETH-R03](threats/eth-r03.md) | Prysm DataColumnsByRoot Incorrect Timeout | Low (3.7) | code\_review |
+| [ETH-R04](threats/eth-r04.md) | c-kzg-4844 Go Binding Thread Safety | Low (3.4) | code\_review |
 
 ## Key Findings
 
-### ETH-R01: c-kzg-4844 Missing Subgroup Check -- Defense-in-Depth
+### ETH-R01: c-kzg-4844 Missing Subgroup Check -- Low (3.8)
 
-The `load_trusted_setup` function deserializes G1/G2 points without performing subgroup membership checks, while the runtime input path in the same codebase does perform this check. This validation asymmetry means a supply chain attack injecting tampered setup bytes could theoretically break pairing equation soundness, allowing forged proofs to be accepted. Since the setup is embedded at build time, this is not remotely triggerable but represents a defense-in-depth gap.
+The `load_trusted_setup` function deserializes G1/G2 points without performing subgroup membership checks, while the runtime input path in the same codebase does perform this check. This validation asymmetry means a supply chain attack injecting tampered setup bytes could theoretically break pairing equation soundness, allowing forged proofs to be accepted. Since the setup is embedded at build time, this is not remotely triggerable.
 
 ### ETH-R02: Prysm DataColumnsByRange Rate Limit Bypass -- Medium (5.3)
 
 Prysm's `DataColumnsByRange` RPC handler charges a constant cost of 1 to the rate limiter regardless of request size, while the equivalent `DataColumnsByRoot` handler correctly charges the actual number of columns. An unauthenticated P2P peer can exploit this asymmetry to amplify DB lookup and I/O workload on the target node, potentially degrading attestation and sync performance. The leaky bucket provides post-hoc throttling, bounding the impact to initial uncharged work amplification.
 
-### ETH-R04: c-kzg-4844 Go Binding Thread Safety -- Defense-in-Depth
+### ETH-R04: c-kzg-4844 Go Binding Thread Safety -- Low (3.4)
 
-The c-kzg Go binding uses package-level globals without synchronization primitives, creating data race conditions under concurrent access. While standard usage loads the setup once at startup, the API contract gap means concurrent Load/verify/Free calls can theoretically cause undefined behavior, double initialization, or use-after-free. This is a formal Go memory model violation classified as a robustness improvement.
+The c-kzg Go binding uses package-level globals without synchronization primitives, creating data race conditions under concurrent access. While standard usage loads the setup once at startup, the API contract gap means concurrent Load/verify/Free calls can theoretically cause undefined behavior, double initialization, or use-after-free. This is a formal Go memory model violation.
 
 ## Referenced Repositories
 

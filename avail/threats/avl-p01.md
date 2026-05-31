@@ -1,7 +1,7 @@
 # AVL-P01: Slashing Infrastructure Present but Never Triggered
 
 {% hint style="info" %}
-**Severity**: Low (2.1/10) · **STRIDE**: P · **Status**: verified
+**Severity**: Medium (4.3/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -38,12 +38,12 @@ On-chain state was queried via Avail Substrate RPC. See [Verification Evidence](
 Validators observing the lack of enforcement may be incentivized to take risks such as running on lower-quality infrastructure, double-signing to maximize rewards across forks, or engaging in collusion. The absence of real penalties erodes the economic deterrent that secures the network. This is an internal validator incentive concern rather than a direct external attack vector.
 
 ### CVSS 3.1
-**Score**: 2.1/10 (Low)  
-**Vector**: `CVSS:3.1/AV:P/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L`
+**Score**: 4.3/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
-| AV | P (Physical) | Relates to internal validator behavior requiring physical or social context to exploit |
+| AV | N (Network) | Validator equivocation is executed over the P2P network; validators do not require physical access to exploit the absence of slashing enforcement |
 | AC | L (Low) | Non-triggering of slashing is a persistent, observable state, not something that needs engineering |
 | PR | L (Low) | Validator credentials are required to be in a position to misbehave |
 | UI | N (None) | No user interaction required |

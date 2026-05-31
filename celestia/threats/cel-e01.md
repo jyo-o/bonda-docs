@@ -1,7 +1,7 @@
 # CEL-E01: SP1Blobstream Instant Upgrade via Unprotected 4-of-6 Multisig
 
-{% hint style="warning" %}
-**Severity**: High (7.7/10) · **STRIDE**: E · **Status**: verified
+{% hint style="info" %}
+**Severity**: Medium (6.6/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -68,12 +68,12 @@ Complete compromise of the Blobstream DA bridge, enabling arbitrary proof accept
 
 ### CVSS 3.1
 
-**Score**: 7.7/10 (High)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:C/C:N/I:H/A:H`
+**Score**: 6.6/10 (Medium)
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:C/C:N/I:H/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
-| AV (Attack Vector) | N (Network) | Attack is executed via on-chain multisig transactions over the network |
+| AV (Attack Vector) | P (Physical) | Compromising 4-of-6 multisig signers requires physical access to multiple independent signing devices, consistent with multisig compromise scoring |
 | AC (Attack Complexity) | H (High) | Requires compromising or coercing 4 of 6 independent multisig signers |
 | PR (Privileges Required) | H (High) | Attacker must control 4 multisig signer keys (privileged role) |
 | UI (User Interaction) | N (None) | No user interaction required once signer keys are obtained |

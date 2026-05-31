@@ -1,7 +1,7 @@
 # EDA-D06: Relay Single Point of Failure on Mainnet
 
-{% hint style="warning" %}
-**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: verified
+{% hint style="info" %}
+**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -48,8 +48,8 @@ A denial-of-service attack or outage targeting the single relay at `relay-0-main
 
 ### CVSS 3.1
 
-**Score**: 7.5/10 (High)
-**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`
+**Score**: 5.3/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -60,7 +60,7 @@ A denial-of-service attack or outage targeting the single relay at `relay-0-main
 | S (Scope) | U (Unchanged) | Impact is within the EigenDA read path |
 | C (Confidentiality) | N (None) | No data exposure from relay outage |
 | I (Integrity) | N (None) | No data integrity impact; data is not corrupted |
-| A (Availability) | H (High) | Single point of failure for the primary read path; fallback exists but with degraded performance |
+| A (Availability) | L (Low) | Relay failure causes retrieval degradation but not data loss; the GetChunks fallback path via direct operator contact remains available |
 
 ## Recommendation
 

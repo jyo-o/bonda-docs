@@ -44,7 +44,7 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 |--------|-------|
 | Total threats identified | 9 |
 | Verified | 9 |
-| Highest severity | High — 8.4, deployer retains admin role on VectorX |
+| Highest severity | High — 7.7, deployer retains admin role on VectorX |
 | Active validators | 105 out of 1,200 max |
 | Nakamoto coefficient | ~34 validators to control 33% of stake |
 | Governance multisig | 4/7 Gnosis Safe |
@@ -57,27 +57,27 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [AVL-E03](threats/avl-e03.md) | Deployer EOA retains admin role, can upgrade VectorX solo | High (8.2) | verified |
+| [AVL-E03](threats/avl-e03.md) | Deployer EOA retains admin role, can upgrade VectorX solo | High (7.7) | verified |
 | [AVL-D01](threats/avl-d01.md) | VectorX single relayer with no on-chain heartbeat or rate limit | High (7.5) | verified |
-| [AVL-D02](threats/avl-d02.md) | Only 105 of 1,200 validator slots are active | Medium (5.9) | verified |
-| [AVL-T01](threats/avl-t01.md) | VectorX upgradeable instantly by 4/7 multisig, no timelock | Medium (5.6) | verified |
-| [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Medium (4.0) | verified |
-| [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Medium (4.0) | verified |
+| [AVL-T01](threats/avl-t01.md) | VectorX upgradeable instantly by 4/7 multisig, no timelock | Medium (5.4) | verified |
+| [AVL-D02](threats/avl-d02.md) | Only 105 of 1,200 validator slots are active | Medium (5.3) | verified |
+| [AVL-P01](threats/avl-p01.md) | Slashing exists but has never been triggered in 688 eras | Medium (4.3) | verified |
+| [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Low (3.8) | verified |
+| [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Low (3.8) | verified |
 | [AVL-P02](threats/avl-p02.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | verified |
-| [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (2.9) | verified |
-| [AVL-P01](threats/avl-p01.md) | Slashing exists but has never been triggered in 688 eras | Low (2.1) | verified |
+| [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (2.7) | verified |
 
 ## Key Findings
 
 ### Deployer EOA Still Has Full Admin Access
 
-**AVL-E03** | High (8.4)
+**AVL-E03** | High (7.7)
 
 The deployer wallet that originally set up the VectorX contract still holds the most powerful admin role. This role was supposed to be revoked after deployment, but the revocation code was found commented out in the deployment script. Because this admin role governs all other roles, the deployer can grant itself upgrade permissions and replace the entire VectorX contract in just two transactions. This bypasses the 4/7 multisig governance entirely, meaning a single compromised key could take over the bridge.
 
 ### VectorX Runs on a Single Relayer
 
-**AVL-D01** | Medium (6.6)
+**AVL-D01** | High (7.5)
 
 The entire bridge between Avail and Ethereum depends on a single relayer wallet. There is no backup relayer, no on-chain heartbeat monitoring, and no staleness detection. If this one wallet goes offline or its private key is compromised, DA attestation bridging to Ethereum stops completely. The relay interval is controlled purely on the client side with no on-chain enforcement, and there is no mechanism to propose replacement relayers through the contract.
 
@@ -89,7 +89,7 @@ Avail supports up to 1,200 validators but only 105 are currently active, using j
 
 ### Multisig Key Holders Overlap Across Three Groups
 
-**AVL-E02** | Low (0.5)
+**AVL-E02** | Low (2.7)
 
 Three separate multisig wallets govern different parts of the system: Governance, Pauser, and SP1 Verifier. However, these are not truly independent. Four of the five Pauser multisig owners are the same people as Governance multisig owners, and one address appears in all three multisigs. This means compromising the Governance multisig effectively compromises the Pauser and partially compromises the SP1 verifier control as well.
 

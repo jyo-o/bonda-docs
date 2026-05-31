@@ -1,7 +1,7 @@
 # CEL-D13: Pre-gas Commitment Computation with Unlimited Blob Count in CheckTx
 
-{% hint style="warning" %}
-**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: verified
+{% hint style="info" %}
+**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -79,8 +79,8 @@ Validator CPU exhaustion leading to mempool processing delays and reduced consen
 
 ### CVSS 3.1
 
-**Score**: 7.5/10 (High)
-**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`
+**Score**: 5.3/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -91,7 +91,7 @@ Validator CPU exhaustion leading to mempool processing delays and reduced consen
 | S (Scope) | U (Unchanged) | Impact is confined to the targeted validator node's CPU |
 | C (Confidentiality) | N (None) | No confidentiality impact |
 | I (Integrity) | N (None) | No integrity impact; the attack targets availability only |
-| A (Availability) | H (High) | CPU exhaustion degrades mempool processing and consensus throughput |
+| A (Availability) | L (Low) | A single oversized transaction causes temporary processing degradation but does not crash the node; the system recovers after the affected block is processed |
 
 ## Recommendation
 

@@ -1,7 +1,7 @@
 # EDA-P02: Absence of Data Availability Sampling Forces Full Quorum Trust
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: verified
+**Severity**: Medium (4.8/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -55,8 +55,8 @@ On-chain verification passes because it only checks signatures and stake thresho
 
 ### CVSS 3.1
 
-**Score**: 6.5/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:L`
+**Score**: 4.8/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -66,7 +66,7 @@ On-chain verification passes because it only checks signatures and stake thresho
 | UI (User Interaction) | N (None) | No user interaction required |
 | S (Scope) | U (Unchanged) | Impact is within the EigenDA protocol and dependent rollups |
 | C (Confidentiality) | N (None) | No data exposure |
-| I (Integrity) | H (High) | Clients are entirely dependent on quorum trust with no independent verification; KZG provides partial but insufficient mitigation |
+| I (Integrity) | L (Low) | Partial KZG verification covers commitment validity but not full data recoverability; the design choice provides baseline integrity assurance while accepting residual reconstruction risk |
 | A (Availability) | L (Low) | The protocol itself continues to function normally; data unavailability is detected only at retrieval time |
 
 ## Recommendation

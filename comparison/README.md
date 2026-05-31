@@ -22,13 +22,10 @@ This section compares threat modeling results across all four Data Availability 
 | Severity | EigenDA | Celestia | Avail | Ethereum | Total |
 |----------|:-------:|:--------:|:-----:|:--------:|:-----:|
 | **Critical (9.0-10.0)** | 0 | 0 | 0 | 0 | **0** |
-| **High (7.0-8.9)** | 2 | 4 | 2 | 0 | **8** |
-| **Medium (4.0-6.9)** | 9 | 6 | 4 | 1 | **20** |
-| **Low (0.1-3.9)** | 2 | 2 | 3 | 0 | **7** |
-| **Unscored** | 0 | 0 | 0 | 3 | **3** |
+| **High (7.0-8.9)** | 0 | 1 | 2 | 0 | **3** |
+| **Medium (4.0-6.9)** | 9 | 8 | 3 | 1 | **21** |
+| **Low (0.1-3.9)** | 4 | 3 | 4 | 3 | **14** |
 | **Total** | **13** | **12** | **9** | **4** | **38** |
-
-Three Ethereum findings use qualitative severity classifications from external audit reports: 2 Defense-in-Depth and 1 Informational. These are not scored on the CVSS scale.
 
 No threats reach CVSS Critical (9.0+). This is consistent with the threat landscape: DA layers do not directly custody user funds, and most attacks require either multisig compromise (PR:H) or high complexity (AC:H), both of which cap the exploitability sub-score.
 

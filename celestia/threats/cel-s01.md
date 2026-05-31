@@ -1,7 +1,7 @@
 # CEL-S01: DAS Selective Disclosure Attack via Sybil Peers
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: S · **Status**: verified
+**Severity**: Low (3.1/10) · **STRIDE**: S · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -59,14 +59,14 @@ Targeted light node deception causing false DA availability attestation. Rollups
 
 ### CVSS 3.1
 
-**Score**: 3.7/10 (Low)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N`
+**Score**: 3.1/10 (Low)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV (Attack Vector) | N (Network) | Attack is executed over the P2P network via DHT poisoning and Sybil nodes |
 | AC (Attack Complexity) | H (High) | Requires block producer collusion, Sybil infrastructure, and successful DHT poisoning of the target |
-| PR (Privileges Required) | N (None) | No protocol-level privileges needed, though block producer collusion implies validator access |
+| PR (Privileges Required) | L (Low) | Block producer collusion is required, which implies at least validator-level participation in the network with associated staking requirements |
 | UI (User Interaction) | N (None) | No user interaction required |
 | S (Scope) | U (Unchanged) | Impact is confined to the specifically targeted light node(s) |
 | C (Confidentiality) | N (None) | No confidentiality impact |

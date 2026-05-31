@@ -1,7 +1,7 @@
 # AVL-T03: Unlimited Token Minting via Malicious Bridge or VectorX Upgrade
 
 {% hint style="info" %}
-**Severity**: Medium (4.0/10) · **STRIDE**: T · **Status**: verified
+**Severity**: Low (3.8/10) · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -28,14 +28,14 @@ On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../e
 A successful malicious upgrade through either the Bridge or VectorX path would allow the attacker to mint an unlimited number of AVAIL tokens, flooding the market and destroying the token's economic value. Bridge users who rely on accurate token accounting face direct financial losses. The VectorX path offers no detection window, while the Bridge path gives users 24 hours to react.
 
 ### CVSS 3.1
-**Score**: 4.0/10 (Medium)  
-**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N`
+**Score**: 3.8/10 (Low)  
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:N`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV | P (Physical) | Requires physical or social engineering access to key holders; 4 of 7 keys must be compromised |
 | AC | H (High) | 24-hour timelock on Bridge path and 4-of-7 multisig requirement on VectorX path raise complexity |
-| PR | L (Low) | Attacker needs multisig signer or timelock proposer credentials |
+| PR | H (High) | Requires multisig signer-level access, which constitutes significant administrative control over the upgrade mechanism |
 | UI | N (None) | No user interaction required |
 | S | U (Unchanged) | Impact within the token minting function scope |
 | C | N (None) | No confidentiality impact |

@@ -1,7 +1,7 @@
 # CEL-P01: DAS-Only Safety Model After Fraud Proof Removal
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: verified
+**Severity**: Low (3.7/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -55,8 +55,8 @@ The DAS-only model has two layers of degradation. First, light nodes cannot veri
 
 ### CVSS 3.1
 
-**Score**: 6.5/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:L`
+**Score**: 3.7/10 (Low)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -66,8 +66,8 @@ The DAS-only model has two layers of degradation. First, light nodes cannot veri
 | UI (User Interaction) | N (None) | No user interaction required; the threat is the passive existence of incorrect documentation |
 | S (Scope) | U (Unchanged) | Impact is confined to systems that directly consume Celestia's documented security model |
 | C (Confidentiality) | N (None) | No confidentiality impact |
-| I (Integrity) | H (High) | Rollups may accept blocks with invalid encodings, believing fraud proofs would catch them |
-| A (Availability) | L (Low) | Encoding errors could cause partial data recovery failures in affected rollups |
+| I (Integrity) | L (Low) | The DAS-only model lacks correctness verification, but exploiting this gap requires breaking BFT assumptions, which the threat's own analysis acknowledges as unrealistic |
+| A (Availability) | N (None) | No direct availability impact; the documentation gap affects downstream design decisions but does not degrade Celestia's own availability |
 
 ## Recommendation
 

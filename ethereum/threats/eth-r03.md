@@ -1,7 +1,7 @@
 # ETH-R03: Prysm DataColumnsByRoot Incorrect Timeout
 
 {% hint style="info" %}
-**Severity**: Informational (no CVSS) · **STRIDE**: D (DoS) · **Status**: code\_review
+**Severity**: Low (3.7/10) · **STRIDE**: R · **Status**: code\_review
 {% endhint %}
 
 ## Summary
@@ -38,7 +38,21 @@ No exploit reproduction was conducted. The finding is established through code c
 
 Large ByRoot responses are truncated when the context expires at 5 seconds. Peers receive incomplete responses and retry, causing minor network load amplification. No crash, data corruption, or consensus impact occurs.
 
-No CVSS score is assigned. The availability impact is minor and transient, below the A:L threshold. This is classified as a correctness fix.
+### CVSS 3.1
+
+**Score**: 3.7/10 (Low)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L`
+
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV (Attack Vector) | N (Network) | Column reconstruction attacks are executed over the P2P network |
+| AC (Attack Complexity) | H (High) | Requires controlling a significant fraction of peers and coordinating withholding across multiple columns simultaneously |
+| PR (Privileges Required) | N (None) | No special privileges needed to participate in PeerDAS as a peer |
+| UI (User Interaction) | N (None) | No user interaction required |
+| S (Scope) | U (Unchanged) | Impact is confined to the targeted node's data availability sampling |
+| C (Confidentiality) | N (None) | No confidentiality impact |
+| I (Integrity) | N (None) | No integrity impact; the attack targets availability of specific columns |
+| A (Availability) | L (Low) | Partial column unavailability causes sampling degradation but does not halt the node; peer rotation and redundancy limit sustained impact |
 
 ## Recommendation
 

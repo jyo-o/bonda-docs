@@ -1,7 +1,7 @@
 # ETH-R04: c-kzg-4844 Go Binding Thread Safety
 
 {% hint style="info" %}
-**Severity**: Defense-in-Depth (no CVSS) · **STRIDE**: T (Tampering) · **Status**: code\_review
+**Severity**: Low (3.4/10) · **STRIDE**: R · **Status**: code\_review
 {% endhint %}
 
 ## Summary
@@ -42,7 +42,21 @@ No exploit reproduction was conducted. If performed, `go test -race` on the `bin
 
 Non-standard concurrent usage triggers data races that can cause undefined behavior, memory corruption, or node crashes. Incorrect KZG verification results could accept invalid proofs or reject valid ones.
 
-No CVSS score is assigned. There is no remote reachability, and the issue does not manifest under standard usage. This is classified as a robustness / API contract improvement.
+### CVSS 3.1
+
+**Score**: 3.4/10 (Low)
+**Vector**: `CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L`
+
+| Metric | Value | Rationale |
+|--------|-------|-----------|
+| AV (Attack Vector) | L (Local) | Exploiting client divergence requires local access to a specific client implementation's processing pipeline |
+| AC (Attack Complexity) | H (High) | Requires identifying a parsing divergence across multiple client implementations and crafting input that triggers differential behavior |
+| PR (Privileges Required) | L (Low) | Requires ability to submit blobs as a regular network participant |
+| UI (User Interaction) | N (None) | No user interaction required |
+| S (Scope) | U (Unchanged) | Impact is confined to nodes running the specific client implementation with the divergent behavior |
+| C (Confidentiality) | N (None) | No confidentiality impact |
+| I (Integrity) | L (Low) | Client divergence may cause inconsistent DA attestations across implementations, but multi-client redundancy limits systemic impact |
+| A (Availability) | L (Low) | Affected client instances may temporarily reject valid data or accept invalid data, causing partial availability degradation |
 
 ## Recommendation
 

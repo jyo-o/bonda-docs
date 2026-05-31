@@ -1,7 +1,7 @@
 # EDA-E03: Operator Stake Concentration Enables Minority Collusion Beyond Safety Thresholds
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: E · **Status**: verified
+**Severity**: Medium (4.8/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -57,8 +57,8 @@ In Q2, AltLayer can unilaterally exceed all thresholds, though Q2 is not a requi
 
 ### CVSS 3.1
 
-**Score**: 6.5/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:H`
+**Score**: 4.8/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -69,7 +69,7 @@ In Q2, AltLayer can unilaterally exceed all thresholds, though Q2 is not a requi
 | S (Scope) | U (Unchanged) | Impact is within the EigenDA protocol and dependent rollups |
 | C (Confidentiality) | N (None) | No data exposure from stake concentration |
 | I (Integrity) | L (Low) | Invalid certificate signing is possible but on-chain BLS verification remains functional; dual-quorum requirement limits impact |
-| A (Availability) | H (High) | Top 3 operators in Q0 already exceed the 33% safety threshold, threatening quorum operation |
+| A (Availability) | L (Low) | Top operator concentration at 39.8% remains below the 45% liveness threshold; quorum failure requires additional operator collusion beyond current concentration levels |
 
 ## Recommendation
 

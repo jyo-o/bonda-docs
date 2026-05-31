@@ -26,7 +26,7 @@ If a significant number of the approximately 40 full nodes go offline simultaneo
 
 ### CVSS 3.1
 **Score**: 3.7/10 (Low)  
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N`
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -35,9 +35,9 @@ If a significant number of the approximately 40 full nodes go offline simultaneo
 | PR | N (None) | No special privileges required to attempt data reconstruction |
 | UI | N (None) | No user interaction required |
 | S | U (Unchanged) | Impact limited to the DAS security guarantees |
-| C | L (Low) | Some data may become inaccessible if recovery fails |
+| C | N (None) | No confidentiality impact; the DAS gap does not expose sensitive information |
 | I | N (None) | No integrity impact |
-| A | N (None) | No direct availability impact on chain operations |
+| A | L (Low) | Light clients unable to perform DAS face partial data availability degradation, which is an availability impact rather than a confidentiality concern |
 
 ## Recommendation
 

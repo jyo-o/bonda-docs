@@ -1,7 +1,7 @@
 # EDA-G01: Infrastructure Concentration
 
 {% hint style="info" %}
-**Severity**: Medium (5.9/10) · **STRIDE**: G · **Status**: verified
+**Severity**: Low (3.7/10) · **STRIDE**: G · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -46,8 +46,8 @@ No attacker action is required. Natural infrastructure failures suffice.
 
 ### CVSS 3.1
 
-**Score**: 5.9/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H`
+**Score**: 3.7/10 (Low)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -58,7 +58,7 @@ No attacker action is required. Natural infrastructure failures suffice.
 | S (Scope) | U (Unchanged) | Impact is within the EigenDA operator infrastructure |
 | C (Confidentiality) | N (None) | No data exposure from infrastructure concentration |
 | I (Integrity) | N (None) | No data integrity impact |
-| A (Availability) | H (High) | A single provider outage could affect a significant portion of stake (AWS 21.78% Q0, Herd SaaS 41.87% Q1, top 5 cumulative 82.7%), approaching the 55% quorum confirmation threshold |
+| A (Availability) | L (Low) | Single cloud provider outage affects a subset of operators but does not cause total system failure; remaining operators on other providers maintain quorum availability |
 
 ## Recommendation
 

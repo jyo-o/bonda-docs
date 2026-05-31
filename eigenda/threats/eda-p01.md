@@ -1,7 +1,7 @@
 # EDA-P01: Operator Slashing Not Implemented Creates Asymmetric Honesty Incentives
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: verified
+**Severity**: Medium (4.8/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -49,8 +49,8 @@ The 8 free-rider candidates already observed in EDA-D12 demonstrate this is not 
 
 ### CVSS 3.1
 
-**Score**: 6.5/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:L`
+**Score**: 4.8/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -60,7 +60,7 @@ The 8 free-rider candidates already observed in EDA-D12 demonstrate this is not 
 | UI (User Interaction) | N (None) | No user interaction required |
 | S (Scope) | U (Unchanged) | Impact is within the EigenDA protocol |
 | C (Confidentiality) | N (None) | No data exposure from free-riding |
-| I (Integrity) | H (High) | The DA guarantee has an integrity gap where data withholding goes undetected; KZG and erasure coding provide compensating but incomplete mechanisms |
+| I (Integrity) | L (Low) | Absence of slashing is a design gap, but KZG commitment verification provides a compensating integrity mechanism that prevents invalid data from being certified |
 | A (Availability) | L (Low) | Service quality degradation is gradual rather than immediate; accumulated over time |
 
 ## Recommendation

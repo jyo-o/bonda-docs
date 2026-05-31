@@ -1,7 +1,7 @@
 # CEL-G01: KYC Validator Concentration Enabling Legal Censorship
 
-{% hint style="warning" %}
-**Severity**: High (8.7/10) · **STRIDE**: G · **Status**: verified
+{% hint style="info" %}
+**Severity**: Medium (6.5/10) · **STRIDE**: G · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -75,8 +75,8 @@ Legally enforced, indefinite transaction censorship with zero technical cost and
 
 ### CVSS 3.1
 
-**Score**: 8.7/10 (High)
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:H/A:H`
+**Score**: 6.5/10 (Medium)
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -84,10 +84,10 @@ Legally enforced, indefinite transaction censorship with zero technical cost and
 | AC (Attack Complexity) | H (High) | Requires coordinated judicial action across multiple jurisdictions targeting 6-7 entities |
 | PR (Privileges Required) | N (None) | No protocol-level privileges needed; attack is executed via legal compulsion of existing validators |
 | UI (User Interaction) | N (None) | No user interaction required; validators comply with legal orders |
-| S (Scope) | C (Changed) | Censorship affects all users and L2 rollups depending on Celestia DA, crossing trust boundaries |
+| S (Scope) | U (Unchanged) | Censorship impact is confined to transactions within the Celestia network itself; L2 rollups are affected as direct consumers, not as independent trust boundaries |
 | C (Confidentiality) | N (None) | No confidentiality impact |
 | I (Integrity) | H (High) | Targeted transactions are permanently excluded from the canonical chain |
-| A (Availability) | H (High) | Targeted namespaces or transaction types become permanently unavailable |
+| A (Availability) | L (Low) | Targeted transaction or namespace censorship causes selective unavailability, not total network disruption; non-targeted transactions continue processing normally |
 
 ## Recommendation
 

@@ -1,7 +1,7 @@
 # AVL-D02: Low Validator Utilization Concentrates Consensus Power
 
 {% hint style="info" %}
-**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: verified
+**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -29,14 +29,14 @@ On-chain state and Subscan Era #688 data were analyzed. See [Verification Eviden
 An attacker controlling 34 or more validators, representing roughly 33% of total stake, could block finality by refusing to vote on blocks. With 70 or more compromised validators at roughly 67% of stake, the attacker could seize full control of finality, potentially censoring transactions, reorganizing blocks, or halting the chain entirely. However, the even Phragmen distribution requires targeting many validators with similar stake levels rather than focusing on a few high-stake validators.
 
 ### CVSS 3.1
-**Score**: 5.9/10 (Medium)  
-**Vector**: `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H`
+**Score**: 5.3/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV | N (Network) | Attack operates at the network level through validator collusion |
 | AC | H (High) | Requires coordinated collusion of 34+ validators with even stake distribution |
-| PR | N (None) | Validator credentials can be obtained by anyone who stakes |
+| PR | L (Low) | Validators must bond stake to participate, requiring basic protocol-level authorization as a registered operator |
 | UI | N (None) | No user interaction required |
 | S | U (Unchanged) | Impact stays within the chain's finality scope |
 | C | N (None) | No confidentiality impact |

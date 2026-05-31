@@ -1,7 +1,7 @@
 # AVL-T01: VectorX Can Be Upgraded Instantly Without Timelock
 
 {% hint style="info" %}
-**Severity**: Medium (5.6/10) · **STRIDE**: T · **Status**: verified
+**Severity**: Medium (5.4/10) · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -40,14 +40,14 @@ No exploit reproduction was conducted. This finding is based on on-chain state v
 A compromised 4-of-7 multisig could replace the VectorX implementation with arbitrary code in a single transaction. The malicious implementation can forge data roots to produce false block header attestations, redirect bridge operations, or halt the bridge entirely. The community has no time window to detect the upgrade and respond before damage is done, unlike the Avail Bridge which provides a 24-hour detection window for the same operation.
 
 ### CVSS 3.1
-**Score**: 5.6/10 (Medium)  
-**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:H`
+**Score**: 5.4/10 (Medium)  
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV | P (Physical) | Requires physical or social engineering access to obtain 4 of 7 multisig signer keys |
 | AC | H (High) | Simultaneously compromising 4 of 7 independent signers is difficult |
-| PR | L (Low) | Attacker needs multisig signer credentials specifically |
+| PR | H (High) | Requires 4-of-7 multisig signer access, which constitutes significant administrative control over bridge governance |
 | UI | N (None) | No user interaction required |
 | S | U (Unchanged) | Impact stays within the VectorX upgrade scope |
 | C | N (None) | No confidentiality impact |

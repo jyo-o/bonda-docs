@@ -1,7 +1,7 @@
 # AVL-E02: Key Holder Overlap Across Three Governance Multisigs
 
 {% hint style="info" %}
-**Severity**: Low (2.9/10) · **STRIDE**: E · **Status**: verified
+**Severity**: Low (2.7/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -29,14 +29,14 @@ On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../e
 Compromising 4 of the 7 Governance Multisig keys automatically grants control over the Pauser Multisig because at least 3 of those keys also meet the Pauser's 3-of-5 threshold. The attacker can pause the bridge at will or prevent emergency pauses during an active attack. If the compromised set includes the shared key holder 0x72Ff...4f54, the attacker also gains a signing position in the SP1VerifierGateway's 2-of-3 multisig, needing only one more key to manipulate ZK verifier routing.
 
 ### CVSS 3.1
-**Score**: 2.9/10 (Low)  
-**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L`
+**Score**: 2.7/10 (Low)  
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:U/C:N/I:L/A:L`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV | P (Physical) | Requires physical or social engineering access to compromise multiple key holders |
 | AC | H (High) | Multiple simultaneous key compromises needed |
-| PR | L (Low) | Attacker needs signer credentials for the multisigs |
+| PR | H (High) | Requires multisig signer-level access, which constitutes significant administrative control over the Guardian role configuration |
 | UI | N (None) | No user interaction required |
 | S | U (Unchanged) | Impact limited to internal governance structure |
 | C | N (None) | No confidentiality impact |

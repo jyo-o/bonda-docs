@@ -85,14 +85,14 @@ Final score is rounded up to the nearest 0.1.
 
 **Threat:** The deployer EOA retains `DEFAULT_ADMIN_ROLE` on Avail's VectorX bridge contract. This role controls all other roles, enabling a solo upgrade path that bypasses multisig governance.
 
-**Vector:** `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:N/I:H/A:H`
+**Vector:** `CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:C/C:N/I:H/A:H`
 
 ### Step-by-step Calculation
 
 **Exploitability:**
 - AV = 0.85 (Network) — The attack executes via Ethereum mainnet transactions.
 - AC = 0.44 (High) — Requires compromising the deployer's private key.
-- PR = 0.68 (Low, Changed scope) — Requires the deployer's specific credentials, but the deployer is a known single EOA.
+- PR = 0.50 (High, Changed scope) — Requires the deployer's specific credentials, a privileged role held by a single EOA.
 - UI = 0.85 (None) — No victim interaction needed.
 
 **Scope:** Changed — Impact extends beyond VectorX to the entire bridge ecosystem and all dependent rollups.
@@ -115,17 +115,17 @@ Impact (Changed) = 7.52 x (0.8064 - 0.029) - 3.25 x (0.8064 - 0.02)^15
                  = 5.846 - 0.091
                  = 5.755
 
-Exploitability = 8.22 x 0.85 x 0.44 x 0.68 x 0.85
-               = 8.22 x 0.2170
-               = 1.784
+Exploitability = 8.22 x 0.85 x 0.44 x 0.50 x 0.85
+               = 8.22 x 0.1590
+               = 1.307
 
-Score = min(1.08 x (5.755 + 1.784), 10)
-      = min(1.08 x 7.539, 10)
-      = min(8.142, 10)
-      = 8.2
+Score = min(1.08 x (5.755 + 1.307), 10)
+      = min(1.08 x 7.062, 10)
+      = min(7.627, 10)
+      = 7.7
 ```
 
-**Severity: High (8.2/10)**
+**Severity: High (7.7/10)**
 
 ### CVSS Metric Rationale
 
@@ -133,7 +133,7 @@ Score = min(1.08 x (5.755 + 1.784), 10)
 |--------|-------|-----------|
 | AV (Attack Vector) | N (Network) | Attack executes via Ethereum mainnet transactions |
 | AC (Attack Complexity) | H (High) | Requires compromising the deployer EOA private key |
-| PR (Privileges Required) | L (Low) | Deployer is a known single EOA, not a multisig |
+| PR (Privileges Required) | H (High) | Deployer holds a privileged admin role on the contract |
 | UI (User Interaction) | N (None) | Fully automated, no victim action needed |
 | S (Scope) | C (Changed) | Bridge compromise cascades to all dependent rollups |
 | C (Confidentiality) | N (None) | No data exposure |

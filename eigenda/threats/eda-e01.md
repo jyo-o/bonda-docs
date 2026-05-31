@@ -1,7 +1,7 @@
 # EDA-E01: Configuration Flag Can Disable All Anchor Signature Verification
 
 {% hint style="info" %}
-**Severity**: Medium (4.0/10) · **STRIDE**: E · **Status**: verified
+**Severity**: Low (3.8/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -53,14 +53,14 @@ The attack requires server administrator privileges, either through physical acc
 
 ### CVSS 3.1
 
-**Score**: 4.0/10 (Medium)
-**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N`
+**Score**: 3.8/10 (Low)
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:N`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV (Attack Vector) | P (Physical) | Server environment variable access is required to change the flag |
 | AC (Attack Complexity) | H (High) | The flag defaults to `false` and intentional activation is needed; requires server administrator access |
-| PR (Privileges Required) | L (Low) | Server administrator privileges are necessary |
+| PR (Privileges Required) | H (High) | Requires server administrator-level access to the disperser infrastructure, which constitutes significant administrative control |
 | UI (User Interaction) | N (None) | No user interaction required |
 | S (Scope) | U (Unchanged) | Impact is within the Disperser's verification scope |
 | C (Confidentiality) | N (None) | No data exposure |

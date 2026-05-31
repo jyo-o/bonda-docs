@@ -1,7 +1,7 @@
 # AVL-E01: ZK Verifier Route Manipulation via SP1VerifierGateway Multisig
 
 {% hint style="info" %}
-**Severity**: Medium (4.0/10) · **STRIDE**: E · **Status**: verified
+**Severity**: Low (3.8/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -36,14 +36,14 @@ On-chain state was queried on Ethereum mainnet. See [Verification Evidence](../e
 If 2 of the 3 signing keys are compromised, the attacker could replace the legitimate ZK verifier contract with a malicious one that accepts any proof as valid. This would enable fabricated zero-knowledge proofs to be accepted by the bridge, potentially allowing unauthorized bridge operations such as withdrawing funds that were never deposited on the source chain. The overlapping key holder 0x72Ff...4f54 between the SP1 and Governance multisigs is a high-value target whose compromise cascades across both security domains.
 
 ### CVSS 3.1
-**Score**: 4.0/10 (Medium)  
-**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N`
+**Score**: 3.8/10 (Low)  
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:N`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV | P (Physical) | 2 of 3 keys must be compromised through physical or social engineering targeting of key holders |
 | AC | H (High) | Requires simultaneous compromise of two separate signer keys |
-| PR | L (Low) | Attacker needs multisig signer credentials to execute |
+| PR | H (High) | Requires multisig signer-level access, which constitutes significant administrative control over the governance mechanism |
 | UI | N (None) | No user interaction required |
 | S | U (Unchanged) | Impact limited to the verifier route change function |
 | C | N (None) | No confidentiality impact |

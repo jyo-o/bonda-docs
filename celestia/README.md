@@ -33,7 +33,7 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 ## Key Numbers
 
 - **12** threats identified through STRIDE analysis, on-chain verification, and source code review
-- **4 High**, **6 Medium**, **2 Low**
+- **1 High**, **8 Medium**, **3 Low**
 - **94 / 100** active validators (near saturation)
 - **35.77%** voting power held by top 8 validators (exceeds the 33% censorship threshold)
 - **6 of top 8** validators are KYC-regulated entities in US, EU, Swiss, or HK jurisdictions
@@ -42,26 +42,26 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 
 | SID | Threat | Severity | Status |
 |-----|--------|----------|--------|
-| [CEL-G01](threats/cel-g01.md) | KYC Validator Concentration Enabling Legal Censorship | High (8.7) | verified |
-| [CEL-E01](threats/cel-e01.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | High (7.7) | verified |
-| [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | High (7.5) | verified |
 | [CEL-D17](threats/cel-d17.md) | TxCache Key Mismatch Causing Permanent Cache Leak | High (7.5) | poc_verified |
-| [CEL-P01](threats/cel-p01.md) | DAS-Only Safety Model After Fraud Proof Removal | Medium (6.5) | verified |
+| [CEL-E01](threats/cel-e01.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | Medium (6.6) | verified |
+| [CEL-G01](threats/cel-g01.md) | KYC Validator Concentration Enabling Legal Censorship | Medium (6.5) | verified |
 | [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium (5.9) | verified |
 | [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium (5.9) | verified |
 | [CEL-D03](threats/cel-d03.md) | Unbounded Memory Growth via Fake DataHash Injection | Medium (5.3) | poc_verified |
 | [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium (5.3) | verified |
+| [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | Medium (5.3) | verified |
 | [CEL-G02](threats/cel-g02.md) | Documentation vs Code Information Asymmetry | Medium (5.3) | verified |
 | [CEL-D05](threats/cel-d05.md) | ShrEx Client-side Unbounded Response Size | Low (3.7) | verified |
-| [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.7) | verified |
+| [CEL-P01](threats/cel-p01.md) | DAS-Only Safety Model After Fraud Proof Removal | Low (3.7) | verified |
+| [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.1) | verified |
 
 ## Key Findings
 
-### CEL-E01: SP1Blobstream Multisig Can Upgrade Instantly (High, CVSS 7.7)
+### CEL-E01: SP1Blobstream Multisig Can Upgrade Instantly (Medium, CVSS 6.6)
 
 The SP1Blobstream bridge contract on Ethereum is controlled by a 4-of-6 Gnosis Safe multisig. The problem is that the same multisig address holds three separate roles: guardian, timelock controller, and default admin. This means 4 signers can upgrade the bridge verifier and program keys instantly with no delay, no public review window, and no on-chain event emitted. Any rollup relying on SP1Blobstream for DA verification would have no warning before the bridge logic changes underneath them.
 
-### CEL-G01: Validator Set is Legally Concentrated (High, CVSS 8.7)
+### CEL-G01: Validator Set is Legally Concentrated (Medium, CVSS 6.5)
 
 The top 8 validators control 35.77% of total voting power, which crosses the critical 33% threshold needed to censor transactions in CometBFT consensus. Six of those eight validators are KYC-regulated entities operating in US, EU, Swiss, or Hong Kong jurisdictions. This means a single coordinated legal order could compel enough validators to censor specific transactions without any validator acting maliciously. Anchorage Digital alone holds 11.08% of voting power. Because the validator cap is 100 and 94 slots are already filled, the set has limited room to diversify.
 

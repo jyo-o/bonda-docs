@@ -43,7 +43,7 @@ Downstream security design errors in L2 rollups and incorrect academic analyses.
 ### CVSS 3.1
 
 **Score**: 5.3/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N`
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -52,8 +52,8 @@ Downstream security design errors in L2 rollups and incorrect academic analyses.
 | PR (Privileges Required) | N (None) | No privileges needed to access the stale documentation |
 | UI (User Interaction) | N (None) | No user interaction required; the threat is the passive existence of incorrect documentation |
 | S (Scope) | U (Unchanged) | Impact is confined to systems that directly consume Celestia's documented parameters |
-| C (Confidentiality) | L (Low) | Information about actual security parameters is obscured by stale documentation, leading to incorrect threat models |
-| I (Integrity) | N (None) | No direct integrity impact on Celestia itself; downstream designs may be flawed but Celestia's chain integrity is unaffected |
+| C (Confidentiality) | N (None) | No confidentiality impact; stale documentation does not expose sensitive information |
+| I (Integrity) | L (Low) | Stale documentation causes downstream systems to be designed against incorrect security assumptions, which is an integrity issue in the information provided to builders |
 | A (Availability) | N (None) | No availability impact on Celestia; downstream systems may have flawed liveness assumptions |
 
 ## Recommendation

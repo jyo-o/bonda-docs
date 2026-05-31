@@ -1,7 +1,7 @@
 # EDA-E02: Single Multisig Controls All Eight Core Contracts Without Timelock
 
 {% hint style="info" %}
-**Severity**: Medium (6.3/10) · **STRIDE**: E · **Status**: verified
+**Severity**: Medium (6.1/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -73,14 +73,14 @@ This is consistent with the Dedaub N1 Informational classification.
 
 ### CVSS 3.1
 
-**Score**: 6.3/10 (Medium)
-**Vector**: `CVSS:3.1/AV:P/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H`
+**Score**: 6.1/10 (Medium)
+**Vector**: `CVSS:3.1/AV:P/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
 | AV (Attack Vector) | P (Physical) | Simultaneous compromise of 3 independent keys requires physical access or social engineering |
 | AC (Attack Complexity) | H (High) | 3-of-4 multisig is a security hardening measure; compromising 3 independent keys simultaneously is difficult |
-| PR (Privileges Required) | L (Low) | Signer credentials are needed |
+| PR (Privileges Required) | H (High) | Requires 3-of-4 multisig signer access, which constitutes significant administrative control over protocol governance |
 | UI (User Interaction) | N (None) | No user interaction required |
 | S (Scope) | U (Unchanged) | Impact is within the EigenDA governance scope |
 | C (Confidentiality) | H (High) | Full control over all contract configurations upon compromise |
