@@ -14,13 +14,9 @@ The current light node security model relies exclusively on DAS with 16 random s
 
 **Collective DAS Guarantee is Unrealized**
 
-The theoretical security of DAS depends on collective sampling: many independent light nodes each sample random shares, and the union of all samples covers enough of the data square to guarantee availability with high probability. This guarantee requires that when any single node fails to retrieve a sample, the result propagates to the network so other nodes can reject the block.
+DAS security depends on collective sampling: if any light node fails to retrieve a sample, the network should reject the block. In practice, Celestia light nodes operate in isolation — each makes a local availability judgment with no mechanism to share results. This reduces security from collective DAS to individual local checks, where each node relies solely on its own 16 samples. As shown in CEL-S01, this isolation enables selective disclosure attacks with no network-wide alarm.
 
-In practice, Celestia light nodes operate in isolation. Each node independently requests 16 samples, makes a local availability judgment, and has no mechanism to share that result with other light nodes. If node A detects unavailability while node B successfully retrieves all 16 samples, node B has no way to learn about node A's failure. The network-level DAS guarantee — where the failure of any single node to retrieve data triggers collective block rejection — is not implemented.
-
-This reduces the effective security from collective DAS (exponentially decreasing failure probability across N nodes) to individual local sampling (each node's independent ~99% confidence with 25% withholding). As demonstrated in CEL-S01, this isolation enables targeted selective disclosure attacks where Sybil peers can deceive individual nodes without triggering any network-wide alarm.
-
-BEFPs previously served as an indirect coordination mechanism: if a full node detected invalid encoding, it could generate a fraud proof that propagated to all light nodes, causing collective block rejection. With BEFPs removed, no inter-node observation path remains for either correctness or availability failures.
+BEFPs previously served as an indirect coordination path — fraud proofs propagated to all light nodes, triggering collective rejection. With BEFPs removed, no inter-node observation mechanism remains for either correctness or availability failures.
 
 **Stale Documentation Surfaces**
 
