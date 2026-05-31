@@ -16,6 +16,7 @@ The blacklisting mechanism exists in code but is disabled by default:
 // celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62
 // @audit EnableBlackListing defaults to false
 // @audit TODO comment: "enable blacklisting once all related issues are resolved"
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/options.go
 ```
 
 When `EnableBlackListing` is `false`, the `blacklistPeers` function skips the actual blocking:
@@ -27,6 +28,7 @@ When `EnableBlackListing` is `false`, the `blacklistPeers` function skips the ac
 
 // celestia-node/share/shwap/p2p/shrex/peers/manager.go:423-425
 // @audit Gating condition: if !m.params.EnableBlackListing { continue }
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
 ```
 
 Verified at commit `celestia-node f8cefbe3e5bd3e144a414cb2140dd223ec6191c6`.

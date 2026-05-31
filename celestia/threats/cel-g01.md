@@ -30,13 +30,15 @@ When targeted blocks are proposed, compelled validators cast prevote-nil, preven
 
 ```go
 // celestia-core/types/evidence.go:22-219
-// Only DuplicateVoteEvidence and LightClientAttackEvidence are implemented
-// No nil-vote evidence type exists
+// @audit Only DuplicateVoteEvidence and LightClientAttackEvidence are implemented
+// @audit No nil-vote evidence type exists
+// https://github.com/celestiaorg/celestia-core/blob/main/types/evidence.go
 ```
 
 ```go
 // celestia-core/consensus/state.go:1553-1577
-// Honest and malicious prevote-nil follow the same code path
+// @audit Honest and malicious prevote-nil follow the same code path
+// https://github.com/celestiaorg/celestia-core/blob/main/consensus/state.go
 ```
 
 The on-chain cost is zero. Mainnet slashing parameters (2026-05-20, height 11,172,730) confirmed via `celestia-rest.publicnode.com/cosmos/slashing/v1beta1/params`:

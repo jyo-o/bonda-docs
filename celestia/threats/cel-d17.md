@@ -15,22 +15,26 @@ The key mismatch originates from the re-serialization of blob transactions durin
 ```go
 // celestia-app/app/check_tx.go:63
 // @audit txCache.Set(btx.Tx) stores using sha256 of inner SDK tx as key
+// https://github.com/celestiaorg/celestia-app/blob/main/app/check_tx.go
 ```
 
 ```go
 // celestia-app/app/app.go:589
 // @audit txCache.RemoveTransaction(tx) deletes using sha256 of full BlobTx key
+// https://github.com/celestiaorg/celestia-app/blob/main/app/app.go
 ```
 
 ```go
 // celestia-app/app/filtered_square_builder.go:193-197
 // @audit encodeBlobTxs re-serializes via MarshalBlobTx(innerTx, blobs...)
 // @audit This produces different wire bytes than the original inner SDK tx
+// https://github.com/celestiaorg/celestia-app/blob/main/app/filtered_square_builder.go
 ```
 
 ```go
 // celestia-app/app/tx_cache.go:23-27
 // @audit sha256-based key generation — sha256(full BlobTx) != sha256(inner SDK tx)
+// https://github.com/celestiaorg/celestia-app/blob/main/app/tx_cache.go
 ```
 
 The `TxCache` is implemented as a `sync.Map` with no capacity limit, no TTL, and no separate cleanup mechanism. The only recovery is a node restart.

@@ -16,18 +16,21 @@ The ante handler chain in `celestia-app/app/ante/ante.go` runs in the order: `Se
 // celestia-app/app/check_tx.go
 // @audit handleBlobCheckTx calls ValidateBlobTx before the ante handler chain
 // @audit This triggers CreateParallelCommitments before any gas deduction
+// https://github.com/celestiaorg/celestia-app/blob/main/app/check_tx.go
 ```
 
 ```go
 // celestia-app/x/blob/types/payforblob.go
 // @audit ValidateBasic has no maximum blob count check
 // @audit Within MaxTxSize of 8 MiB, thousands of 1-byte blobs can be packed
+// https://github.com/celestiaorg/celestia-app/blob/main/x/blob/types/payforblob.go
 ```
 
 ```go
 // celestia-app/x/blob/types/blob_tx.go
 // @audit ValidateBlobTx calls CreateParallelCommitments
 // @audit Each blob triggers NMT subtree and Merkle root computation
+// https://github.com/celestiaorg/celestia-app/blob/main/x/blob/types/blob_tx.go
 ```
 
 The attack flow is:
@@ -42,7 +45,7 @@ The attack is especially cheap because rejected transactions still trigger the f
 
 ## Proof of Concept
 
-No proof of concept was conducted for this threat.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app CheckTx handler and ante chain execution order.
 
 ## Impact
 

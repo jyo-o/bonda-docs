@@ -18,6 +18,7 @@ The SP1Blobstream contract at `sp1-blobstream/contracts/src/SP1Blobstream.sol` c
 // sp1-blobstream/contracts/src/SP1Blobstream.sol:89
 // @audit initialize(guardian, guardian) assigns all three roles to the same address
 initialize(_guardian, _guardian);
+// https://github.com/succinctlabs/sp1-blobstream/blob/main/contracts/src/SP1Blobstream.sol
 ```
 
 On-chain `hasRole()` calls confirm that `DEFAULT_ADMIN_ROLE`, `TIMELOCK_ROLE`, and `GUARDIAN_ROLE` are all held by the Gnosis Safe at `0x8bF34D8df1eF0A8A7f27fC587202848E528018E6` (threshold=4, owners=6). All three `RoleGranted` events were emitted simultaneously at block 20027685 with zero subsequent `RoleRevoked` events.
@@ -30,6 +31,7 @@ On-chain `hasRole()` calls confirm that `DEFAULT_ADMIN_ROLE`, `TIMELOCK_ROLE`, a
 // @audit No timelock delay, no emitted events, no review window
 function updateVerifier(address _verifier) external onlyGuardian { ... }
 function updateProgramVkey(bytes32 _vkey) external onlyGuardian { ... }
+// https://github.com/succinctlabs/sp1-blobstream/blob/main/contracts/src/SP1Blobstream.sol
 ```
 
 **Case #3: Missing Height Monotonicity**
@@ -42,6 +44,7 @@ function updateProgramVkey(bytes32 _vkey) external onlyGuardian { ... }
 // sp1-blobstream/contracts/src/SP1Blobstream.sol:65-72
 // @audit ProofOutputs struct lacks chain_id field, enabling cross-deployment proof reuse
 struct ProofOutputs { ... }
+// https://github.com/succinctlabs/sp1-blobstream/blob/main/contracts/src/SP1Blobstream.sol
 ```
 
 As of 2026-05-24, the bridge has zero actual users. All 12,109 contract transactions on Etherscan are `commitHeaderRange` calls from the relayer, with zero internal transactions and zero `verifyAttestation` calls. Molten Network and Rari Chain's `SequencerInbox` contracts point to a dead address (bytecode `0x`) for their `BLOBSTREAM` getter.

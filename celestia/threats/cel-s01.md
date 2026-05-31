@@ -15,6 +15,7 @@ The attack leverages the non-anonymous nature of Celestia's P2P layer, which all
 ```go
 // celestia-node/share/availability/light/options.go:10
 // @audit DefaultSampleAmount=16 — light nodes request only 16 random samples
+// https://github.com/celestiaorg/celestia-node/blob/main/share/availability/light/options.go
 ```
 
 The attack flow:
@@ -32,6 +33,7 @@ The defense assumption of peer blacklisting is weakened by `EnableBlackListing` 
 // celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62
 // @audit EnableBlackListing defaults to false
 // @audit Same Sybil peer can reconnect without being blocked
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/options.go
 ```
 
 According to research by Common Prefix (2022-11-09), with 16 samples and 25% data withholding, the mathematical analysis shows:

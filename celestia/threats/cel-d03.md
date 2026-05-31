@@ -15,16 +15,19 @@ The unbounded growth is caused by a cleanup function that adds to the blacklist 
 ```go
 // celestia-node/share/shwap/p2p/shrex/peers/manager.go:78
 // @audit blacklistedHashes map[string]bool declaration — no deletion path exists
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
 ```
 
 ```go
 // celestia-node/share/shwap/p2p/shrex/peers/manager.go:523
 // @audit cleanUp function: the ONLY write path that sets blacklistedHashes[h]=true
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
 ```
 
 ```go
 // celestia-node/share/shwap/p2p/shrex/peers/manager.go:504,511,517
 // @audit delete calls apply only to m.pools, NOT to blacklistedHashes
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
 ```
 
 The shrexsub message validation is insufficient to prevent fake hash injection:
@@ -33,11 +36,13 @@ The shrexsub message validation is insufficient to prevent fake hash injection:
 // celestia-node/share/shwap/p2p/shrex/shrexsub/pubsub.go:114
 // @audit Message validation checks only: height != 0, EDS non-empty, hash length == 32
 // @audit Does NOT verify whether the DataHash exists on-chain
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/shrexsub/pubsub.go
 ```
 
 ```go
 // celestia-node/share/root.go:28-33
 // @audit DataHash.Validate checks only len==32
+// https://github.com/celestiaorg/celestia-node/blob/main/share/root.go
 ```
 
 Bridge nodes are not affected because they do not use the `WithShrexSubPools` path (`celestia-node/nodebuilder/share/p2p_constructors.go:58`). The attack targets Light nodes exclusively. Since `EnableBlackListing` defaults to `false` (see CEL-D06), the attacking peer is never blocked and can inject hashes indefinitely.

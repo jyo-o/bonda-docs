@@ -20,6 +20,7 @@ The retry loop in the `Subscribe` method uses a bare `for` loop with no delay be
 //     if err == nil { break }
 // }
 // @audit No sleep or backoff between retries — immediate retry on failure
+// https://github.com/celestiaorg/celestia-node/blob/main/blob/service.go
 ```
 
 Under normal conditions, `getAll` succeeds and the loop terminates quickly. However, when a malicious full node returns intermittent errors:
@@ -34,7 +35,7 @@ The only exit condition is context cancellation. If the subscription is long-liv
 
 ## Proof of Concept
 
-No proof of concept was conducted for this threat.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-node blob subscription handler.
 
 ## Impact
 

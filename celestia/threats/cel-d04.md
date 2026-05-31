@@ -17,6 +17,7 @@ Three independent code defects exist in celestia-core's evidence processing: a h
 // @audit Hash() off-by-one: line 325 uses copy(bz[:tmhash.Size-1]) instead of tmhash.Size
 // @audit Copies only 31 of 32 bytes from LightClientAttackEvidence
 // @audit Collision probability on 248-bit hash is effectively zero — no security consequence
+// https://github.com/celestiaorg/celestia-core/blob/main/types/evidence.go
 ```
 
 **Case #2: Unbounded Consensus Buffer**
@@ -27,11 +28,13 @@ Three independent code defects exist in celestia-core's evidence processing: a h
 // @audit However, buffer drains every block (~6 seconds)
 // @audit ed25519 signature verification is CPU bottleneck: ~500-1000 verifications/sec
 // @audit This limits buffer to ~3,000-6,000 entries (~3 MB) per drain cycle — OOM impossible
+// https://github.com/celestiaorg/celestia-core/blob/main/evidence/pool.go
 ```
 
 ```go
 // celestia-core/consensus/state.go:2395
 // @audit ErrVoteConflictingVotes handler feeds the consensusBuffer
+// https://github.com/celestiaorg/celestia-core/blob/main/consensus/state.go
 ```
 
 **Case #3: Evidence Expiry Gap**
@@ -42,13 +45,14 @@ Three independent code defects exist in celestia-core's evidence processing: a h
 // @audit max_age_num_blocks=242,640 → ~17 days (at 6s/block)
 // @audit unbonding_time=1,213,200s → 14 days
 // @audit Gap of ~3 days where evidence might be submitted after unbonding completes
+// https://github.com/celestiaorg/celestia-core/blob/main/evidence/verify.go
 ```
 
 Mainnet consensus parameters confirm: `max_age_num_blocks=242,640`, `max_age_duration=1,213,200s` (337 hours), `unbonding_time=1,213,200s`. The 242,640 blocks at 6 seconds each equals approximately 404 hours (17 days), exceeding the 14-day unbonding period by about 3 days. However, double signs are almost always detected well within 14 days, and tombstoning is the primary penalty, making the 2% slashing avoidance during the gap practically meaningless.
 
 ## Proof of Concept
 
-No proof of concept was conducted for this threat.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-core evidence subsystem and mainnet consensus parameter verification via `celestia-rest.publicnode.com`.
 
 ## Impact
 

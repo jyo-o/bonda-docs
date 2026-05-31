@@ -16,6 +16,7 @@ The blockspace monopoly is enabled by the ratio between maximum transaction size
 // celestia-app/pkg/appconsts/app_consts.go
 // @audit BlockMaxBytes=32 MiB, MaxTxSize=8 MiB, GasPerBlobByte=8
 // @audit Only 4 max-size PFBs needed to fill an entire block
+// https://github.com/celestiaorg/celestia-app/blob/main/pkg/appconsts/app_consts.go
 ```
 
 Transaction inclusion follows fee-per-gas priority, and shares within the data square are sorted by namespace:
@@ -23,11 +24,13 @@ Transaction inclusion follows fee-per-gas priority, and shares within the data s
 ```go
 // go-square/builder.go:261
 // @audit Blob sorting by namespace order with tx priority preserved
+// https://github.com/celestiaorg/go-square/blob/main/builder.go
 ```
 
 ```go
 // celestia-app/app/filtered_square_builder.go
 // @audit Fill function uses fee/gas priority-based inclusion
+// https://github.com/celestiaorg/celestia-app/blob/main/app/filtered_square_builder.go
 ```
 
 While a `MaxPFBMessages` cap was introduced in v9 (PR `celestia-app#6604`), it does not resolve the fundamental blockspace monopoly problem because a single PFB with maximum-size data is sufficient to consume a large portion of block capacity.
@@ -39,7 +42,7 @@ At mainnet prices (2026-05-26), with `minimum_gas_price=0.002 utia/gas` (confirm
 
 ## Proof of Concept
 
-No proof of concept was conducted for this threat. Cost calculations are derived from on-chain gas parameters and current TIA market prices.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app and go-square codebases combined with on-chain gas parameter verification via `celestia-rest.publicnode.com`.
 
 ## Impact
 

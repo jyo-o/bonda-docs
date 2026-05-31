@@ -14,14 +14,16 @@ This is a structural pattern rather than an isolated oversight: when parameter c
 
 **Identified Stale Surfaces**
 
-```
+```markdown
 // celestia-app/specs/src/fraud_proofs.md:5-13
 // @audit Still states "BEFPs enforce DAS" — removed in PR #4934
+// https://github.com/celestiaorg/celestia-app/blob/main/specs/src/fraud_proofs.md
 ```
 
-```
+```markdown
 // CIPs/cips/cip-019.md
 // @audit Claims "Does not change the security model" — stale after BEFP removal
+// https://github.com/celestiaorg/CIPs/blob/main/cips/cip-019.md
 ```
 
 **Slashing Parameter Drift**

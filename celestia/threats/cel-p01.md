@@ -14,14 +14,16 @@ The current light node security model relies exclusively on DAS with 16 random s
 
 **Stale Documentation Surfaces**
 
-```
+```markdown
 // celestia-app/specs/src/fraud_proofs.md:5-13
 // @audit Still states "BEFPs enforce DAS" — this is factually incorrect post-PR #4934
+// https://github.com/celestiaorg/celestia-app/blob/main/specs/src/fraud_proofs.md
 ```
 
-```
+```markdown
 // CIPs/cips/cip-019.md
 // @audit Claims "Does not change the security model" — stale after BEFP removal
+// https://github.com/celestiaorg/CIPs/blob/main/cips/cip-019.md
 ```
 
 **BEFP Removal Timeline**
