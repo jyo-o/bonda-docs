@@ -63,17 +63,10 @@
 ## Ethereum / PeerDAS
 
 * [Overview](ethereum/README.md)
-* [ETH-S01: Testing API JWT Bypass](ethereum/threats/eth-s01.md)
-* [ETH-S02: Custody Group Node ID Grinding](ethereum/threats/eth-s02.md)
-* [ETH-T01: Blob Fee Fork Dependency](ethereum/threats/eth-t01.md)
-* [ETH-T02: KZG Trusted Setup File Replacement](ethereum/threats/eth-t02.md)
-* [ETH-T03: Data Column Inclusion Proof Omission](ethereum/threats/eth-t03.md)
-* [ETH-T04: Cell Index Bounds Check Asymmetry](ethereum/threats/eth-t04.md)
-* [ETH-T05: Column Proof Verification Gap](ethereum/threats/eth-t05.md)
-* [ETH-R01: Equivocation Detection Failure](ethereum/threats/eth-r01.md)
-* [ETH-D01: Per-Account Blobpool Exhaustion](ethereum/threats/eth-d01.md)
-* [ETH-D02: Verified Column Discard](ethereum/threats/eth-d02.md)
-* [ETH-E01: Reconstruction Failure Mode Mismatch](ethereum/threats/eth-e01.md)
+* [ETH-R01: Missing Subgroup Check](ethereum/threats/eth-r01.md)
+* [ETH-R02: Rate Limit Bypass](ethereum/threats/eth-r02.md)
+* [ETH-R03: Incorrect Timeout](ethereum/threats/eth-r03.md)
+* [ETH-R04: Go Binding Thread Safety](ethereum/threats/eth-r04.md)
 
 ## Cross-DA Comparison
 
