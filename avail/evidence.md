@@ -8,7 +8,7 @@ This page summarizes the on-chain verification evidence collected for Avail DA t
 
 ---
 
-## 1. VectorX Single Relayer Verification (AVL-D01)
+## VectorX Single Relayer Verification (AVL-D01)
 
 The VectorX DA attestation bridge operates with a single approved relayer EOA.
 
@@ -83,7 +83,7 @@ Source code analysis of `commitHeaderRange()` confirms:
 
 ---
 
-## 2. SP1VerifierGateway Multisig Analysis (AVL-E01)
+## SP1VerifierGateway Multisig Analysis (AVL-E01)
 
 The ZK proof verifier routing is controlled by a 2-of-3 multisig with key holder overlap.
 
@@ -106,7 +106,7 @@ Owner #2 (`0x72Ff...4f54`) is the same address as Avail Governance Multisig 1 ow
 
 ---
 
-## 3. Governance Multisig Cross-Analysis (AVL-E02)
+## Governance Multisig Cross-Analysis (AVL-E02)
 
 Three multisigs share overlapping key holders, reducing effective independence.
 
@@ -139,7 +139,7 @@ cast call 0x7F2f87B0Efc66Fea0b7c30C61654E53C37993666 \
 
 ---
 
-## 4. Deployer Admin Role Verification (AVL-E03)
+## Deployer Admin Role Verification (AVL-E03)
 
 The deployer EOA retains DEFAULT_ADMIN_ROLE, enabling a 2-transaction VectorX takeover.
 
@@ -183,7 +183,7 @@ This bypasses the 4-of-7 governance multisig entirely. The root cause is that `G
 
 ---
 
-## 5. Bridge and Token Verification
+## Bridge and Token Verification
 
 ### AvailBridge Access Control
 
@@ -219,7 +219,7 @@ Mint/burn authority is restricted to the Bridge contract (0x054f...). A maliciou
 
 ---
 
-## 6. Avail Chain Verification
+## Avail Chain Verification
 
 ### Validator Set (AVL-D02)
 

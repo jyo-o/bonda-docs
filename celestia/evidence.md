@@ -8,7 +8,7 @@ This page summarizes the on-chain verification and parameter measurement evidenc
 
 ---
 
-## 1. SP1Blobstream Bridge Verification (CEL-E01)
+## SP1Blobstream Bridge Verification (CEL-E01)
 
 The SP1Blobstream contract assigns all three access control roles to a single 4-of-6 Gnosis Safe, with no timelock on critical upgrade functions.
 
@@ -69,7 +69,7 @@ Etherscan proxy at `0x7Cf3876F681Dbb6EdA8f6FfC45D66b996Df08fAe` shows zero user-
 
 ---
 
-## 2. Validator Set and Slashing Parameters (CEL-G01, CEL-G02)
+## Validator Set and Slashing Parameters (CEL-G01, CEL-G02)
 
 ### Slashing Parameters
 
@@ -115,7 +115,7 @@ Data cross-verified across three independent endpoints: publicnode, polkachu, po
 
 ---
 
-## 3. Gas and Blockspace Parameters (CEL-D02, CEL-D13)
+## Gas and Blockspace Parameters (CEL-D02, CEL-D13)
 
 ```bash
 # Minimum gas price
@@ -139,7 +139,7 @@ At mainnet prices as of 2026-05-26:
 
 ---
 
-## 4. PoC Test Results
+## PoC Test Results
 
 ### CEL-D17: TxCache Key Mismatch (poc_verified)
 

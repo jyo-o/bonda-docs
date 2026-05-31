@@ -51,7 +51,7 @@ As of 2026-05-24, the bridge has zero actual users. All 12,109 contract transact
 
 ## Proof of Concept
 
-On-chain verification was conducted. See [Verification Evidence](../evidence.md#id-1.-sp1blobstream-bridge-verification-cel-e01) for full commands and results.
+On-chain verification was conducted. See [Verification Evidence](../evidence.md#sp1blobstream-bridge-verification-cel-e01) for full commands and results.
 
 - `eth_call hasRole(DEFAULT_ADMIN_ROLE, 0x8bF3...18E6)` returns `true`
 - `eth_call hasRole(TIMELOCK_ROLE, 0x8bF3...18E6)` returns `true`

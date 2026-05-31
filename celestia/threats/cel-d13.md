@@ -71,7 +71,7 @@ The attack is especially cheap because rejected transactions still trigger the f
 
 ## Proof of Concept
 
-No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app CheckTx handler and ante chain execution order. See [Verification Evidence](../evidence.md#id-3.-gas-and-blockspace-parameters-cel-d02-cel-d13) for gas parameter data.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app CheckTx handler and ante chain execution order. See [Verification Evidence](../evidence.md#gas-and-blockspace-parameters-cel-d02-cel-d13) for gas parameter data.
 
 ## Impact
 

@@ -9,7 +9,7 @@ This page summarizes the on-chain verification and data analysis evidence collec
 
 ---
 
-## 1. Ejector Role Parameters (EDA-T09)
+## Ejector Role Parameters (EDA-T09)
 
 The `EjectionManager` contract delegates ejection authority to EOA addresses with rate-limited parameters.
 
@@ -64,7 +64,7 @@ Source: Blockscout transaction history for EjectionManager (`0x130d8E...`).
 
 ---
 
-## 2. Governance Multisig Configuration (EDA-E02)
+## Governance Multisig Configuration (EDA-E02)
 
 A single Gnosis Safe controls eight core EigenDA contracts with no timelock.
 
@@ -116,7 +116,7 @@ The CertVerifier at `0x61692e...` is an exception: `owner()` reverts, confirming
 
 ---
 
-## 3. Operator Stake Distribution (EDA-E03)
+## Operator Stake Distribution (EDA-E03)
 
 Stake distribution was queried at block 25101686 to measure concentration against safety and liveness thresholds.
 
@@ -169,7 +169,7 @@ Data source: EigenDA DataAPI `signing-info` endpoint (120 operator-quorum pairs,
 
 ---
 
-## 4. Slashing Absence Verification (EDA-P01)
+## Slashing Absence Verification (EDA-P01)
 
 A comprehensive audit confirmed that EigenDA has no active slashing mechanism.
 
@@ -215,7 +215,7 @@ A `grep` across all EigenDA core Solidity contracts (`contracts/src/core/`) foun
 
 ---
 
-## 5. Relay Registry Single Point of Failure (EDA-D06)
+## Relay Registry Single Point of Failure (EDA-D06)
 
 The RelayRegistry confirms only one relay is registered on mainnet.
 
@@ -248,7 +248,7 @@ The registered relay URL is `relay-0-mainnet-ethereum.eigenda.xyz`. DNS resolves
 
 ---
 
-## 6. Infrastructure Concentration Analysis (EDA-G01)
+## Infrastructure Concentration Analysis (EDA-G01)
 
 ASN aggregation analysis of 78 operator host classes reveals systemic provider concentration.
 
@@ -291,7 +291,7 @@ ASN aggregation analysis of 78 operator host classes reveals systemic provider c
 
 ---
 
-## 7. Dead Operator Measurement (EDA-D12)
+## Dead Operator Measurement (EDA-D12)
 
 A 24-hour prober measurement of 79 EigenDA operators identified chronic non-serving behavior.
 
@@ -326,7 +326,7 @@ The `signing-info` endpoint becomes unreliable beyond 24-hour windows. Requests 
 
 ---
 
-## 8. Proxy Admin and Upgrade Authority (EDA-E02 supplementary)
+## Proxy Admin and Upgrade Authority (EDA-E02 supplementary)
 
 All 12 upgradeable proxy contracts share a single ProxyAdmin, which is owned by the same DA Ops Multisig.
 
@@ -369,7 +369,7 @@ All 12 proxies share a single ProxyAdmin (`0x8247ef...2e99`), owned by the DA Op
 
 ---
 
-## 9. Unpauser and Pauser Structure (EDA-E02 supplementary)
+## Unpauser and Pauser Structure (EDA-E02 supplementary)
 
 The pause/unpause authority is separated from the DA Ops Multisig via a dedicated PauserRegistry.
 
@@ -442,7 +442,7 @@ The Unpauser Safe has never executed an `execTransaction` (nonce = 30 from setup
 
 ---
 
-## 10. Dispersal Client Centralization (EDA-D06 supplementary)
+## Dispersal Client Centralization (EDA-D06 supplementary)
 
 Analysis of 3,695 blobs from the DataAPI `blobs/feed` endpoint reveals extreme dispersal concentration.
 
@@ -479,7 +479,7 @@ The reservation was set by the DA Ops Multisig via `setReservation()` on Payment
 
 ---
 
-## 11. Relay Latency Spike Observation (EDA-D06 supplementary)
+## Relay Latency Spike Observation (EDA-D06 supplementary)
 
 A naturally occurring latency inflation event on the single relay was observed by the BONDA prober.
 

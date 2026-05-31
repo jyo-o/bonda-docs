@@ -42,7 +42,7 @@ At mainnet prices as of 2026-05-26, with `minimum_gas_price=0.002 utia/gas` conf
 
 ## Proof of Concept
 
-No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app and go-square codebases combined with on-chain gas parameter verification. See [Verification Evidence](../evidence.md#id-3.-gas-and-blockspace-parameters-cel-d02-cel-d13) for gas price and cost calculations.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app and go-square codebases combined with on-chain gas parameter verification. See [Verification Evidence](../evidence.md#gas-and-blockspace-parameters-cel-d02-cel-d13) for gas price and cost calculations.
 
 ## Impact
 
