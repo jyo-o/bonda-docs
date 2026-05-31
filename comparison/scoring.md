@@ -33,14 +33,14 @@ The two highest-scoring threats (CEL-G01 at 8.7, AVL-E03 at 8.2) both involve Sc
 
 ## Average CVSS Score per DA
 
-| DA Protocol | Average | Min | Max | Threat Count |
+| DA Protocol | Average | Min | Max | Scored / Total |
 |---|---|---|---|---|
-| Celestia | 6.1 | 3.7 | 8.7 | 12 |
-| EigenDA | 6.1 | 3.5 | 7.5 | 13 |
-| Avail | 4.9 | 2.1 | 8.2 | 9 |
-| Ethereum / PeerDAS | 4.1 | 3.7 | 6.5 | 11 |
+| Celestia | 6.1 | 3.7 | 8.7 | 12 / 12 |
+| EigenDA | 6.1 | 3.5 | 7.5 | 13 / 13 |
+| Avail | 4.9 | 2.1 | 8.2 | 9 / 9 |
+| Ethereum / PeerDAS | 5.3 | 5.3 | 5.3 | 1 / 4 |
 
-Celestia's higher average reflects governance-level risks and bridge vulnerabilities that trigger Scope Change (S:C) in CVSS scoring. Avail's average is moderated by many bridge-layer threats requiring multisig compromise (AC:H, AV:P), which penalizes exploitability.
+Celestia's higher average reflects governance-level risks and bridge vulnerabilities that trigger Scope Change (S:C) in CVSS scoring. Avail's average is moderated by many bridge-layer threats requiring multisig compromise (AC:H, AV:P), which penalizes exploitability. Only 1 of 4 Ethereum findings has a CVSS score; the other 3 use qualitative severity classifications from external audit reports.
 
 ## CVSS Severity Distribution
 
@@ -48,8 +48,10 @@ Celestia's higher average reflects governance-level risks and bridge vulnerabili
 |---|---|---|---|---|---|
 | Critical (9.0-10.0) | 0 | 0 | 0 | 0 | 0 |
 | High (7.0-8.9) | 2 | 4 | 2 | 0 | 8 |
-| Medium (4.0-6.9) | 9 | 6 | 4 | 4 | 23 |
-| Low (0.1-3.9) | 2 | 2 | 3 | 7 | 14 |
-| Informational (0.0) | 0 | 0 | 0 | 0 | 0 |
+| Medium (4.0-6.9) | 9 | 6 | 4 | 1 | 20 |
+| Low (0.1-3.9) | 2 | 2 | 3 | 0 | 7 |
+| Unscored | 0 | 0 | 0 | 3 | 3 |
+
+Three Ethereum findings use qualitative severity classifications from external audit reports: 2 Defense-in-Depth and 1 Informational. These are not scored on the CVSS scale.
 
 No threats reach CVSS Critical (9.0+). This is consistent with the threat landscape: DA layers do not directly custody user funds, and most attacks require either multisig compromise (PR:H) or high complexity (AC:H), both of which cap the exploitability sub-score.

@@ -34,11 +34,11 @@ The practical consequence is that an L2 builder reading the slashing documentati
 
 ## Proof of Concept
 
-Mainnet slashing parameters were confirmed via `celestia-rest.publicnode.com`: `min_signed_per_window=0.001`, `signed_blocks_window=10000`. These directly contradict the documented values of "25% of 5,000 blocks" on `docs.celestia.org`.
+Mainnet slashing parameters were confirmed via `celestia-rest.publicnode.com`. See [Verification Evidence](../evidence.md#id-2.-validator-set-and-slashing-parameters-cel-g01-cel-g02-cel-d04) for full parameter data. The actual values directly contradict the documented values of "25% of 5,000 blocks" on `docs.celestia.org`.
 
 ## Impact
 
-Downstream security design errors in L2 rollups and incorrect academic analyses. The risk is proportional to how widely the stale documentation is referenced. Specific stale surfaces include `fraud_proofs.md` (claims BEFPs enforce DAS), `docs.celestia.org` slashing page (states 25% of 5,000 blocks when actual is 0.1% of 10,000), and CIP-019 (claims the security model is unchanged).
+Downstream security design errors in L2 rollups and incorrect academic analyses. The risk is proportional to how widely the stale documentation is referenced. Specific stale surfaces include `fraud_proofs.md` which claims BEFPs enforce DAS, the `docs.celestia.org` slashing page which states 25% of 5,000 blocks while the actual value is 0.1% of 10,000, and CIP-019 which claims the security model is unchanged.
 
 ### CVSS 3.1
 
@@ -58,6 +58,6 @@ Downstream security design errors in L2 rollups and incorrect academic analyses.
 
 ## Recommendation
 
-1. Make documentation PRs mandatory for code PRs that change safety-relevant parameters or models, enforced via CI gate (e.g., require a `docs-updated` label or linked documentation PR before merge).
+1. Make documentation PRs mandatory for code PRs that change safety-relevant parameters or models, enforced via CI gate. For example, require a `docs-updated` label or linked documentation PR before merge.
 2. Add deprecation banners to all identified stale documentation surfaces, including `fraud_proofs.md`, CIP-019, and the slashing page on `docs.celestia.org`.
 3. Conduct quarterly stale documentation audits to catch drift before it accumulates, comparing on-chain parameters against documented values.

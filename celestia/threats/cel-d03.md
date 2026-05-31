@@ -13,43 +13,67 @@ The SHREX peer manager maintains a `blacklistedHashes` map (`map[string]bool`) t
 The unbounded growth is caused by a cleanup function that adds to the blacklist but never removes from it:
 
 ```go
-// celestia-node/share/shwap/p2p/shrex/peers/manager.go:78
-// @audit blacklistedHashes map[string]bool declaration — no deletion path exists
+// celestia-node/share/shwap/p2p/shrex/peers/manager.go — Manager struct
+// @audit blacklistedHashes has no deletion path anywhere in the codebase
 // https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
+type Manager struct {
+    // ...
+    blacklistedHashes map[string]bool // @audit grows without bound
+    // ...
+}
 ```
 
 ```go
-// celestia-node/share/shwap/p2p/shrex/peers/manager.go:523
-// @audit cleanUp function: the ONLY write path that sets blacklistedHashes[h]=true
+// celestia-node/share/shwap/p2p/shrex/peers/manager.go — cleanUp
+// @audit The ONLY write path: sets blacklistedHashes[h]=true, never deletes
 // https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
-```
-
-```go
-// celestia-node/share/shwap/p2p/shrex/peers/manager.go:504,511,517
-// @audit delete calls apply only to m.pools, NOT to blacklistedHashes
-// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
+func (m *Manager) cleanUp() []peer.ID {
+    // ...
+    for h, p := range m.pools {
+        if p.isValidatedDataHash.Load() {
+            if p.height < m.storeFrom.Load() {
+                delete(m.pools, h)   // @audit deletes pool, NOT blacklistedHashes
+            }
+            continue
+        }
+        if time.Since(p.createdAt) > m.params.PoolValidationTimeout {
+            delete(m.pools, h)       // @audit deletes pool
+            m.blacklistedHashes[h] = true  // @audit adds to blacklist — never removed
+            for _, peer := range p.peersList {
+                addToBlackList[peer] = struct{}{}
+            }
+        }
+    }
+    // ...
+}
 ```
 
 The shrexsub message validation is insufficient to prevent fake hash injection:
 
 ```go
-// celestia-node/share/shwap/p2p/shrex/shrexsub/pubsub.go:114
-// @audit Message validation checks only: height != 0, EDS non-empty, hash length == 32
+// celestia-node/share/shwap/p2p/shrex/shrexsub/pubsub.go — validate
+// @audit Only checks height != 0, non-empty EDS, and hash length == 32
 // @audit Does NOT verify whether the DataHash exists on-chain
 // https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/shrexsub/pubsub.go
+func (v ValidatorFn) validate(ctx context.Context, p peer.ID, msg *pubsub.Message) pubsub.ValidationResult {
+    var pbmsg pb.RecentEDSNotification
+    if err := pbmsg.Unmarshal(msg.Data); err != nil {
+        return pubsub.ValidationReject
+    }
+    n := Notification{DataHash: pbmsg.DataHash, Height: pbmsg.Height}
+    if n.Height == 0 || n.DataHash.IsEmptyEDS() || n.DataHash.Validate() != nil {
+        return pubsub.ValidationReject
+        // @audit Validate() checks only len==32 — any 32-byte value passes
+    }
+    return v(ctx, p, n)
+}
 ```
 
-```go
-// celestia-node/share/root.go:28-33
-// @audit DataHash.Validate checks only len==32
-// https://github.com/celestiaorg/celestia-node/blob/main/share/root.go
-```
-
-Bridge nodes are not affected because they do not use the `WithShrexSubPools` path (`celestia-node/nodebuilder/share/p2p_constructors.go:58`). The attack targets Light nodes exclusively. Since `EnableBlackListing` defaults to `false` (see CEL-D06), the attacking peer is never blocked and can inject hashes indefinitely.
+Bridge nodes are not affected because they do not use the `WithShrexSubPools` path at `celestia-node/nodebuilder/share/p2p_constructors.go:58`. The attack targets Light nodes exclusively. Since `EnableBlackListing` defaults to `false` (see CEL-D06), the attacking peer is never blocked and can inject hashes indefinitely.
 
 ## Proof of Concept
 
-Local unit PoC confirmed: N unique fake hashes injected, after `cleanUp` the `blacklistedHashes` length increases by N while pools are deleted. Isolated Light node network PoC is feasible but was not executed.
+Local unit PoC confirmed. See [Verification Evidence](../evidence.md#cel-d03-blacklistedhashes-growth-poc_verified) for details. N unique fake hashes were injected; after `cleanUp`, the `blacklistedHashes` map length increased by N while pools were correctly deleted. Isolated Light node network PoC is feasible but was not executed.
 
 ## Impact
 

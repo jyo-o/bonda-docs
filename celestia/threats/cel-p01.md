@@ -43,7 +43,7 @@ BEFPs previously served as an indirect coordination path — fraud proofs propag
 - `celestia-core/light/verifier.go:14-16` -- `DefaultTrustLevel=Fraction{1,3}`
 - `celestia-node/nodebuilder/share/module.go:134-144` -- shrexsub no-op stub for light nodes
 
-The threat is not the DAS-only model itself (breaking BFT assumptions to exploit it is unrealistic), but the fact that the documentation spoofs a stronger security guarantee than the protocol actually provides, leading to potential downstream security model contamination.
+The threat is not the DAS-only model itself — breaking BFT assumptions to exploit it is unrealistic. The threat is that the documentation spoofs a stronger security guarantee than the protocol actually provides, leading to potential downstream security model contamination.
 
 ## Proof of Concept
 

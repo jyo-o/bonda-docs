@@ -13,29 +13,55 @@ In celestia-app, the `handleBlobCheckTx` function executes `ValidateBlobTx` and 
 The ante handler chain in `celestia-app/app/ante/ante.go` runs in the order: `SetUpContext` -> `DeductFee` -> `SigVerify` -> `MinGasPFB` -> `BlobShare`. However, commitment computation occurs before this entire chain:
 
 ```go
-// celestia-app/app/check_tx.go
-// @audit handleBlobCheckTx calls ValidateBlobTx before the ante handler chain
-// @audit This triggers CreateParallelCommitments before any gas deduction
+// celestia-app/app/check_tx.go — handleBlobCheckTx
+// @audit ValidateBlobTx runs BEFORE the ante handler chain (forwardCheckTx)
+// @audit Commitment computation happens before any gas deduction or signature check
 // https://github.com/celestiaorg/celestia-app/blob/main/app/check_tx.go
+func (app *App) handleBlobCheckTx(req *abci.RequestCheckTx, btx *blobtx.BlobTx) (*abci.ResponseCheckTx, error) {
+    baseReq := &abci.RequestCheckTx{Tx: btx.Tx, Type: req.GetType()}
+    case abci.CheckTxType_New:
+        if err := blobtypes.ValidateBlobTx(app.encodingConfig.TxConfig, btx, ...); err != nil {
+            return responseCheckTxWithEvents(err, ...), err
+        }
+        app.txCache.Set(btx.Tx, btx.Blobs)
+    // ...
+    return app.forwardCheckTx(baseReq, sdkTx) // @audit ante chain runs here, AFTER ValidateBlobTx
+}
 ```
 
 ```go
-// celestia-app/x/blob/types/payforblob.go
-// @audit ValidateBasic has no maximum blob count check
-// @audit Within MaxTxSize of 8 MiB, thousands of 1-byte blobs can be packed
-// https://github.com/celestiaorg/celestia-app/blob/main/x/blob/types/payforblob.go
-```
-
-```go
-// celestia-app/x/blob/types/blob_tx.go
-// @audit ValidateBlobTx calls CreateParallelCommitments
-// @audit Each blob triggers NMT subtree and Merkle root computation
+// celestia-app/x/blob/types/blob_tx.go — ValidateBlobTx
+// @audit CreateParallelCommitments computes NMT roots for ALL blobs using NumCPU*2 goroutines
 // https://github.com/celestiaorg/celestia-app/blob/main/x/blob/types/blob_tx.go
+func ValidateBlobTx(txcfg client.TxEncodingConfig, bTx *tx.BlobTx, ...) error {
+    msgPFB, err := ValidateBlobTxSkipCommitment(txcfg, bTx)
+    if err != nil {
+        return err
+    }
+    calculatedCommitments, err := inclusion.CreateParallelCommitments(
+        bTx.Blobs, merkle.HashFromByteSlices, subtreeRootThreshold, runtime.NumCPU()*2,
+    )
+    // ...
+}
+```
+
+```go
+// celestia-app/x/blob/types/payforblob.go — ValidateBasic
+// @audit No maximum blob count check — only validates arrays are non-empty and consistent
+// https://github.com/celestiaorg/celestia-app/blob/main/x/blob/types/payforblob.go
+func (msg *MsgPayForBlobs) ValidateBasic() error {
+    if len(msg.Namespaces) == 0 { return ErrNoNamespaces }
+    if len(msg.Namespaces) != len(msg.ShareVersions) || len(msg.Namespaces) != len(msg.BlobSizes) || ... {
+        return ErrMismatchedNumberOfPFBComponent.Wrapf(...)
+    }
+    // @audit No cap on len(msg.Namespaces) — thousands of 1-byte blobs accepted
+    return nil
+}
 ```
 
 The attack flow is:
 
-1. Attacker crafts a `BlobTx` containing thousands of 1-byte blobs (e.g., 1,000 blobs at approximately 70 KB total including metadata)
+1. Attacker crafts a `BlobTx` containing thousands of 1-byte blobs, for example 1,000 blobs at approximately 70 KB total
 2. Attacker sets an invalid signature or zero fee to ensure rejection
 3. Validator's `handleBlobCheckTx` runs `ValidateBlobTx` and `CreateParallelCommitments`, computing NMT commitments for all blobs
 4. The ante chain runs afterward and rejects the transaction
@@ -45,7 +71,7 @@ The attack is especially cheap because rejected transactions still trigger the f
 
 ## Proof of Concept
 
-No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app CheckTx handler and ante chain execution order.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app CheckTx handler and ante chain execution order. See [Verification Evidence](../evidence.md#id-3.-gas-and-blockspace-parameters-cel-d02-cel-d13) for gas parameter data.
 
 ## Impact
 

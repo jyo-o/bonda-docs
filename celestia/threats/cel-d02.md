@@ -35,14 +35,14 @@ Transaction inclusion follows fee-per-gas priority, and shares within the data s
 
 While a `MaxPFBMessages` cap was introduced in v9 (PR `celestia-app#6604`), it does not resolve the fundamental blockspace monopoly problem because a single PFB with maximum-size data is sufficient to consume a large portion of block capacity.
 
-At mainnet prices (2026-05-26), with `minimum_gas_price=0.002 utia/gas` (confirmed via `celestia-rest.publicnode.com/cosmos/base/node/v1beta1/config`):
+At mainnet prices as of 2026-05-26, with `minimum_gas_price=0.002 utia/gas` confirmed via `celestia-rest.publicnode.com/cosmos/base/node/v1beta1/config`:
 - A single 8 MiB PFB costs approximately 0.134 TIA (about $0.063)
 - Filling an entire block costs about $0.25
 - Sustaining the attack for one hour (600 blocks) costs roughly $151 before fee market response
 
 ## Proof of Concept
 
-No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app and go-square codebases combined with on-chain gas parameter verification via `celestia-rest.publicnode.com`.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app and go-square codebases combined with on-chain gas parameter verification. See [Verification Evidence](../evidence.md#id-3.-gas-and-blockspace-parameters-cel-d02-cel-d13) for gas price and cost calculations.
 
 ## Impact
 

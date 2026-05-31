@@ -60,11 +60,11 @@ exploited the key mismatch, causing a validator crash.
 The attack is reproducible end-to-end.
 ```
 
-**`unverified`** — ETH-T03 Gloas Data Column Inclusion Proof Omission:
+**`unverified`** — hypothetical example:
 ```
-Gloas fork is not yet implemented. Only design documents exist.
-The threat is identified from specification analysis, but no code
-or deployed system is available for verification.
+Target implementation does not yet exist. Only design documents
+are available. The threat is identified from specification analysis,
+but no code or deployed system is available for verification.
 ```
 
 ### Distribution Across Protocols
@@ -74,7 +74,8 @@ or deployed system is available for verification.
 | EigenDA  | 13 | 0 | 0 |
 | Celestia | 10 | 2 | 0 |
 | Avail    | 9  | 0 | 0 |
-| Ethereum | 9  | 0 | 2 |
+
+Ethereum findings use a separate `code_review` status because they are based on external audit report analysis with code-level reasoning. All 4 Ethereum findings carry this status and are not included in the table above.
 
 ---
 

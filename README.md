@@ -10,7 +10,7 @@ BONDA analyzes the security of four major DA protocols by combining STRIDE-based
 
 Data Availability is one of the most critical layers in the Ethereum rollup stack. Rollups post their transaction data to DA layers, and if that data becomes unavailable, users cannot verify rollup state or withdraw their funds. BONDA systematically identifies threats to these DA layers — from governance risks and bridge vulnerabilities to code-level bugs and protocol design gaps.
 
-This documentation covers **45 verified threats** across four protocols, each with detailed analysis, on-chain evidence, and severity scoring.
+This documentation covers **38 threats** across four protocols, each with detailed analysis, on-chain evidence, and severity scoring.
 
 ---
 
@@ -21,7 +21,7 @@ This documentation covers **45 verified threats** across four protocols, each wi
 | [**EigenDA**](eigenda/) | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 13 | High (7.5) |
 | [**Celestia**](celestia/) | Modular DA layer with CometBFT consensus and light client DAS | 12 | High (8.7) |
 | [**Avail**](avail/) | Substrate-based DA chain with VectorX bridge to Ethereum | 9 | High (8.2) |
-| [**Ethereum / PeerDAS**](ethereum/) | Ethereum's upcoming DA scaling upgrade with multi-client architecture | 11 | Medium (6.5) |
+| [**Ethereum / PeerDAS**](ethereum/) | KZG library and consensus client audit findings | 4 | Medium (5.3) |
 
 ---
 
@@ -29,10 +29,10 @@ This documentation covers **45 verified threats** across four protocols, each wi
 
 | Metric | Count |
 |--------|-------|
-| Total threats | 45 |
-| Verified | 41 |
+| Total threats | 38 |
+| Verified | 32 |
 | PoC verified | 2 |
-| Unverified | 2 |
+| Code review | 4 |
 
 All verification levels are explained in the [Verification Methodology](methodology/verification.md).
 
@@ -48,7 +48,7 @@ All verification levels are explained in the [Verification Methodology](methodol
 | [AVL-E03](avail/threats/avl-e03.md) | Avail | Deployer EOA still holds admin role on VectorX, enabling solo bridge upgrade in 2 transactions |
 | [CEL-E01](celestia/threats/cel-e01.md) | Celestia | SP1Blobstream bridge can be instantly upgraded by a 4-of-6 multisig with no timelock |
 | [EDA-T09](eigenda/threats/eda-t09.md) | EigenDA | Single EOA can eject up to 33% of operator stake within a 3-day window |
-| [CEL-P01](celestia/threats/cel-p01.md) | Celestia | DAS-only safety model after fraud proof removal |
+| [CEL-D13](celestia/threats/cel-d13.md) | Celestia | Pre-gas commitment computation with unlimited blob count in CheckTx |
 
 ---
 
@@ -58,7 +58,7 @@ All verification levels are explained in the [Verification Methodology](methodol
 - [EigenDA](eigenda/) — Disperser, Relay, Operator, and governance threats
 - [Celestia](celestia/) — Consensus, DAS, and Blobstream bridge threats
 - [Avail](avail/) — VectorX bridge, validator set, and governance threats
-- [Ethereum / PeerDAS](ethereum/) — Multi-client divergence, KZG, and custody group threats
+- [Ethereum / PeerDAS](ethereum/) — KZG library and consensus client audit findings
 
 ### By Topic
 - [Methodology](methodology/) — STRIDE framework, CVSS scoring, verification approach, terminology

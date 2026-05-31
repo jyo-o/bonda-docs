@@ -13,28 +13,40 @@ celestia-app's `TxCache` uses different keys for storing and deleting blob trans
 The key mismatch originates from the re-serialization of blob transactions during block building:
 
 ```go
-// celestia-app/app/check_tx.go:63
-// @audit txCache.Set(btx.Tx) stores using sha256 of inner SDK tx as key
+// celestia-app/app/check_tx.go — handleBlobCheckTx
+// @audit txCache.Set(btx.Tx, btx.Blobs) stores using sha256 of inner SDK tx as key
 // https://github.com/celestiaorg/celestia-app/blob/main/app/check_tx.go
+case abci.CheckTxType_New:
+    if err := blobtypes.ValidateBlobTx(app.encodingConfig.TxConfig, btx, appconsts.SubtreeRootThreshold, appconsts.Version); err != nil {
+        return responseCheckTxWithEvents(err, 0, 0, []abci.Event{}, false), err
+    }
+    app.txCache.Set(btx.Tx, btx.Blobs) // @audit key = sha256(btx.Tx) = sha256(inner SDK tx)
 ```
 
 ```go
-// celestia-app/app/app.go:589
-// @audit txCache.RemoveTransaction(tx) deletes using sha256 of full BlobTx key
+// celestia-app/app/app.go — FinalizeBlock
+// @audit RemoveTransaction uses sha256 of full BlobTx wire bytes, not inner SDK tx
 // https://github.com/celestiaorg/celestia-app/blob/main/app/app.go
+func (app *App) FinalizeBlock(req *abci.RequestFinalizeBlock) (*abci.ResponseFinalizeBlock, error) {
+    res, err := app.BaseApp.FinalizeBlock(req)
+    if err != nil {
+        return nil, err
+    }
+    for _, tx := range req.Txs {
+        app.txCache.RemoveTransaction(tx) // @audit key = sha256(tx) = sha256(full BlobTx wire bytes)
+    }
+    return res, nil
+}
 ```
 
 ```go
-// celestia-app/app/filtered_square_builder.go:193-197
-// @audit encodeBlobTxs re-serializes via MarshalBlobTx(innerTx, blobs...)
-// @audit This produces different wire bytes than the original inner SDK tx
-// https://github.com/celestiaorg/celestia-app/blob/main/app/filtered_square_builder.go
-```
-
-```go
-// celestia-app/app/tx_cache.go:23-27
+// celestia-app/app/tx_cache.go — getTxKey
 // @audit sha256-based key generation — sha256(full BlobTx) != sha256(inner SDK tx)
 // https://github.com/celestiaorg/celestia-app/blob/main/app/tx_cache.go
+func (c *TxCache) getTxKey(tx []byte) string {
+    hash := sha256.Sum256(tx)
+    return string(hash[:])
+}
 ```
 
 The `TxCache` is implemented as a `sync.Map` with no capacity limit, no TTL, and no separate cleanup mechanism. The only recovery is a node restart.
@@ -45,11 +57,13 @@ Note: `process_proposal.go:251` correctly queries using the inner tx key via `Ex
 
 ## Proof of Concept
 
-- **TestTxCacheLeakProductionPath**: `CheckTx` followed by `FinalizeBlock(wrappedTx)` confirmed `fromCache` still returns `true` (cache not deleted). Test passed.
-- **Rejected transaction persistence verified**: future sequence blob tx (`checktx_code=32`) and zero-fee blob tx (`checktx_code=11`) both leave cache entries.
-- **Per-entry memory**: measured at approximately 204 bytes.
+End-to-end reproduction confirmed the key mismatch. See [Verification Evidence](../evidence.md#cel-d17-txcache-key-mismatch-poc_verified) for full test results.
+
+- **TestTxCacheLeakProductionPath**: `CheckTx` followed by `FinalizeBlock(wrappedTx)` confirmed `fromCache` still returns `true`. Cache entry was not deleted.
+- **Rejected transaction persistence verified**: future sequence blob tx and zero-fee blob tx both leave permanent cache entries.
+- **Per-entry memory**: approximately 204 bytes.
+- **Projected leak rate**: approximately 1 GB per 160 seconds at 100 Mbps rejected transaction rate.
 - **Existing test suite gap**: existing tests do not reproduce the production path because they pass `blobTx.Tx` directly to `FinalizeBlock` instead of the wrapped `BlobTx`.
-- **Projected leak rate**: at approximately 204 bytes per entry and 100 Mbps rejected transaction rate, memory leaks at roughly 1 GB every 160 seconds.
 
 ## Impact
 

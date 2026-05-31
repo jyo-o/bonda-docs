@@ -29,10 +29,25 @@ Six of the top 8 validators are KYC-regulated entities operating under jurisdict
 When targeted blocks are proposed, compelled validators cast prevote-nil, preventing the block from reaching the two-thirds prevote threshold required for finalization. The protocol cannot distinguish between honest nil votes (e.g., proposal not received) and malicious censorship because there is no nil-vote evidence type in the evidence subsystem:
 
 ```go
-// celestia-core/types/evidence.go:22-219
-// @audit Only DuplicateVoteEvidence and LightClientAttackEvidence are implemented
-// @audit No nil-vote evidence type exists
+// celestia-core/types/evidence.go — only two evidence types exist
+// @audit No nil-vote evidence type — prevote-nil censorship is undetectable
 // https://github.com/celestiaorg/celestia-core/blob/main/types/evidence.go
+type DuplicateVoteEvidence struct {
+    VoteA            *Vote
+    VoteB            *Vote
+    TotalVotingPower int64
+    ValidatorPower   int64
+    Timestamp        time.Time
+}
+
+type LightClientAttackEvidence struct {
+    ConflictingBlock    *LightBlock
+    CommonHeight        int64
+    ByzantineValidators []*Validator
+    TotalVotingPower    int64
+    Timestamp           time.Time
+}
+// @audit No NilVoteEvidence type — honest and malicious prevote-nil are indistinguishable
 ```
 
 ```go
@@ -52,7 +67,7 @@ Because validators act under legal obligation, there is no economic deterrent or
 
 ## Proof of Concept
 
-No proof of concept was conducted for this threat. Evidence is based on on-chain staking data cross-verified across three independent endpoints (publicnode, polkachu, pops.one) as of 2026-05-24.
+No exploit reproduction was conducted. Evidence is based on on-chain staking data cross-verified across three independent endpoints as of 2026-05-24. See [Verification Evidence](../evidence.md#id-2.-validator-set-and-slashing-parameters-cel-g01-cel-g02-cel-d04) for full parameter data.
 
 ## Impact
 

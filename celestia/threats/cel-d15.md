@@ -13,14 +13,34 @@ The `Subscribe` method in celestia-node's `blob/service.go` contains an infinite
 The retry loop in the `Subscribe` method uses a bare `for` loop with no delay between iterations:
 
 ```go
-// celestia-node/blob/service.go
-// @audit Subscribe method contains the pattern:
-// for {
-//     blobs, err = s.getAll(ctx, header, []Namespace{ns})
-//     if err == nil { break }
-// }
-// @audit No sleep or backoff between retries — immediate retry on failure
+// celestia-node/blob/service.go — Subscribe method inner retry loop
+// @audit Bare for loop with no sleep, backoff, or retry limit
 // https://github.com/celestiaorg/celestia-node/blob/main/blob/service.go
+go func() {
+    defer close(blobCh)
+    for {
+        select {
+        case header, ok := <-headerCh:
+            // ...
+            var blobs []*Blob
+            var err error
+            for {
+                blobs, err = s.getAll(ctx, header, []libshare.Namespace{ns})
+                if ctx.Err() != nil {
+                    return
+                }
+                if err == nil {
+                    break
+                }
+                // @audit No sleep, no backoff — immediate retry on failure
+                // @audit CPU burns at 100% until getAll succeeds or context is cancelled
+            }
+            // ...
+        case <-ctx.Done():
+            return
+        }
+    }
+}()
 ```
 
 Under normal conditions, `getAll` succeeds and the loop terminates quickly. However, when a malicious full node returns intermittent errors:

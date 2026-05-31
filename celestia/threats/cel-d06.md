@@ -13,22 +13,38 @@ The SHREX peer manager's `EnableBlackListing` flag defaults to `false`, meaning 
 The blacklisting mechanism exists in code but is disabled by default:
 
 ```go
-// celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62
-// @audit EnableBlackListing defaults to false
-// @audit TODO comment: "enable blacklisting once all related issues are resolved"
+// celestia-node/share/shwap/p2p/shrex/peers/options.go — DefaultParameters
+// @audit EnableBlackListing defaults to false with explicit TODO
 // https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/options.go
+func DefaultParameters() *Parameters {
+    return &Parameters{
+        PoolValidationTimeout: 2 * time.Minute,
+        PeerCooldown:          3 * time.Second,
+        GcInterval:            time.Second * 30,
+        // blacklisting is off by default
+        // TODO(@walldiss): enable blacklisting once all related issues are resolved
+        EnableBlackListing: false,
+    }
+}
 ```
 
-When `EnableBlackListing` is `false`, the `blacklistPeers` function skips the actual blocking:
+When `EnableBlackListing` is `false`, the `blacklistPeers` function logs but skips actual blocking:
 
 ```go
-// celestia-node/share/shwap/p2p/shrex/peers/manager.go:416-438
-// @audit blacklistPeers function: when EnableBlackListing is false,
-// @audit BlockPeer() and ClosePeer() are skipped
-
-// celestia-node/share/shwap/p2p/shrex/peers/manager.go:423-425
-// @audit Gating condition: if !m.params.EnableBlackListing { continue }
+// celestia-node/share/shwap/p2p/shrex/peers/manager.go — blacklistPeers
+// @audit When EnableBlackListing is false, BlockPeer() and ClosePeer() are skipped
 // https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
+func (m *Manager) blacklistPeers(reason blacklistPeerReason, peerIDs ...peer.ID) {
+    for _, peerID := range peerIDs {
+        log.Debugw("blacklisting peer", "peer", peerID.String(), "reason", reason)
+        if !m.params.EnableBlackListing {
+            continue // @audit logs the event but does NOT block or disconnect
+        }
+        m.nodes.remove(peerID)
+        m.connGater.BlockPeer(peerID)
+        m.host.Network().ClosePeer(peerID)
+    }
+}
 ```
 
 Verified at commit `celestia-node f8cefbe3e5bd3e144a414cb2140dd223ec6191c6`.

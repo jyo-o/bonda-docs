@@ -13,9 +13,12 @@ A selective disclosure attack exploits Celestia's non-anonymous P2P transport to
 The attack leverages the non-anonymous nature of Celestia's P2P layer, which allows an attacker to identify which node is making a sample request and provide targeted responses:
 
 ```go
-// celestia-node/share/availability/light/options.go:10
-// @audit DefaultSampleAmount=16 — light nodes request only 16 random samples
+// celestia-node/share/availability/light/options.go
+// @audit Light nodes sample only 16 random cells before declaring a block available
 // https://github.com/celestiaorg/celestia-node/blob/main/share/availability/light/options.go
+var (
+    DefaultSampleAmount uint = 16
+)
 ```
 
 The attack flow:
@@ -30,10 +33,16 @@ The attack flow:
 The defense assumption of peer blacklisting is weakened by `EnableBlackListing` defaulting to `false` (see CEL-D06):
 
 ```go
-// celestia-node/share/shwap/p2p/shrex/peers/options.go:60-62
-// @audit EnableBlackListing defaults to false
-// @audit Same Sybil peer can reconnect without being blocked
+// celestia-node/share/shwap/p2p/shrex/peers/options.go — DefaultParameters
+// @audit EnableBlackListing defaults to false — Sybil peers reconnect without being blocked
 // https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/options.go
+func DefaultParameters() *Parameters {
+    return &Parameters{
+        // ...
+        EnableBlackListing: false,
+        // TODO(@walldiss): enable blacklisting once all related issues are resolved
+    }
+}
 ```
 
 According to research by Common Prefix (2022-11-09), with 16 samples and 25% data withholding, the mathematical analysis shows:

@@ -13,28 +13,42 @@ Three independent code defects exist in celestia-core's evidence processing: a h
 **Case #1: Hash Truncation Off-by-One**
 
 ```go
-// celestia-core/types/evidence.go:321-328
-// @audit Hash() off-by-one: line 325 uses copy(bz[:tmhash.Size-1]) instead of tmhash.Size
-// @audit Copies only 31 of 32 bytes from LightClientAttackEvidence
+// celestia-core/types/evidence.go — LightClientAttackEvidence.Hash()
+// @audit Off-by-one: copies 31 of 32 bytes, leaving bz[31] as zero
 // @audit Collision probability on 248-bit hash is effectively zero — no security consequence
 // https://github.com/celestiaorg/celestia-core/blob/main/types/evidence.go
+func (l *LightClientAttackEvidence) Hash() []byte {
+    buf := make([]byte, binary.MaxVarintLen64)
+    n := binary.PutVarint(buf, l.CommonHeight)
+    bz := make([]byte, tmhash.Size+n)
+    copy(bz[:tmhash.Size-1], l.ConflictingBlock.Hash().Bytes())
+    //         ^^^^^^^^^^^^ @audit should be tmhash.Size (32), not tmhash.Size-1 (31)
+    copy(bz[tmhash.Size:], buf)
+    return tmhash.Sum(bz)
+}
 ```
 
 **Case #2: Unbounded Consensus Buffer**
 
 ```go
-// celestia-core/evidence/pool.go:47,179-186,459-537
-// @audit consensusBuffer has no cap on entries — unbounded append
-// @audit However, buffer drains every block (~6 seconds)
-// @audit ed25519 signature verification is CPU bottleneck: ~500-1000 verifications/sec
-// @audit This limits buffer to ~3,000-6,000 entries (~3 MB) per drain cycle — OOM impossible
+// celestia-core/evidence/pool.go — Pool struct and ReportConflictingVotes
+// @audit consensusBuffer has no cap — unbounded append
+// @audit Buffer drains every block (~6s); CPU bottleneck limits to ~3,000-6,000 entries
 // https://github.com/celestiaorg/celestia-core/blob/main/evidence/pool.go
-```
+type Pool struct {
+    // ...
+    consensusBuffer []duplicateVoteSet // @audit no size limit
+    // ...
+}
 
-```go
-// celestia-core/consensus/state.go:2395
-// @audit ErrVoteConflictingVotes handler feeds the consensusBuffer
-// https://github.com/celestiaorg/celestia-core/blob/main/consensus/state.go
+func (evpool *Pool) ReportConflictingVotes(voteA, voteB *types.Vote) {
+    evpool.mtx.Lock()
+    defer evpool.mtx.Unlock()
+    evpool.consensusBuffer = append(evpool.consensusBuffer, duplicateVoteSet{
+        VoteA: voteA, VoteB: voteB,
+    })
+    // @audit unbounded append — drained in processConsensusBuffer each block
+}
 ```
 
 **Case #3: Evidence Expiry Gap**
@@ -52,7 +66,7 @@ Mainnet consensus parameters confirm: `max_age_num_blocks=242,640`, `max_age_dur
 
 ## Proof of Concept
 
-No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-core evidence subsystem and mainnet consensus parameter verification via `celestia-rest.publicnode.com`.
+No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-core evidence subsystem and mainnet consensus parameter verification. See [Verification Evidence](../evidence.md#id-2.-validator-set-and-slashing-parameters-cel-g01-cel-g02-cel-d04) for the full consensus parameter query results.
 
 ## Impact
 

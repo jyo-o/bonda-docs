@@ -69,14 +69,14 @@ DAS is the theoretical foundation for trust-minimized DA verification, but imple
 | EigenDA | EDA-P02 | **No DAS by design.** Spec explicitly states DAS is not used. Clients must trust the quorum's BLS aggregate signature (55% stake threshold). Client-side random shuffle is load balancing, not cryptographic sampling. |
 | Avail | AVL-P02 | **DAS implemented, reconstruction incomplete.** Light client DAS achieves 99.84% confidence (Observatory measured). However, block reconstruction protocol is still in development -- full recovery from DAS samples alone is not yet possible. |
 | Celestia | CEL-P01 | **DAS-only model after BEFP removal.** BEFP (Bad Encoding Fraud Proofs) were removed as dead code in PR #4934 (April 2026). Light nodes now rely solely on 16-sample DAS for availability, with no correctness verification. Documentation still claims BEFP+DAS model. |
-| Ethereum | (PeerDAS) | **PeerDAS active in Fulu fork.** Column-based sampling with custody groups. Most mature DAS implementation, but cross-client reconstruction failure modes exist (ETH-E01, ETH-D02). |
+| Ethereum | — | **PeerDAS active in Fulu fork.** Column-based sampling with custody groups. Most mature DAS implementation among all assessed protocols. |
 
 ## Pattern 6: KZG Trusted Setup Risks
 
-Two protocols share exposure to KZG trusted setup assumptions.
+KZG-based protocols share exposure to trusted setup assumptions.
 
 | Protocol | Threat ID | Setup Ceremony | Risk |
 |---|---|---|---|
-| Ethereum | ETH-T02 | Ethereum KZG ceremony | Setup file is go:embed + sync.Once protected (runtime replacement impossible). Risk is limited to build-time supply chain compromise. |
+| Ethereum | ETH-R01 | Ethereum KZG ceremony | `load_trusted_setup` deserializes G1/G2 points without subgroup membership checks, creating a validation asymmetry with the runtime input path. Risk is limited to build-time supply chain compromise. |
 
-Both rely on the 1-of-N honest participant assumption, but Ethereum's implementation is more hardened against runtime tampering.
+The setup relies on the 1-of-N honest participant assumption, and Ethereum's implementation embeds setup bytes at build time, preventing runtime tampering.

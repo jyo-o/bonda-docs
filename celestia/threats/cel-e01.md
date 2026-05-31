@@ -51,7 +51,7 @@ As of 2026-05-24, the bridge has zero actual users. All 12,109 contract transact
 
 ## Proof of Concept
 
-On-chain verification was conducted:
+On-chain verification was conducted. See [Verification Evidence](../evidence.md#id-1.-sp1blobstream-bridge-verification-cel-e01) for full commands and results.
 
 - `eth_call hasRole(DEFAULT_ADMIN_ROLE, 0x8bF3...18E6)` returns `true`
 - `eth_call hasRole(TIMELOCK_ROLE, 0x8bF3...18E6)` returns `true`
@@ -87,4 +87,4 @@ Complete compromise of the Blobstream DA bridge, enabling arbitrary proof accept
 1. Route `updateVerifier` and `updateProgramVkey` through a separate `TIMELOCK` role with a minimum delay (e.g., 48 hours) and add event emission for all state-changing operations.
 2. Add `require(_height > latestBlock)` to `updateGenesisState` to enforce height monotonicity and prevent validator set rollback.
 3. Add `chain_id` and `genesis_hash` fields to the `ProofOutputs` struct to prevent cross-deployment proof reuse.
-4. Separate the `GUARDIAN` role (for freeze/emergency operations) from the `TIMELOCK` role (for upgrades and parameter changes).
+4. Separate the `GUARDIAN` role for freeze and emergency operations from the `TIMELOCK` role for upgrades and parameter changes.

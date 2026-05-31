@@ -45,6 +45,7 @@
 * [CEL-D04: Evidence Subsystem Defects](celestia/threats/cel-d04.md)
 * [CEL-S01: DAS Selective Disclosure](celestia/threats/cel-s01.md)
 * [Attack Chains](celestia/attack-chains.md)
+* [Verification Evidence](celestia/evidence.md)
 
 ## Avail
 

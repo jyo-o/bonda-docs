@@ -74,3 +74,7 @@ When a blob transaction enters the mempool, CheckTx caches it using the hash of 
 Several of these threats combine into compound attack chains that are more dangerous than any single threat alone. For example, disabled peer blacklisting (CEL-D06) amplifies both the DataHash memory leak (CEL-D03) and DAS selective disclosure (CEL-S01) because malicious peers can reconnect indefinitely after being detected.
 
 For the full attack chain analysis, see [Attack Chains](attack-chains.md).
+
+## Verification Evidence
+
+On-chain bridge verification, chain parameter queries, and PoC test results are documented in [Verification Evidence](evidence.md).
