@@ -1,7 +1,7 @@
 # EDA-E02: Single Multisig Controls All Eight Core Contracts Without Timelock
 
 {% hint style="info" %}
-**Severity**: Medium (6.3/10) · **STRIDE**: E · **Status**: Verified
+**Severity**: Medium (6.3/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary

@@ -1,7 +1,7 @@
 # EDA-P01: Operator Slashing Not Implemented Creates Asymmetric Honesty Incentives
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: Verified
+**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary

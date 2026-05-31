@@ -1,7 +1,7 @@
 # CEL-D04: Three Code Defects in the Evidence Subsystem
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: D · **Status**: code_verified
+**Severity**: Low (3.7/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

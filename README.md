@@ -30,11 +30,9 @@ This documentation covers **45 verified threats** across four protocols, each wi
 | Metric | Count |
 |--------|-------|
 | Total threats | 45 |
-| Verified on mainnet | 29 |
+| Verified | 41 |
 | PoC verified | 2 |
-| Code verified | 10 |
-| Partial evidence | 3 |
-| Unverified | 1 |
+| Unverified | 2 |
 
 All verification levels are explained in the [Verification Methodology](methodology/verification.md).
 

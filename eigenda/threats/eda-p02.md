@@ -1,7 +1,7 @@
 # EDA-P02: Absence of Data Availability Sampling Forces Full Quorum Trust
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: Code Verified
+**Severity**: Medium (6.5/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary

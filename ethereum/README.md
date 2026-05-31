@@ -2,7 +2,7 @@
 
 > **How to Read This Section**
 >
-> Each threat is identified by an SID like `ETH-S01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `verified` means confirmed through specification and documentation review, `code_verified` means confirmed by reading the actual source code, and `partial` means the threat is identified but not yet fully verified across all relevant implementations.
+> Each threat is identified by an SID like `ETH-S01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `verified` means confirmed through source code analysis, specification review, or on-chain queries; `poc_verified` means the attack was reproduced in a controlled environment; and `unverified` means the implementation does not yet exist for verification.
 
 ## Architecture
 
@@ -33,9 +33,8 @@ Data integrity in PeerDAS relies on KZG commitments, a cryptographic proof schem
 ## Key Numbers
 
 - **11** threats identified across the Ethereum DA stack
-- **6** verified through specification and documentation review
-- **3** code_verified through direct source code analysis
-- **2** partial, identified but not yet fully verified across all implementations
+- **9** verified through specification review and source code analysis
+- **2** unverified, target implementation does not yet exist
 - **Medium (5.3)** is the highest severity found
 - **6** source code repositories analyzed
 - **1** multi-client behavioral divergence discovered (ETH-E01: Lighthouse vs Prysm)
@@ -50,15 +49,15 @@ Data integrity in PeerDAS relies on KZG commitments, a cryptographic proof schem
 |-----|--------|----------|--------|
 | [ETH-S01](threats/eth-s01.md) | Testing API JWT Authentication Missing | Medium (5.3) | verified |
 | [ETH-S02](threats/eth-s02.md) | Custody Group Node ID Grinding | Medium (5.3) | verified |
-| [ETH-T01](threats/eth-t01.md) | Blob Fee Denominator Fork Dependency | Low (3.7) | code_verified |
+| [ETH-T01](threats/eth-t01.md) | Blob Fee Denominator Fork Dependency | Low (3.7) | verified |
 | [ETH-T02](threats/eth-t02.md) | KZG Trusted Setup File Replacement | Low (2.5) | verified |
-| [ETH-T03](threats/eth-t03.md) | Data Column Inclusion Proof Omission | Low (2.5) | code_verified |
+| [ETH-T03](threats/eth-t03.md) | Data Column Inclusion Proof Omission | Low (2.5) | unverified |
 | [ETH-T04](threats/eth-t04.md) | Cell Index Bounds Check Asymmetry | Low (1.3) | verified |
-| [ETH-T05](threats/eth-t05.md) | Column Proof Verification Gap | Low (1.3) | verified |
+| [ETH-T05](threats/eth-t05.md) | Column Proof Verification Gap | Low (1.3) | unverified |
 | [ETH-R01](threats/eth-r01.md) | Blob/DataColumn Equivocation Detection Failure | Low (0.8) | verified |
-| [ETH-D01](threats/eth-d01.md) | Per-Account Blobpool Exhaustion | Low (0.8) | code_verified |
-| [ETH-D02](threats/eth-d02.md) | Verified Column Discard on Reconstruction Failure | Low (0.6) | partial |
-| [ETH-E01](threats/eth-e01.md) | Reconstruction Failure Mode Mismatch (Lighthouse vs Prysm) | Low (0.6) | partial |
+| [ETH-D01](threats/eth-d01.md) | Per-Account Blobpool Exhaustion | Low (0.8) | verified |
+| [ETH-D02](threats/eth-d02.md) | Verified Column Discard on Reconstruction Failure | Low (0.6) | verified |
+| [ETH-E01](threats/eth-e01.md) | Reconstruction Failure Mode Mismatch (Lighthouse vs Prysm) | Low (0.6) | verified |
 
 ## Key Findings
 

@@ -1,7 +1,7 @@
 # AVL-D02: Low Validator Utilization Concentrates Consensus Power
 
 {% hint style="info" %}
-**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: Verified
+**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

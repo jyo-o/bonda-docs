@@ -1,7 +1,7 @@
 # AVL-E01: ZK Verifier Route Manipulation via SP1VerifierGateway Multisig
 
 {% hint style="info" %}
-**Severity**: Medium (4.0/10) · **STRIDE**: E · **Status**: Verified
+**Severity**: Medium (4.0/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary

@@ -1,7 +1,7 @@
 # AVL-E03: Deployer EOA Retains Admin Role Enabling Solo VectorX Upgrade
 
 {% hint style="warning" %}
-**Severity**: High (8.2/10) · **STRIDE**: E · **Status**: Verified
+**Severity**: High (8.2/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary

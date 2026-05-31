@@ -1,7 +1,7 @@
 # EDA-D06: Relay Single Point of Failure on Mainnet
 
 {% hint style="warning" %}
-**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: Verified
+**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

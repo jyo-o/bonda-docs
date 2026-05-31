@@ -43,8 +43,7 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 | Metric | Value |
 |--------|-------|
 | Total threats identified | 9 |
-| Verified | 8 |
-| Unverified | 1 |
+| Verified | 9 |
 | Highest severity | High — 8.4, deployer retains admin role on VectorX |
 | Active validators | 105 out of 1,200 max |
 | Nakamoto coefficient | ~34 validators to control 33% of stake |
@@ -64,7 +63,7 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 | [AVL-T01](threats/avl-t01.md) | VectorX upgradeable instantly by 4/7 multisig, no timelock | Medium (5.6) | verified |
 | [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Medium (4.0) | verified |
 | [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Medium (4.0) | verified |
-| [AVL-P02](threats/avl-p02.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | unverified |
+| [AVL-P02](threats/avl-p02.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | verified |
 | [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (2.9) | verified |
 | [AVL-P01](threats/avl-p01.md) | Slashing exists but has never been triggered in 688 eras | Low (2.1) | verified |
 

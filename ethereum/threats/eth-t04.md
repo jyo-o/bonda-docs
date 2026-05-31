@@ -1,7 +1,7 @@
 # ETH-T04: Cell Index Bounds Check Asymmetry
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
+**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: verified
 {% endhint %}
 
 ## Summary

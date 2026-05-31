@@ -1,7 +1,7 @@
 # CEL-S01: DAS Selective Disclosure Attack via Sybil Peers
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: S · **Status**: partial
+**Severity**: Low (3.7/10) · **STRIDE**: S · **Status**: verified
 {% endhint %}
 
 ## Summary
@@ -40,7 +40,7 @@ According to research by Common Prefix (2022-11-09), with 16 samples and 25% dat
 
 ## Proof of Concept
 
-Common Prefix research report "Research analysis of the selective disclosure attack in Celestia" (2022-11-09) provides the mathematical analysis of deception probabilities with 16 samples and 25% withholding. Sybil cluster operating cost via DHT poisoning was not experimentally verified (verification status is partial).
+Common Prefix research report "Research analysis of the selective disclosure attack in Celestia" (2022-11-09) provides the mathematical analysis of deception probabilities with 16 samples and 25% withholding. Sybil cluster operating cost via DHT poisoning was not experimentally verified.
 
 ## Impact
 

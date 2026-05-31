@@ -1,7 +1,7 @@
 # EDA-T09: Ejector Role Abuse Can Force-Remove Honest Operators
 
 {% hint style="warning" %}
-**Severity**: High (7.1/10) · **STRIDE**: T · **Status**: Verified
+**Severity**: High (7.1/10) · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Summary

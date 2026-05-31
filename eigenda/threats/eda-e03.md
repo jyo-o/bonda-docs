@@ -1,7 +1,7 @@
 # EDA-E03: Operator Stake Concentration Enables Minority Collusion Beyond Safety Thresholds
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: E · **Status**: Verified
+**Severity**: Medium (6.5/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary

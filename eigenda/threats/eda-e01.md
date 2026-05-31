@@ -1,7 +1,7 @@
 # EDA-E01: Configuration Flag Can Disable All Anchor Signature Verification
 
 {% hint style="info" %}
-**Severity**: Medium (4.0/10) · **STRIDE**: E · **Status**: Code Verified
+**Severity**: Medium (4.0/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary

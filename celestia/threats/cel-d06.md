@@ -1,7 +1,7 @@
 # CEL-D06: Peer Blacklisting Disabled by Default Allowing Sybil Reconnection
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: code_verified
+**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

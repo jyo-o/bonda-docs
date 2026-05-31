@@ -1,7 +1,7 @@
 # ETH-S02: Custody Group Node ID Grinding
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: S (Spoofing) · **Status**: code_verified
+**Severity**: Low (3.7/10) · **STRIDE**: S (Spoofing) · **Status**: verified
 {% endhint %}
 
 ## Summary

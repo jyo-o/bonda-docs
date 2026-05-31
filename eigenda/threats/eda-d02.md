@@ -1,7 +1,7 @@
 # EDA-D02: Proxy HTTP Server Missing Rate Limiting
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: D · **Status**: Code Verified
+**Severity**: Low (3.7/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

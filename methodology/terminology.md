@@ -81,11 +81,9 @@ Terms are grouped by category. For deeper context, follow the cross-references t
 
 | Term | Definition |
 |------|------------|
-| **verified** | Full verification. The threat's exploitability has been confirmed against production infrastructure through mainnet probes or live system testing. See [Verification Approach](verification.md). |
-| **code_verified** | The vulnerable code path has been traced through source code at a pinned commit. Parameters and control flow are confirmed, but no live exploitation was performed. See [Verification Approach](verification.md). |
-| **poc_verified** | A Proof of Concept demonstrates the mechanism in a controlled environment, confirming the threat is reproducible under test conditions. See [Verification Approach](verification.md). |
-| **partial** | Some evidence supports the finding, but defense boundaries or environmental factors prevent full confirmation. Acknowledged limitations are documented. See [Verification Approach](verification.md). |
-| **unverified** | The threat is identified through design analysis or documentation review but lacks primary-source confirmation. See [Verification Approach](verification.md). |
+| **verified** | Vulnerability existence confirmed through source code analysis, on-chain state queries, data measurement, or documentation review. Standard level for most findings. See [Verification Approach](verification.md). |
+| **poc_verified** | Attack reproduced end-to-end in a controlled environment such as an Anvil mainnet fork or testnet. Strongest evidence level. See [Verification Approach](verification.md). |
+| **unverified** | The target implementation does not yet exist or access is insufficient for verification. Analysis is based on design documents and specifications only. See [Verification Approach](verification.md). |
 | **PoC** | Proof of Concept. A minimal, reproducible demonstration that a vulnerability can be triggered. BONDA PoCs are typically shell scripts using Foundry tools or direct RPC/gRPC calls. |
 | **cast** | A command-line tool from the Foundry suite used to interact with Ethereum smart contracts. BONDA uses cast extensively to query on-chain state such as role assignments, multisig configurations, and proxy implementations. |
 | **Anvil** | A local Ethereum node provided by the Foundry suite. Anvil can fork mainnet state, allowing PoCs to simulate exploits against real contract deployments without affecting the live network. |

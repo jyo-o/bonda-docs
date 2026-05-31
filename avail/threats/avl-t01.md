@@ -1,7 +1,7 @@
 # AVL-T01: VectorX Can Be Upgraded Instantly Without Timelock
 
 {% hint style="info" %}
-**Severity**: Medium (5.6/10) · **STRIDE**: T · **Status**: Verified
+**Severity**: Medium (5.6/10) · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Summary

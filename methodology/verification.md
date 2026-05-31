@@ -6,74 +6,75 @@ BONDA backs every finding with primary-source evidence. This page explains the v
 
 ## Verification Levels
 
-The key question behind every level: **where did you actually look?**
+Every threat is assigned one of three verification levels based on the strength of evidence collected.
 
-| | `code_verified` | `verified` |
-|---|---|---|
-| **What you looked at** | Source code on GitHub | Live mainnet contracts and endpoints |
-| **What you did** | Read and traced the vulnerable code path | Ran `cast call`, `grpcurl`, or RPC queries against production |
-| **What you know** | The vulnerability **exists in code** | The vulnerability **is live in production right now** |
-
-{% hint style="info" %}
-**The core distinction is static vs. dynamic analysis.** Reading source code tells you a vulnerability *could* exist. Querying mainnet tells you it *does* exist at this moment.
-{% endhint %}
-
-### Side-by-Side Example
-
-**code_verified** — EDA-E01 (Anchor Signature Bypass):
-```
-Found DisableAnchorSignatureVerification flag in flags.go:251.
-Default is false, but setting it to true skips all anchor checks.
-→ The bypass path EXISTS in the code. Whether any live server 
-  has this flag enabled is unknown.
-```
-
-**verified** — AVL-E03 (Deployer Admin Role):
-```
-cast call 0x02993... "hasRole(bytes32,address)" <ADMIN> <deployer>
-→ Returns: true
-
-The deployer wallet HAS admin access RIGHT NOW on mainnet.
-This is not theoretical — it is a live, exploitable state.
-```
-
----
-
-### All Five Levels
+| Level | Label | Meaning |
+|:-----:|-------|---------|
+| L3 | `poc_verified` | Attack was reproduced in a controlled environment such as an Anvil fork or testnet. Strongest evidence. |
+| L2 | `verified` | Vulnerability existence confirmed through source code analysis, on-chain state queries, data measurement, or documentation review. Standard level for most findings. |
+| L1 | `unverified` | Implementation does not yet exist or access is insufficient for verification. Design-level analysis only. |
 
 ```mermaid
 flowchart LR
     U["🔘 unverified<br/>Design analysis only"]
-    P["🟡 partial<br/>Some evidence,<br/>gaps remain"]
-    C["🟢 code_verified<br/>Found in source code<br/><i>static analysis</i>"]
-    PC["🟢 poc_verified<br/>PoC reproduced it<br/><i>controlled environment</i>"]
-    V["✅ verified<br/>Confirmed on mainnet<br/><i>dynamic analysis</i>"]
+    V["🟢 verified<br/>Confirmed via code,<br/>on-chain, or measurement"]
+    P["✅ poc_verified<br/>Reproduced in<br/>controlled environment"]
 
-    U --> P --> C --> PC --> V
+    U --> V --> P
 
     style U fill:#d4d4d4,color:#1a1a1a,stroke:#b0b0b0
-    style P fill:#8ddb8c,color:#1a1a1a,stroke:#8ddb8c
-    style C fill:#57ab5a,color:#fff,stroke:#57ab5a
-    style PC fill:#2da44e,color:#fff,stroke:#2da44e
-    style V fill:#1a7f37,color:#fff,stroke:#1a7f37
+    style V fill:#57ab5a,color:#fff,stroke:#57ab5a
+    style P fill:#1a7f37,color:#fff,stroke:#1a7f37
 ```
 
-| Level | Label | Where You Looked | What You Did | Real Example |
-|:-----:|-------|-----------------|--------------|--------------|
-| ✅ | `verified` | **Live mainnet** | `cast call`, `grpcurl`, RPC query against deployed contracts or endpoints | Queried `hasRole()` on Ethereum mainnet, got `true` — deployer still has admin |
-| 🟢 | `poc_verified` | **Anvil fork** | Ran a PoC script on a local mainnet fork that reproduced the attack | Forked mainnet with Anvil, called `upgradeTo(malicious)`, confirmed state change |
-| 🟢 | `code_verified` | **GitHub source** | Traced the vulnerable code path at a pinned commit, recorded file and line | Found `flags.go:251` default, confirmed no auth middleware in handler chain |
-| 🟡 | `partial` | **Mixed** | Some evidence exists, but access limitations block full confirmation | Docs describe a feature, but the code is in a private repo and cannot be audited |
-| 🔘 | `unverified` | **Docs only** | Design-level analysis or documentation review, no code or mainnet access | KZG trusted setup ceremony — the ceremony data is not publicly auditable |
+### Level Definitions
+
+**`verified`** is the standard level. A finding reaches this level when its existence is confirmed through at least one concrete evidence source: tracing a vulnerable code path at a pinned commit, querying on-chain state with `cast call`, measuring live network data, or reviewing authoritative documentation against actual behavior. The distinction between static and dynamic analysis does not matter for this level — what matters is that the vulnerability demonstrably exists.
+
+**`poc_verified`** is the highest level. A finding reaches this level when the attack is reproduced end-to-end in a controlled environment. This typically means running an exploit script on an Anvil mainnet fork that demonstrates a state change, a crash, or an unauthorized action. PoC reproduction provides the strongest possible evidence.
+
+**`unverified`** applies when the target implementation does not yet exist or when access is insufficient to confirm the finding. The analysis is based on design documents, specifications, or architectural reasoning. The threat may be valid, but evidence cannot be gathered until the implementation is available.
+
+### Examples
+
+**`verified`** — AVL-E03 Deployer Admin Role:
+```
+cast call 0x02993... "hasRole(bytes32,address)" <ADMIN> <deployer>
+→ Returns: true
+
+The deployer wallet has admin access on mainnet.
+This is confirmed on-chain state, not theoretical.
+```
+
+**`verified`** — EDA-E01 Anchor Signature Bypass:
+```
+Found DisableAnchorSignatureVerification flag in flags.go:251.
+Default is false, but setting it to true skips all anchor checks.
+The bypass path exists in source code at a pinned commit.
+```
+
+**`poc_verified`** — CEL-D17 TxCache Key Mismatch:
+```
+Reproduced on Anvil fork: injected a crafted transaction that
+exploited the key mismatch, causing a validator crash.
+The attack is reproducible end-to-end.
+```
+
+**`unverified`** — ETH-T03 Gloas Data Column Inclusion Proof Omission:
+```
+Gloas fork is not yet implemented. Only design documents exist.
+The threat is identified from specification analysis, but no code
+or deployed system is available for verification.
+```
 
 ### Distribution Across Protocols
 
-| Protocol | Verified (L4) | PoC Verified (L3) | Code Verified (L2) | Partial (L1) | Unverified (L0) |
-|----------|:-------------:|:------------------:|:-------------------:|:-------------:|:---------------:|
-| EigenDA  | 11 | -- | 2 | -- | -- |
-| Celestia | 4  | 2  | 5 | 1 | -- |
-| Avail    | 8  | -- | -- | -- | 1 |
-| Ethereum | 6  | -- | 3 | 2 | -- |
+| Protocol | Verified | PoC Verified | Unverified |
+|----------|:--------:|:------------:|:----------:|
+| EigenDA  | 13 | 0 | 0 |
+| Celestia | 10 | 2 | 0 |
+| Avail    | 9  | 0 | 0 |
+| Ethereum | 9  | 0 | 2 |
 
 ---
 
@@ -173,7 +174,7 @@ Every finding must be traceable to at least two independent sources. A code comm
 | On-chain parameter | Source code constant | Whether the deployed value matches the intended configuration |
 
 {% hint style="warning" %}
-**Single-source findings are flagged.** If a threat can only be confirmed through one evidence type, it receives `partial` status and the limitation is documented explicitly.
+**Single-source findings are flagged.** If a threat can only be confirmed through one evidence type, the limitation is documented explicitly in the threat page.
 {% endhint %}
 
 ---
@@ -182,7 +183,7 @@ Every finding must be traceable to at least two independent sources. A code comm
 
 **Threat:** The deployer EOA for Avail's VectorX bridge contract retains `DEFAULT_ADMIN_ROLE`, enabling a solo upgrade path that bypasses multisig governance.
 
-**Verification level:** `verified` (Level 4) — four independent sources.
+**Verification level:** `verified` — four independent sources.
 
 ### Step 1 — On-chain role query
 

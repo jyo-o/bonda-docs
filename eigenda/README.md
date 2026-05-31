@@ -34,7 +34,7 @@ One important architectural note: EigenDA does not implement Data Availability S
 | Metric | Value |
 |--------|-------|
 | Total threats identified | 13 |
-| Verification status | 11 verified, 2 code_verified |
+| Verification status | 13 verified |
 | Highest severity | High (CVSS 7.5) |
 | Registered operators | 272 |
 | Dead operators (0% chunk serving) | 11 |
@@ -49,14 +49,14 @@ One important architectural note: EigenDA does not implement Data Availability S
 | [EDA-T09](threats/eda-t09.md) | Ejector Role Abuse to Remove Honest Operators | High (7.1) | verified |
 | [EDA-E03](threats/eda-e03.md) | Operator Stake Concentration Exceeding Safety Thresholds | Medium (6.5) | verified |
 | [EDA-P01](threats/eda-p01.md) | Operator Slashing Not Implemented | Medium (6.5) | verified |
-| [EDA-P02](threats/eda-p02.md) | DAS Absent, Clients Fully Depend on Quorum Trust | Medium (6.5) | code_verified |
+| [EDA-P02](threats/eda-p02.md) | DAS Absent, Clients Fully Depend on Quorum Trust | Medium (6.5) | verified |
 | [EDA-E02](threats/eda-e02.md) | Single 3-of-4 Multisig Controls 8 Core Contracts | Medium (6.3) | verified |
 | [EDA-D03](threats/eda-d03.md) | Disperser V2 KZG Compute Exposed Without Auth | Medium (5.9) | verified |
 | [EDA-G01](threats/eda-g01.md) | Operator Infrastructure Concentration | Medium (5.9) | verified |
 | [EDA-D07](threats/eda-d07.md) | GetBlob No Authentication | Medium (5.3) | verified |
 | [EDA-D12](threats/eda-d12.md) | 11 Dead Operators, 0% Chunk Serving | Medium (5.3) | verified |
-| [EDA-E01](threats/eda-e01.md) | DisableAnchorSignatureVerification Flag Bypass | Medium (4.0) | code_verified |
-| [EDA-D02](threats/eda-d02.md) | Proxy Rate Limit Absence | Low (3.7) | code_verified |
+| [EDA-E01](threats/eda-e01.md) | DisableAnchorSignatureVerification Flag Bypass | Medium (4.0) | verified |
+| [EDA-D02](threats/eda-d02.md) | Proxy Rate Limit Absence | Low (3.7) | verified |
 | [EDA-S03](threats/eda-s03.md) | Cross-chain Signature Replay | Low (3.5) | verified |
 
 ## Key Findings

@@ -1,7 +1,7 @@
 # CEL-D15: Infinite Retry Loop Without Backoff in blob.Subscribe
 
 {% hint style="info" %}
-**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: code_verified
+**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

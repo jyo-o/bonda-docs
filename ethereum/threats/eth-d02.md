@@ -1,7 +1,7 @@
 # ETH-D02: Reconstruction Failure Discards All Verified Columns
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: D (Denial of Service) · **Status**: code_verified
+**Severity**: Low (3.7/10) · **STRIDE**: D (Denial of Service) · **Status**: verified
 {% endhint %}
 
 ## Summary

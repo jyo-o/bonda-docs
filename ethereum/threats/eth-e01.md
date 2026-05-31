@@ -1,7 +1,7 @@
 # ETH-E01: Reconstruction Failure Mode Inconsistency Across Clients
 
 {% hint style="info" %}
-**Severity**: Medium (5.4/10) · **STRIDE**: E (Elevation of Privilege) · **Status**: code_verified
+**Severity**: Medium (5.4/10) · **STRIDE**: E (Elevation of Privilege) · **Status**: verified
 {% endhint %}
 
 ## Summary

@@ -1,7 +1,7 @@
 # AVL-E02: Key Holder Overlap Across Three Governance Multisigs
 
 {% hint style="info" %}
-**Severity**: Low (2.9/10) · **STRIDE**: E · **Status**: Verified
+**Severity**: Low (2.9/10) · **STRIDE**: E · **Status**: verified
 {% endhint %}
 
 ## Summary

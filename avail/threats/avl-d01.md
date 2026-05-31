@@ -1,7 +1,7 @@
 # AVL-D01: Single Relayer Creates Bridge-Wide Single Point of Failure
 
 {% hint style="warning" %}
-**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: Verified
+**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

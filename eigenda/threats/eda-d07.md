@@ -1,7 +1,7 @@
 # EDA-D07: GetBlob Unauthenticated Access Relies Solely on Global Rate Limiting
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: Verified
+**Severity**: Medium (5.3/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

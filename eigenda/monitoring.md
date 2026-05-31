@@ -3,7 +3,7 @@
 BONDA operates a live monitoring system for EigenDA mainnet, providing real-time visibility into the protocol's operational health and threat indicators.
 
 **Dashboard**: [bonda.me](https://bonda.me)
-**Source**: [github.com/jyo-o/BONDA/eigenda](https://github.com/jyo-o/BONDA/eigenda)
+**Source**: [github.com/jyo-o/EigenDA/eigenda](https://github.com/jyo-o/EigenDA/tree/main/eigenda)
 
 ## Architecture
 

@@ -44,16 +44,16 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 |-----|--------|----------|--------|
 | [CEL-G01](threats/cel-g01.md) | KYC Validator Concentration Enabling Legal Censorship | High (8.7) | verified |
 | [CEL-E01](threats/cel-e01.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | High (7.7) | verified |
-| [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | High (7.5) | code_verified |
+| [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | High (7.5) | verified |
 | [CEL-D17](threats/cel-d17.md) | TxCache Key Mismatch Causing Permanent Cache Leak | High (7.5) | poc_verified |
 | [CEL-P01](threats/cel-p01.md) | DAS-Only Safety Model After Fraud Proof Removal | Medium (6.5) | verified |
-| [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium (5.9) | code_verified |
-| [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium (5.9) | code_verified |
+| [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium (5.9) | verified |
+| [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium (5.9) | verified |
 | [CEL-D03](threats/cel-d03.md) | Unbounded Memory Growth via Fake DataHash Injection | Medium (5.3) | poc_verified |
-| [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium (5.3) | code_verified |
+| [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium (5.3) | verified |
 | [CEL-G02](threats/cel-g02.md) | Documentation vs Code Information Asymmetry | Medium (5.3) | verified |
-| [CEL-D04](threats/cel-d04.md) | Evidence Subsystem Code Defects (Hash, Buffer, Expiry) | Low (3.7) | code_verified |
-| [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.7) | partial |
+| [CEL-D04](threats/cel-d04.md) | Evidence Subsystem Code Defects (Hash, Buffer, Expiry) | Low (3.7) | verified |
+| [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.7) | verified |
 
 ## Key Findings
 

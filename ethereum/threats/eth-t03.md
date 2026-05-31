@@ -1,7 +1,7 @@
 # ETH-T03: Gloas Data Column Inclusion Proof Omission
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: partial
+**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: unverified
 {% endhint %}
 
 ## Summary

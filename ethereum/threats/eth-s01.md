@@ -1,7 +1,7 @@
 # ETH-S01: Testing API JWT Authentication Bypass
 
 {% hint style="info" %}
-**Severity**: Medium (6.5/10) · **STRIDE**: S (Spoofing) · **Status**: code_verified
+**Severity**: Medium (6.5/10) · **STRIDE**: S (Spoofing) · **Status**: verified
 {% endhint %}
 
 ## Summary

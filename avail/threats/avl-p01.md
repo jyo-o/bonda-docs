@@ -1,7 +1,7 @@
 # AVL-P01: Slashing Infrastructure Present but Never Triggered
 
 {% hint style="info" %}
-**Severity**: Low (2.1/10) · **STRIDE**: P · **Status**: Verified
+**Severity**: Low (2.1/10) · **STRIDE**: P · **Status**: verified
 {% endhint %}
 
 ## Summary

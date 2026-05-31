@@ -1,7 +1,7 @@
 # ETH-T01: Blob Fee Denominator Fork-Dependent Formula
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
+**Severity**: Low (3.7/10) · **STRIDE**: T (Tampering) · **Status**: verified
 {% endhint %}
 
 ## Summary

@@ -1,7 +1,7 @@
 # ETH-R01: Blob and Data Column Equivocation Detection Failure
 
 {% hint style="info" %}
-**Severity**: Medium (4.2/10) · **STRIDE**: R (Repudiation) · **Status**: code_verified
+**Severity**: Medium (4.2/10) · **STRIDE**: R (Repudiation) · **Status**: verified
 {% endhint %}
 
 ## Summary

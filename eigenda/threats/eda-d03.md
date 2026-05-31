@@ -1,7 +1,7 @@
 # EDA-D03: Disperser V2 KZG Compute Surface Exposed Without Authentication or Prepayment
 
 {% hint style="info" %}
-**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: Verified
+**Severity**: Medium (5.9/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

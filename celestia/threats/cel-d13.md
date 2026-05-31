@@ -1,7 +1,7 @@
 # CEL-D13: Pre-gas Commitment Computation with Unlimited Blob Count in CheckTx
 
 {% hint style="warning" %}
-**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: code_verified
+**Severity**: High (7.5/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

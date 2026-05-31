@@ -1,7 +1,7 @@
 # ETH-T02: KZG Trusted Setup File Replacement
 
 {% hint style="info" %}
-**Severity**: Medium (4.8/10) · **STRIDE**: T (Tampering) · **Status**: code_verified
+**Severity**: Medium (4.8/10) · **STRIDE**: T (Tampering) · **Status**: verified
 {% endhint %}
 
 ## Summary

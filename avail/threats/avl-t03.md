@@ -1,7 +1,7 @@
 # AVL-T03: Unlimited Token Minting via Malicious Bridge or VectorX Upgrade
 
 {% hint style="info" %}
-**Severity**: Medium (4.0/10) · **STRIDE**: T · **Status**: Verified
+**Severity**: Medium (4.0/10) · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Summary

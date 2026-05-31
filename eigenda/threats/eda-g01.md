@@ -1,7 +1,7 @@
 # EDA-G01: Infrastructure Concentration
 
 {% hint style="info" %}
-**Severity**: Medium (5.9/10) · **STRIDE**: G · **Status**: Verified
+**Severity**: Medium (5.9/10) · **STRIDE**: G · **Status**: verified
 {% endhint %}
 
 ## Summary
