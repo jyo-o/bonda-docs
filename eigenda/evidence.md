@@ -323,3 +323,186 @@ Three operators showed 0% signing rate across both 1h and 24h windows (47,502 ba
 ### DataAPI Limitations
 
 The `signing-info` endpoint becomes unreliable beyond 24-hour windows. Requests with `interval=172800` (48h) and above consistently return HTTP 502/504/429 errors. This limits real-time monitoring to 24-hour snapshots, requiring external probers for longer-term observation.
+
+---
+
+## 8. Proxy Admin and Upgrade Authority (EDA-E02 supplementary)
+
+All 12 upgradeable proxy contracts share a single ProxyAdmin, which is owned by the same DA Ops Multisig.
+
+### On-Chain State
+
+```bash
+# EIP-1967 admin slot for ServiceManager
+cast storage 0x870679E138bCdf293b7Ff14dD44b70FC97e12fc0 \
+  0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103 \
+  --rpc-url $RPC
+# Result: 0x0000000000000000000000008247ef5705d3345516286b72bfe6d690197c2e99
+
+# ProxyAdmin owner
+cast call 0x8247ef5705d3345516286b72bfe6d690197c2e99 \
+  "owner()(address)" --rpc-url $RPC
+# Result: 0x002721B4790d97dC140a049936aA710152Ba92D5 (DA Ops Multisig)
+```
+
+### Proxy Classification
+
+| Contract | Proxy? | Admin |
+|---|---|---|
+| SERVICE_MANAGER | Yes | 0x8247...2e99 |
+| REGISTRY_COORDINATOR | Yes | 0x8247...2e99 |
+| EJECTION_MANAGER | Yes | 0x8247...2e99 |
+| RELAY_REGISTRY | Yes | 0x8247...2e99 |
+| DISPERSER_REGISTRY | Yes | 0x8247...2e99 |
+| THRESHOLD_REGISTRY | Yes | 0x8247...2e99 |
+| PAYMENT_VAULT | Yes | 0x8247...2e99 |
+| CERT_VERIFIER_ROUTER | Yes | 0x8247...2e99 |
+| BLS_APK_REGISTRY | Yes | 0x8247...2e99 |
+| INDEX_REGISTRY | Yes | 0x8247...2e99 |
+| STAKE_REGISTRY | Yes | 0x8247...2e99 |
+| SOCKET_REGISTRY | Yes | 0x8247...2e99 |
+| **PAUSER_REGISTRY** | **No** | N/A (immutable) |
+| **CERT_VERIFIER** | **No** | N/A (immutable) |
+| **ACCESS_CONTROL** | **No** | N/A (immutable) |
+
+All 12 proxies share a single ProxyAdmin (`0x8247ef...2e99`), owned by the DA Ops Multisig. The 3-of-4 multisig can upgrade any proxy implementation in a single `execTransaction` call with no timelock delay.
+
+---
+
+## 9. Unpauser and Pauser Structure (EDA-E02 supplementary)
+
+The pause/unpause authority is separated from the DA Ops Multisig via a dedicated PauserRegistry.
+
+### On-Chain State
+
+```bash
+# PauserRegistry unpauser
+cast call 0x0c431C66F4dE941d089625E5B423D00707977060 \
+  "unpauser()(address)" --rpc-url $RPC
+# Result: 0x369e6F597e22EaB55fFb173C6d9cD234BD699111
+
+# Unpauser Safe threshold and owners
+cast call 0x369e6F597e22EaB55fFb173C6d9cD234BD699111 \
+  "getThreshold()(uint256)" --rpc-url $RPC
+# Result: 1
+
+cast call 0x369e6F597e22EaB55fFb173C6d9cD234BD699111 \
+  "getOwners()(address[])" --rpc-url $RPC
+# Result: [0xC06Fd4F821eaC1fF1ae8067b36342899b57BAa2d,
+#          0xFEA47018D632A77bA579846c840d5706705Dc598]
+
+# Owner A: TimelockController (10-day delay)
+cast call 0xC06Fd4F821eaC1fF1ae8067b36342899b57BAa2d \
+  "getMinDelay()(uint256)" --rpc-url $RPC
+# Result: 864000 (10 days)
+
+# Owner B: 9-of-13 Gnosis Safe
+cast call 0xFEA47018D632A77bA579846c840d5706705Dc598 \
+  "getThreshold()(uint256)" --rpc-url $RPC
+# Result: 9
+
+cast call 0xFEA47018D632A77bA579846c840d5706705Dc598 \
+  "getOwners()(address[])" --rpc-url $RPC
+# Result: [13 addresses]
+
+# Active pausers (3 SafeProxy addresses)
+cast call 0x0c431C66F4dE941d089625E5B423D00707977060 \
+  "isPauser(address)(bool)" 0x369e6F597e22EaB55fFb173C6d9cD234BD699111 --rpc-url $RPC
+# Result: true
+
+cast call 0x0c431C66F4dE941d089625E5B423D00707977060 \
+  "isPauser(address)(bool)" 0xbe1685c81aA44FF9FB319dD389addd9374383e90 --rpc-url $RPC
+# Result: true
+
+cast call 0x0c431C66F4dE941d089625E5B423D00707977060 \
+  "isPauser(address)(bool)" 0x5050389572f2d220ad927ccbea0d406831012390 --rpc-url $RPC
+# Result: true
+
+# DA Ops Multisig is NOT a pauser (separation confirmed)
+cast call 0x0c431C66F4dE941d089625E5B423D00707977060 \
+  "isPauser(address)(bool)" 0x002721B4790d97dC140a049936aA710152Ba92D5 --rpc-url $RPC
+# Result: false
+
+# Current pause bitmap (all functions active)
+cast call 0x0BAAc79acD45A023E19345c352d8a7a83C4e5656 \
+  "paused()(uint256)" --rpc-url $RPC
+# Result: 0 (all unpaused)
+```
+
+### Governance Separation Summary
+
+| Role | Entity | Scheme |
+|---|---|---|
+| Contract owner | DA Ops Multisig | 3-of-4 EOA |
+| ProxyAdmin owner | DA Ops Multisig | 3-of-4 EOA |
+| Pauser | 3 SafeProxy contracts | Any one can pause |
+| Unpauser | Unpauser Safe | 1-of-2: TimelockController (10d) OR 9-of-13 Safe |
+
+The Unpauser Safe has never executed an `execTransaction` (nonce = 30 from setup, 0 actual user transactions), confirming its emergency-only design.
+
+---
+
+## 10. Dispersal Client Centralization (EDA-D06 supplementary)
+
+Analysis of 3,695 blobs from the DataAPI `blobs/feed` endpoint reveals extreme dispersal concentration.
+
+### Distribution
+
+```bash
+# Query DataAPI feed
+curl -s "https://dataapi.eigenda.xyz/api/v2/blobs/feed?limit=1000" > feed.json
+# Paginate via cursor until exhaustion
+```
+
+| Metric | Value |
+|---|---|
+| Unique dispersing accounts | 10 |
+| Top 1 account share | 98.65% |
+| Top 1 address | `0x41fa832fad553c3b92976344d44b3548517679ac` |
+| HHI (Herfindahl-Hirschman) | 9,731 (monopoly territory) |
+| Effective number of dispersers | 1.03 |
+| Sample window | ~1 hour (3,695 blobs) |
+
+All 10 accounts are anonymous EOAs with no Blockscout public tags, ENS names, or other identifiers.
+
+### PaymentVault Reservation
+
+```bash
+# Dominant account reservation
+cast call 0xb2e7ef419a2A399472ae22ef5cFcCb8bE97A4B05 \
+  "getReservations(address[])((uint64,uint64,uint64,bytes,bytes)[])" \
+  "[0x41fa832fad553c3b92976344d44b3548517679ac]" --rpc-url $RPC
+# Result: symbolsPerSecond=163840, start=2025-06-25, end=2027-02-08, quorums=[0,1]
+```
+
+The reservation was set by the DA Ops Multisig via `setReservation()` on PaymentVault. The DA Ops Safe can revoke this reservation at any time (no timelock), which would instantly halt 98.65% of EigenDA mainnet traffic.
+
+---
+
+## 11. Relay Latency Spike Observation (EDA-D06 supplementary)
+
+A naturally occurring latency inflation event on the single relay was observed by the BONDA prober.
+
+### Baseline vs Spike
+
+| Period | Window (UTC) | Requests | Avg Latency | P95 Latency |
+|---|---|---|---|---|
+| Baseline | 06:30-06:37 | 472 | 599 ms | 999 ms |
+| Spike | 06:40-06:47 | 471 | 2,449 ms | 4,076 ms |
+
+Latency inflated 4.1x during the spike, with peak individual retrievals reaching 6,094 ms. The spike was not explained by blob size shift (average blob size identical in both windows) or local infrastructure issues.
+
+### Spike Minute-Level Detail
+
+| Minute (UTC) | Requests | Avg (ms) | P95 (ms) | >2s | >5s |
+|---|---|---|---|---|---|
+| 06:39 | 59 | 835 | 2,205 | 4 | 0 |
+| 06:40 | 63 | 2,639 | 4,257 | 45 | 0 |
+| 06:41 | 78 | 2,386 | 3,916 | 38 | 2 |
+| 06:42 | 69 | 2,730 | 4,542 | 49 | 1 |
+| 06:43 | 61 | 2,560 | 3,745 | 44 | 0 |
+| 06:44 | 58 | 2,099 | 3,223 | 23 | 0 |
+| 06:45 | 59 | 2,402 | 3,888 | 30 | 2 |
+| 06:46 | 83 | 2,327 | 4,031 | 46 | 0 |
+
+All 471 spike-window retrievals went through relay key 0 (the only registered relay). The proxy default relay timeout is 10 seconds, meaning sustained latency above this would cause complete retrieval failures.

@@ -77,6 +77,10 @@ The on-chain RelayRegistry shows only one relay registered on mainnet. The Relay
 
 No slash or freeze functions exist in EigenDA's core contracts. The EigenLayer AllocationManager returns zero operator sets for EigenDA, confirming that the slashing infrastructure is entirely absent. Operators earn restaking rewards but face no penalty for dishonest behavior such as failing to store chunks or producing false attestations. This incentive asymmetry directly contributes to the 11 dead operators observed in EDA-D12, who remain registered and collect rewards while serving 0% of their assigned chunks.
 
+## Verification Evidence
+
+On-chain contract queries, operator stake distribution data, ASN infrastructure analysis, and prober measurement results are documented in [Verification Evidence](evidence.md).
+
 ## Monitoring
 
 For live metrics on operator availability, relay health, blob dispersal success rates, and stake distribution, see the [monitoring dashboard](monitoring.md).
