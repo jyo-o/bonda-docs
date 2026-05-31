@@ -57,7 +57,7 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 
 ## Key Findings
 
-### CEL-E01: SP1Blobstream Multisig Can Upgrade Instantly (Critical)
+### CEL-E01: SP1Blobstream Multisig Can Upgrade Instantly (High, CVSS 7.7)
 
 The SP1Blobstream bridge contract on Ethereum is controlled by a 4-of-6 Gnosis Safe multisig. The problem is that the same multisig address holds three separate roles: guardian, timelock controller, and default admin. This means 4 signers can upgrade the bridge verifier and program keys instantly with no delay, no public review window, and no on-chain event emitted. Any rollup relying on SP1Blobstream for DA verification would have no warning before the bridge logic changes underneath them.
 
