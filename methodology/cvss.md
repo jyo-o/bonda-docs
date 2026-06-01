@@ -1,8 +1,8 @@
 # CVSS 3.1 Scoring
 
-BONDA uses the Common Vulnerability Scoring System (CVSS) version 3.1 to score threat severity. CVSS is the industry-standard framework used by NVD, major audit firms (Trail of Bits, ChainLight, Sigma Prime), and bug bounty platforms. This page describes the scoring formula, vector components, severity ranges, and provides an example walkthrough.
+BONDA uses the Common Vulnerability Scoring System (CVSS) version 3.1 to score threat severity. CVSS is the industry-standard framework used by NVD, major audit firms and bug bounty platforms. This page describes the scoring formula, vector components, severity ranges, and provides an example walkthrough.
 
----
+***
 
 ## Why CVSS 3.1?
 
@@ -16,7 +16,7 @@ CVSS 3.1 was chosen for three reasons:
 **Blockchain-specific context** is captured in the CVSS metric rationale (the "why" column in each threat's scoring table), not in custom metrics. For example, "Scope: Changed" can express that a bridge vulnerability cascades to all dependent rollups.
 {% endhint %}
 
----
+***
 
 ## Formula
 
@@ -39,47 +39,47 @@ If Scope is Changed:    Score = min(1.08 x (Impact + Exploitability), 10)
 Final score is rounded up to the nearest 0.1.
 ```
 
----
+***
 
 ## Vector Components
 
 ### Exploitability Metrics
 
-| Metric | Values | Description |
-|--------|--------|-------------|
-| **AV** — Attack Vector | Network (0.85), Adjacent (0.62), Local (0.55), Physical (0.20) | How the attacker reaches the vulnerable component |
-| **AC** — Attack Complexity | Low (0.77), High (0.44) | Conditions beyond the attacker's control that must exist |
-| **PR** — Privileges Required | None (0.85), Low (0.62/0.68), High (0.27/0.50) | Level of access needed. Values differ for Unchanged/Changed scope. |
-| **UI** — User Interaction | None (0.85), Required (0.62) | Whether a victim must take action |
+| Metric                       | Values                                                         | Description                                                        |
+| ---------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **AV** — Attack Vector       | Network (0.85), Adjacent (0.62), Local (0.55), Physical (0.20) | How the attacker reaches the vulnerable component                  |
+| **AC** — Attack Complexity   | Low (0.77), High (0.44)                                        | Conditions beyond the attacker's control that must exist           |
+| **PR** — Privileges Required | None (0.85), Low (0.62/0.68), High (0.27/0.50)                 | Level of access needed. Values differ for Unchanged/Changed scope. |
+| **UI** — User Interaction    | None (0.85), Required (0.62)                                   | Whether a victim must take action                                  |
 
 ### Scope
 
-| Value | Description |
-|-------|-------------|
-| **Unchanged (U)** | Impact stays within the vulnerable component's security scope |
-| **Changed (C)** | Impact crosses trust boundaries (e.g., bridge exploit affects all dependent rollups) |
+| Value             | Description                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| **Unchanged (U)** | Impact stays within the vulnerable component's security scope                        |
+| **Changed (C)**   | Impact crosses trust boundaries (e.g., bridge exploit affects all dependent rollups) |
 
 ### Impact Metrics
 
-| Metric | Values | Description |
-|--------|--------|-------------|
+| Metric                  | Values                            | Description                      |
+| ----------------------- | --------------------------------- | -------------------------------- |
 | **C** — Confidentiality | None (0), Low (0.22), High (0.56) | Degree of information disclosure |
-| **I** — Integrity | None (0), Low (0.22), High (0.56) | Degree of data modification |
-| **A** — Availability | None (0), Low (0.22), High (0.56) | Degree of service disruption |
+| **I** — Integrity       | None (0), Low (0.22), High (0.56) | Degree of data modification      |
+| **A** — Availability    | None (0), Low (0.22), High (0.56) | Degree of service disruption     |
 
----
+***
 
 ## Severity Ranges
 
-| Severity | Score Range | GitBook Hint Style |
-|----------|-------------|-------------------|
-| Critical | 9.0 -- 10.0 | `danger` (red) |
-| High | 7.0 -- 8.9 | `warning` (orange) |
-| Medium | 4.0 -- 6.9 | `info` (blue) |
-| Low | 0.1 -- 3.9 | `info` (blue) |
-| Informational | 0.0 | `success` (green) |
+| Severity      | Score Range | GitBook Hint Style |
+| ------------- | ----------- | ------------------ |
+| Critical      | 9.0 -- 10.0 | `danger` (red)     |
+| High          | 7.0 -- 8.9  | `warning` (orange) |
+| Medium        | 4.0 -- 6.9  | `info` (blue)      |
+| Low           | 0.1 -- 3.9  | `info` (blue)      |
+| Informational | 0.0         | `success` (green)  |
 
----
+***
 
 ## Example: AVL-E03 — Deployer Retains Admin Role
 
@@ -90,17 +90,19 @@ Final score is rounded up to the nearest 0.1.
 ### Step-by-step Calculation
 
 **Exploitability:**
-- AV = 0.85 (Network) — The attack executes via Ethereum mainnet transactions.
-- AC = 0.44 (High) — Requires compromising the deployer's private key.
-- PR = 0.50 (High, Changed scope) — Requires the deployer's specific credentials, a privileged role held by a single EOA.
-- UI = 0.85 (None) — No victim interaction needed.
+
+* AV = 0.85 (Network) — The attack executes via Ethereum mainnet transactions.
+* AC = 0.44 (High) — Requires compromising the deployer's private key.
+* PR = 0.50 (High, Changed scope) — Requires the deployer's specific credentials, a privileged role held by a single EOA.
+* UI = 0.85 (None) — No victim interaction needed.
 
 **Scope:** Changed — Impact extends beyond VectorX to the entire bridge ecosystem and all dependent rollups.
 
 **Impact:**
-- C = 0.0 (None) — No confidentiality impact.
-- I = 0.56 (High) — Arbitrary contract implementation replacement enables false attestations and bypasses governance.
-- A = 0.56 (High) — A single compromised key can halt the entire bridge.
+
+* C = 0.0 (None) — No confidentiality impact.
+* I = 0.56 (High) — Arbitrary contract implementation replacement enables false attestations and bypasses governance.
+* A = 0.56 (High) — A single compromised key can halt the entire bridge.
 
 **Calculation:**
 
@@ -129,18 +131,18 @@ Score = min(1.08 x (5.755 + 1.307), 10)
 
 ### CVSS Metric Rationale
 
-| Metric | Value | Rationale |
-|--------|-------|-----------|
-| AV (Attack Vector) | N (Network) | Attack executes via Ethereum mainnet transactions |
-| AC (Attack Complexity) | H (High) | Requires compromising the deployer EOA private key |
-| PR (Privileges Required) | H (High) | Deployer holds a privileged admin role on the contract |
-| UI (User Interaction) | N (None) | Fully automated, no victim action needed |
-| S (Scope) | C (Changed) | Bridge compromise cascades to all dependent rollups |
-| C (Confidentiality) | N (None) | No data exposure |
-| I (Integrity) | H (High) | Arbitrary implementation replacement bypasses all governance |
-| A (Availability) | H (High) | Single key compromise can halt the entire bridge |
+| Metric                   | Value       | Rationale                                                    |
+| ------------------------ | ----------- | ------------------------------------------------------------ |
+| AV (Attack Vector)       | N (Network) | Attack executes via Ethereum mainnet transactions            |
+| AC (Attack Complexity)   | H (High)    | Requires compromising the deployer EOA private key           |
+| PR (Privileges Required) | H (High)    | Deployer holds a privileged admin role on the contract       |
+| UI (User Interaction)    | N (None)    | Fully automated, no victim action needed                     |
+| S (Scope)                | C (Changed) | Bridge compromise cascades to all dependent rollups          |
+| C (Confidentiality)      | N (None)    | No data exposure                                             |
+| I (Integrity)            | H (High)    | Arbitrary implementation replacement bypasses all governance |
+| A (Availability)         | H (High)    | Single key compromise can halt the entire bridge             |
 
----
+***
 
 ## Vector Format
 
