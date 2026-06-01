@@ -1,7 +1,7 @@
 # ETH-R03: Prysm DataColumnsByRoot Incorrect Timeout
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **STRIDE**: R · **Status**: verified
+**Severity**: Low (3.7/10) · **STRIDE**: D · **Status**: verified
 {% endhint %}
 
 ## Summary

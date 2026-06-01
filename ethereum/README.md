@@ -10,7 +10,7 @@
 
 ## What is PeerDAS?
 
-PeerDAS stands for Peer Data Availability Sampling. It is Ethereum's upcoming data availability scaling upgrade, defined in EIP-7594. Before PeerDAS, every Ethereum node had to download and store all blob data attached to blocks. PeerDAS changes this by splitting blob data into 128 columns and distributing the storage responsibility across the network. Each validator only needs to hold a small subset of columns rather than the full dataset.
+PeerDAS stands for Peer Data Availability Sampling. It is Ethereum's data availability scaling upgrade activated on mainnet via the Fusaka hard fork on December 3, 2025, defined in EIP-7594. Before PeerDAS, every Ethereum node had to download and store all blob data attached to blocks. PeerDAS changes this by splitting blob data into 128 columns and distributing the storage responsibility across the network. Each validator only needs to hold a small subset of columns rather than the full dataset.
 
 The core mechanism works through custody groups. Every validator is assigned to one or more custody groups based on its node ID. Each custody group is responsible for storing and serving a specific set of data columns. When a validator needs data it does not hold locally, it requests the missing columns from peers in the appropriate custody groups. If enough columns are available, the full data can be reconstructed using erasure coding, a mathematical technique that allows recovery of the original data from any sufficiently large subset of columns.
 

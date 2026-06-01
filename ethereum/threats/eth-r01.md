@@ -1,7 +1,7 @@
 # ETH-R01: c-kzg-4844 load\_trusted\_setup Missing Subgroup Check
 
 {% hint style="info" %}
-**Severity**: Low (3.8/10) · **STRIDE**: R · **Status**: verified
+**Severity**: Low (3.8/10) · **STRIDE**: T · **Status**: verified
 {% endhint %}
 
 ## Summary
