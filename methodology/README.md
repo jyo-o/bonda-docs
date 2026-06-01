@@ -1,8 +1,8 @@
-# Methodology Overview
+# Overview
 
 BONDA provides systematic threat modeling for Data Availability (DA) layers that underpin Ethereum's rollup ecosystem. This section describes the analytical framework used to identify, score, and verify threats across EigenDA, Celestia, Avail, and Ethereum PeerDAS.
 
----
+***
 
 ## Why Threat Model DA Layers?
 
@@ -10,7 +10,7 @@ Rollups delegate data publication to DA layers, trusting them to guarantee that 
 
 Despite this critical dependency, most DA layers have not been subjected to structured adversarial analysis. Security audits focus on code correctness but rarely map trust boundaries, governance concentration, or protocol-level design gaps. BONDA fills this gap by applying threat modeling techniques adapted specifically for DA infrastructure.
 
----
+***
 
 ## Three Pillars
 
@@ -24,7 +24,7 @@ See: [STRIDE for DA Layers](stride.md)
 
 ### 2. CVSS 3.1 Scoring
 
-Findings are scored using CVSS 3.1 (Common Vulnerability Scoring System), the industry-standard framework used by NVD, major audit firms (Trail of Bits, ChainLight, Sigma Prime), and bug bounty platforms. Blockchain-specific context is captured in the metric rationale rather than custom metrics, ensuring scores are directly comparable across protocols and audit firms.
+Findings are scored using CVSS 3.1 (Common Vulnerability Scoring System), the industry-standard framework used by NVD, major audit firms, and bug bounty platforms.&#x20;
 
 See: [CVSS 3.1 Scoring](cvss.md)
 
@@ -34,7 +34,7 @@ Every finding is traced to at least two independent primary sources. BONDA goes 
 
 See: [Verification Approach](verification.md)
 
----
+***
 
 ## What Distinguishes BONDA
 
@@ -46,22 +46,22 @@ See: [Verification Approach](verification.md)
 
 **Extended threat categories.** Classic STRIDE misses two critical risk classes in DA infrastructure: protocol-level design omissions (no slashing, no DAS) and governance centralization (single-entity multisig control, KYC validator concentration). BONDA's P and G categories capture these systematically.
 
----
+***
 
 ## Scope
 
 BONDA's threat model covers 38 threats across four DA protocols:
 
-| Protocol | Threats | Scope Areas |
-|----------|---------|-------------|
-| EigenDA | 13 | Disperser, Relay, Operator, governance |
-| Celestia | 12 | Consensus, DAS, Blobstream bridge |
-| Avail | 9 | VectorX bridge, validator set, governance |
-| Ethereum / PeerDAS | 4 | Multi-client PeerDAS, KZG, custody groups |
+| Protocol | Threats | Scope Areas                               |
+| -------- | ------- | ----------------------------------------- |
+| Ethereum | 4       | Multi-client PeerDAS, KZG, custody groups |
+| EigenDA  | 13      | Disperser, Relay, Operator, governance    |
+| Celestia | 12      | Consensus, DAS, Blobstream bridge         |
+| Avail    | 9       | VectorX bridge, validator set, governance |
 
 Each threat is classified by scope: **protocol** (core DA mechanism), **bridge** (L1-L2 communication), **rollup** (rollup-operator-facing surface), or **chain** (base layer consensus).
 
----
+***
 
 ## Reference
 
