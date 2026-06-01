@@ -508,3 +508,150 @@ data, err = s.blobProvider.GetBlob(ctx, blobKey)
 | Attacker | 6 RPS | 84 | 30 | 36% |
 
 The bucket was scaled down 20x for the test (1 MiB/s versus the 20 MiB/s production default). The same starvation holds at production scale, requiring proportionally more attacker throughput. The victim losing more than half of its requests confirms that legitimate clients have no priority over anonymous traffic under the global-only scheme.
+
+---
+
+## GetChunks Cold-Miss CPU Exhaustion (EDA-01)
+
+A load test was run against the operator Retrieval `GetChunks` path on an `inabox` local deployment to confirm that unauthenticated random-key requests drive a cold-miss lookup on every call and saturate operator CPU.
+
+### Test Setup
+
+The operator ran on a GCP host matching the Large operator class in the published system requirements. The deployment was the EigenDA `inabox` harness with four validators, one disperser, one encoder, one controller, one relay, one churner, and one proxy, all built from the EigenDA master branch at commit `61019b4`.
+
+| Component | Value |
+|---|---|
+| Instance | GCP `n2-standard-16` (16 vCPU / 64 GB) |
+| Boot disk | pd-ssd 200 GB |
+| OS | Ubuntu 24.04 LTS |
+| Runtime | Docker 29.1.3, docker-compose v2.40 |
+| Go | 1.24.13 |
+| forge | 1.4.4 |
+| grpcurl | 1.9.3 |
+| EigenDA | master branch, commit `61019b4` |
+
+The interceptor passes every method except `StoreChunks`, so Retrieval calls reach the handler without authentication or rate limiting, and a cold-miss lookup returns before any rate-limit token is debited.
+
+```go
+// node/validator_store.go:262-274
+// @audit a random blob key yields exists=false and returns with no token debit, so cold reads are never throttled
+coldReadsExhausted := s.coldReadRateLimiter.Tokens() <= 0
+bundle, exists, hot, err := s.chunkTable.CacheAwareGet(bundleKey, coldReadsExhausted)
+if !exists {
+    return nil, false, nil // returns before reserving any token
+}
+// https://github.com/Layr-Labs/eigenda/blob/61019b4/node/validator_store.go
+```
+
+A single request with a random 32-byte blob key reaches the cold-miss path and returns the `not found` error mapped through `validator_store.go` → `server_v2.go` → `api/errors.go` to a gRPC `Internal` code:
+
+```bash
+# Single GetChunks call with a random 32-byte blob key
+grpcurl -plaintext -max-time 5 \
+  -d "{\"blob_key\":\"$B64KEY\",\"quorum_id\":0}" \
+  $TARGET validator.Retrieval/GetChunks
+# Result:
+#   Code: Internal
+#   Message: failed to get chunks: failed to get chunks: not found
+```
+
+### Results
+
+Scenarios were run sequentially against operator `opr0` with a 30-second gap between each:
+
+| ID | Load | Duration | Purpose |
+|---|---|---|---|
+| BL-idle | none | 60 s | baseline |
+| BL-1 | 100 sequential RPCs (1 conn, 1 worker) | ~30 ms | single-request RTT |
+| S1 | 100 req/s rate cap | 60 s | normal-user level |
+| S2 | 1,000 req/s rate cap | 60 s | first saturation check |
+| S3 | client max (200 inflight) | 60 s | saturation point |
+| S4 | client max | 10 min | sustained load |
+
+CPU was exhausted while disk I/O showed little change:
+
+| Scenario | RPS | Process CPU avg (max) % | Δ GetChunks (Prometheus) |
+|---|---|---|---|
+| BL-idle | 0 | 2.7 (4.0) | 0 |
+| BL-1 | 100 sequential | — | 0 |
+| S1 (100 rps) | 102 | 5.0 (7.0) | 6,094 |
+| S2 (1k rps) | 1,017 | 21.1 (23.0) | 60,953 |
+| S3 (max, 60 s) | 82,029 | 447.97 (463) | 4,850,103 |
+| S4 (max, 10 min) | 83,490 | 458.35 (469) | 50,023,312 |
+
+| Resource | S3 measured | BL-idle |
+|---|---|---|
+| Disk read | 0 kB/s | 0 kB/s |
+| Disk write | 662 kB/s | 25 kB/s |
+| Disk IOPS | 3.4 | 0.6 |
+
+A single attacker drove the EigenDA process to an average of 447.97 percent CPU and a peak of 469 percent, roughly 4.5 cores, while client-side resource use converged toward zero. A 4 vCPU operator with a 400 percent ceiling is fully saturated by one attacker; a 16 vCPU operator absorbs about 28 percent from one attacker and reaches saturation under parallel attackers.
+
+---
+
+## GetBlobCommitment Unauthenticated Compute (EDA-02)
+
+Two layers of verification confirm that the Disperser V2 `GetBlobCommitment` endpoint performs unauthenticated KZG (MSM) work: an in-process measurement of the KZG cost an attacker can trigger, and a live-endpoint check across operational environments.
+
+### Test Setup
+
+The compute cost was measured in-process by directly invoking `committer.GetCommitmentsForPaddedLength`, the same function the handler at `server_v2.go:309` calls, with the mainnet SRS configuration of `SRSNumberToLoad = 524288` (2^19).
+
+| Item | Value |
+|---|---|
+| OS / Arch | darwin / arm64 |
+| CPU | Apple M5, 10 cores (GOMAXPROCS=10) |
+| Go | 1.26.1 |
+| EigenDA source | commit `61019b4e9f91cbbb3dc05ed758674e4bdfeee20e` |
+| KZG library | gnark-crypto (BN254 curve) |
+| SRS files | `g1.point` (16 MiB), `g2.point` (32 MiB), `g2.trailing.point` (32 MiB) |
+| `SRSNumberToLoad` | 524,288 (2^19, mainnet limit) |
+| SRS load time | 13.5 s (one-time at startup) |
+
+`GetCommitments` runs G1 MSM x1 + G2 MSM x2 sequentially, and each MSM alone saturates all cores:
+
+```go
+// encoding/v2/kzg/committer/committer.go:159-176
+// @audit G1 + 2xG2 MSM computed sequentially — each saturates all cores
+commit, err := c.computeCommitmentV2(inputFr)
+lengthCommitment, err := c.computeLengthCommitmentV2(inputFr)
+lenProof, err := c.computeLengthProofV2(inputFr)
+// https://github.com/Layr-Labs/eigenda/blob/61019b4e9f91cbbb3dc05ed758674e4bdfeee20e/encoding/v2/kzg/committer/committer.go#L123-L177
+```
+
+### Results
+
+Single-request KZG cost scales nearly linearly with the symbol count, reaching about 14 core-seconds at the 16 MiB mainnet limit:
+
+| Blob | N (symbols) | run1 | run2 | run3 | avg wall | core-seconds (x10 cores) |
+|---|---|---|---|---|---|---|
+| 2 MiB | 65,536 (2^16) | 214 ms | 219 ms | 216 ms | 216 ms | 2.16 |
+| 8 MiB | 262,144 (2^18) | 737 ms | 753 ms | 745 ms | 745 ms | 7.45 |
+| 16 MiB | 524,288 (2^19) | 1.393 s | 1.418 s | 1.407 s | 1.406 s | 14.06 |
+
+Concurrent 16 MiB requests scale almost linearly in per-request wall time, confirming that requests serialize because one MSM occupies every core:
+
+| Concurrency | per-request avg wall | max wall | vs concurrency 1 |
+|---|---|---|---|
+| 1 | 1.431 s | 1.431 s | 1.0x (baseline) |
+| 2 | 2.675 s | 2.76 s | 1.87x |
+| 4 | 5.556 s | 5.611 s | 3.88x |
+
+A live-endpoint check confirmed the endpoint is active and anonymously callable. The probe sends a 32-byte payload only to check liveness; a real attack would send a 16 MiB blob:
+
+```bash
+# Liveness probe (32-byte payload, no credentials)
+B64=$(head -c 32 /dev/zero | base64)
+grpcurl -max-time 15 -d "{\"blob\":\"$B64\"}" <endpoint>:443 \
+    disperser.v2.Disperser/GetBlobCommitment
+# Result: blobCommitment returned (commitment, lengthCommitment, lengthProof, length=1)
+```
+
+| Environment | Endpoint | Status |
+|---|---|---|
+| Mainnet | `disperser.eigenda.xyz:443` | active |
+| Testnet (Sepolia) | `disperser-testnet-sepolia.eigenda.xyz:443` | active |
+| Testnet (Hoodi) | `disperser-hoodi.eigenda.xyz:443` | active |
+| Preprod (Hoodi v2) | `disperser-v2-preprod-hoodi.eigenda.xyz:443` | active |
+
+A disabled endpoint would instead return `Unimplemented: GetBlobCommitment is deprecated and has been disabled`, confirming the `DISABLE_GET_BLOB_COMMITMENT` flag is inactive in all four environments. All four endpoints resolve to Cloudflare IPs (`104.18.0.169`, `104.18.1.169`), but Cloudflare does not block algorithmic-complexity DoS, so there is no effective protection against this vector. The request context is not propagated into `GetCommitmentsForPaddedLength`, so a short client deadline or early disconnect does not abort the server-side MSM work.

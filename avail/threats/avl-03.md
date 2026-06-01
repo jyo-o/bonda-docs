@@ -1,7 +1,7 @@
 # AVL-03: Kate RPC Triggers Unauthenticated KZG Computation Without Rate Limiting
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **Category**: Vulnerability · **Status**: poc_verified
+**Severity**: Medium (5.3/10) · **Likelihood**: Very High · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary

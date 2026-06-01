@@ -1,7 +1,7 @@
 # ETH-04: c-kzg-4844 Go Binding Thread Safety
 
 {% hint style="info" %}
-**Severity**: Low (3.4/10) · **Category**: Vulnerability · **Status**: verified
+**Severity**: Low (3.4/10) · **Likelihood**: Low · **Category**: Vulnerability · **Status**: verified
 {% endhint %}
 
 ## Summary

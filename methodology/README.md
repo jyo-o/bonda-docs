@@ -48,10 +48,6 @@ See: [Verification Approach](verification.md)
 
 **On-chain verification.** Access control configurations, multisig compositions, role assignments, and upgrade mechanisms are verified against live contract state rather than documentation or deployment scripts alone.
 
-**Tiered classification.** A code bug with a concrete exploit path and a documented architectural trade-off are fundamentally different findings. BONDA's four-tier system keeps them distinct, so that only genuine vulnerabilities carry numeric severity while design choices and governance concentration are characterized on their own terms.
-
-**Cross-DA comparison.** The same analytical framework is applied uniformly across four DA protocols, enabling direct comparison of security properties. The 5-axis model evaluates every DA against identical criteria, so comparison reflects architecture rather than the accident of where research effort was concentrated.
-
 ---
 
 ## Scope

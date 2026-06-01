@@ -1,7 +1,7 @@
 # CEL-02: Infinite Retry Loop Without Backoff in blob.Subscribe
 
 {% hint style="info" %}
-**Severity**: Medium (5.9/10) · **Category**: Vulnerability · **Status**: verified
+**Severity**: Medium (5.9/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: verified
 {% endhint %}
 
 ## Summary

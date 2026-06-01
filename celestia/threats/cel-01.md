@@ -1,7 +1,7 @@
 # CEL-01: TxCache Key Mismatch Causing Permanent Memory Leak in Validators
 
 {% hint style="warning" %}
-**Severity**: High (7.5/10) · **Category**: Vulnerability · **Status**: poc_verified
+**Severity**: High (7.5/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary

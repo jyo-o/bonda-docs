@@ -5,11 +5,11 @@
 ## Methodology
 
 * [Overview](methodology/README.md)
-* [Threat Discovery](methodology/stride.md)
 * [Threat Classification](methodology/classification.md)
 * [Severity & Scoring](methodology/scoring.md)
 * [CVSS 3.1 Scoring](methodology/cvss.md)
 * [Verification Approach](methodology/verification.md)
+* [Threat Discovery](methodology/stride.md)
 * [Terminology](methodology/terminology.md)
 
 ## EigenDA

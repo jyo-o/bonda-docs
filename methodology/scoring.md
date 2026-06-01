@@ -52,7 +52,7 @@ flowchart LR
 
 ### Layer 3 — Threat Deductions
 
-*How much can an attacker degrade this property right now?* Only **Vulnerability**-tier findings produce deductions, and only while the vulnerability remains unpatched. Each vulnerability is mapped to the axis its exploit most directly degrades, with deduction magnitude derived from its CVSS severity band.
+*How much can an attacker degrade this property right now?* Only **Vulnerability**-tier findings produce deductions, and only while the vulnerability remains unpatched. Each vulnerability is mapped to the axis its exploit most directly degrades. The deduction magnitude combines two independent dimensions — **impact** and **likelihood** — explained in [Impact and Likelihood](#impact-and-likelihood) below.
 
 ### Layer 2 — Operational Indicators
 
@@ -66,9 +66,63 @@ flowchart LR
 
 ```
 Displayed Axis Score = Design Baseline (Layer 1, corrected by Layer 4)
-                       − Threat Deductions (Layer 3)
+                       − Σ Threat Deductions (Layer 3)
+
+Threat Deduction = Impact Weight × Likelihood Factor
 
 Operational Indicators (Layer 2) = shown alongside, never in the number
+```
+
+---
+
+## Impact and Likelihood
+
+CVSS measures **impact assuming the attack succeeds**. It does not measure how *likely* the attack is to happen in the first place — its specification states the Base score is "not a measure of risk." A high-impact finding that is realistically improbable should not collapse an axis the way a routinely exploitable one does. So each deduction multiplies an impact weight by a likelihood factor.
+
+### Impact Weight
+
+Derived from the CVSS 3.1 severity band of the Vulnerability.
+
+| CVSS band | Impact weight |
+|-----------|---------------|
+| High / Critical | −1.0 |
+| Medium | −0.5 |
+| Low | −0.2 |
+
+### Likelihood Factor
+
+A separate judgment of how realistically the exploit occurs, scored on the NIST SP 800-30 Rev.1 ordinal scale and informed by the FAIR frequency lens. It is assigned from the exploit's structural preconditions, not from its impact.
+
+| Likelihood | Factor | Typical profile |
+|------------|--------|-----------------|
+| Very High | 1.0 | Unauthenticated, network-reachable, live, reproducible on demand |
+| High | 0.8 | Reachable with minor preconditions; no privileged access required |
+| Moderate | 0.6 | Requires a specific code path, transaction shape, or timing window |
+| Low | 0.4 | Requires rare conditions or a misconfiguration the operator controls |
+| Very Low | 0.2 | Build-time supply-chain, privileged-key, or governance-only trigger |
+
+A consequence by design: an unauthenticated compute-exhaustion bug that any client can fire (Very High) deducts its full impact weight, while a bug reachable only through a compromised signing key or a build-time supply-chain step (Very Low) deducts a fifth of it. The same CVSS score can therefore produce very different axis deductions — which is the point.
+
+The total deduction on any single axis is capped at −3.0 so that one heavily studied layer is not driven to zero by deduction stacking.
+
+### Why likelihood is not folded into CVSS
+
+CVSS 3.1's Exploitability sub-metrics (Attack Vector, Attack Complexity, Privileges Required, User Interaction) measure how *easy* an attack is once attempted, not how *often* it will realistically be attempted. Improbable-but-severe events — a signing-key compromise, a cloud-region outage, a regulatory censorship order — score high on CVSS impact yet rarely occur. Those events are captured as Governance Observations and Operational Risks, which never produce Layer 3 deductions; the likelihood factor handles the same realism concern for the Vulnerabilities that do deduct.
+
+```mermaid
+flowchart LR
+    CVSS["CVSS 3.1 band<br/>(impact)"] --> IW["Impact Weight<br/>−1.0 / −0.5 / −0.2"]
+    Pre["Exploit preconditions<br/>(NIST / FAIR)"] --> LF["Likelihood Factor<br/>1.0 → 0.2"]
+    IW --> D["Threat Deduction<br/>= Impact × Likelihood"]
+    LF --> D
+    Base["Design Baseline<br/>(L1, corrected by L4)"] --> Score["Displayed Axis Score"]
+    D --> Score
+
+    style CVSS fill:#ffe3e3,color:#1a1a1a,stroke:#c92a2a
+    style Pre fill:#fff3bf,color:#1a1a1a,stroke:#e67700
+    style Base fill:#d3f9d8,color:#1a1a1a,stroke:#2b8a3e
+    style D fill:#ffe3e3,color:#1a1a1a,stroke:#c92a2a
+    style Score fill:#e8e8e8,color:#1a1a1a,stroke:#999
 ```
 
 ---

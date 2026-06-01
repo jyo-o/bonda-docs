@@ -1,7 +1,7 @@
 # EDA-02: Disperser V2 KZG Compute Surface Exposed Without Authentication or Prepayment
 
 {% hint style="warning" %}
-**Severity**: High (8.6/10) · **Category**: Vulnerability · **Status**: poc_verified
+**Severity**: High (8.6/10) · **Likelihood**: Very High · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary
@@ -108,6 +108,8 @@ The `GetBlobCommitment` endpoint was confirmed live and anonymously callable acr
 A single 16 MiB blob submitted to `GetBlobCommitment` drives roughly 1.15 seconds of wall-clock time and about 14 core-seconds of KZG work on the Disperser, since the G1 commitment, length commitment, and length proof are each computed sequentially and each saturates all available cores.
 
 The gRPC request context is not propagated into `GetCommitmentsForPaddedLength`, so a short client deadline or an early disconnect does not abort the server-side computation. Front-tier protections such as Cloudflare do not mitigate this: the requests are well-formed and individually inexpensive to issue, and the cost asymmetry is algorithmic rather than volumetric, so rate-based or signature-based WAF rules do not block it.
+
+See [Verification Evidence](../evidence.md#getblobcommitment-unauthenticated-compute-eda-02) for the full reproduction environment, commands, and measurements.
 
 ## Impact
 

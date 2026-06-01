@@ -1,7 +1,7 @@
 # CEL-04: Pre-gas Commitment Computation with Unlimited Blob Count in CheckTx
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **Category**: Vulnerability · **Status**: verified
+**Severity**: Medium (5.3/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: verified
 {% endhint %}
 
 ## Summary

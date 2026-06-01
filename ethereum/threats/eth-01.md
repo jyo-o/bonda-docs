@@ -1,7 +1,7 @@
 # ETH-01: Prysm DataColumnsByRange Rate Limit Bypass
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **Category**: Vulnerability · **Status**: verified
+**Severity**: Medium (5.3/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: verified
 {% endhint %}
 
 ## Summary

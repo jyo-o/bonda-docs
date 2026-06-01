@@ -1,7 +1,7 @@
 # AVL-02: Proxy-Wrapped submitData Bypasses Data Availability Extraction
 
 {% hint style="warning" %}
-**Severity**: High (7.7/10) · **Category**: Vulnerability · **Status**: poc_verified
+**Severity**: High (7.7/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary

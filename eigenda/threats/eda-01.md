@@ -1,7 +1,7 @@
 # EDA-01: Unauthenticated GetChunks Cold-Miss Amplification Exhausts Operator CPU
 
 {% hint style="warning" %}
-**Severity**: High (8.6/10) · **Category**: Vulnerability · **Status**: poc_verified
+**Severity**: High (8.6/10) · **Likelihood**: Very High · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary
@@ -69,6 +69,8 @@ Reproduction was performed on an `inabox` local deployment of EigenDA at master 
 - **S3 — client max, 60 s**: at 82,029 requests per second the EigenDA process averaged 447.97 percent CPU with a peak of 463 percent.
 - **S4 — client max, 10 min sustained**: at 83,490 requests per second the process averaged 458.35 percent CPU with a peak of 469 percent.
 - **Asymmetry**: a single attacker consumed roughly 4.5 cores while client-side resource use converged toward zero. A 4 vCPU operator is fully saturated by one attacker; a 16 vCPU operator absorbs about 28 percent from one attacker and reaches saturation under parallel attackers.
+
+See [Verification Evidence](../evidence.md#getchunks-cold-miss-cpu-exhaustion-eda-01) for the full reproduction environment, commands, and measurements.
 
 ## Impact
 

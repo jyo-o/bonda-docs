@@ -1,7 +1,7 @@
 # CEL-03: Unbounded blacklistedHashes Growth Causing Light Node OOM
 
 {% hint style="info" %}
-**Severity**: Medium (5.3/10) · **Category**: Vulnerability · **Status**: poc_verified
+**Severity**: Medium (5.3/10) · **Likelihood**: Low · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary

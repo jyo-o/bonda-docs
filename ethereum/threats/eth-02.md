@@ -1,7 +1,7 @@
 # ETH-02: c-kzg-4844 load\_trusted\_setup Missing Subgroup Check
 
 {% hint style="info" %}
-**Severity**: Low (3.8/10) · **Category**: Vulnerability · **Status**: verified
+**Severity**: Low (3.8/10) · **Likelihood**: Very Low · **Category**: Vulnerability · **Status**: verified
 {% endhint %}
 
 ## Summary

@@ -1,7 +1,7 @@
 # AVL-01: MultiAddress::Index Signing Causes Silent Bridge Proof Omission
 
 {% hint style="warning" %}
-**Severity**: High (8.5/10) · **Category**: Vulnerability · **Status**: poc_verified
+**Severity**: High (8.5/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary

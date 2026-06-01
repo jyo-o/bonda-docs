@@ -1,7 +1,7 @@
 # ETH-03: Prysm DataColumnsByRoot Incorrect Timeout
 
 {% hint style="info" %}
-**Severity**: Low (3.7/10) · **Category**: Vulnerability · **Status**: verified
+**Severity**: Low (3.7/10) · **Likelihood**: Low · **Category**: Vulnerability · **Status**: verified
 {% endhint %}
 
 ## Summary

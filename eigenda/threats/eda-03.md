@@ -1,7 +1,7 @@
 # EDA-03: Cross-Chain Signature Replay Due to Non-Enforced Anchor Signature
 
 {% hint style="info" %}
-**Severity**: Low (3.5/10) · **Category**: Vulnerability · **Status**: verified
+**Severity**: Low (3.5/10) · **Likelihood**: Low · **Category**: Vulnerability · **Status**: verified
 {% endhint %}
 
 ## Summary

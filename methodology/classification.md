@@ -101,39 +101,9 @@ The Spec-Implementation Gap sub-type is what allows the 5-axis baseline to stay 
 
 ---
 
-## Hint Box Format per Tier
+## Reading a Threat Page
 
-Every threat page opens with a GitBook hint box. The metadata line and style depend on the tier.
-
-**Vulnerability:**
-```
-{% hint style="warning" %}
-**Severity**: High (7.8/10) · **Category**: Vulnerability · **Status**: poc_verified
-{% endhint %}
-```
-
-**Operational Risk:**
-```
-{% hint style="warning" %}
-**Severity**: High · **Category**: Operational Risk · **Status**: verified
-{% endhint %}
-```
-
-**Governance Observation:**
-```
-{% hint style="info" %}
-**Category**: Governance Observation · **Status**: verified
-{% endhint %}
-```
-
-**Design Note:**
-```
-{% hint style="success" %}
-**Category**: Design Note · **Status**: verified
-{% endhint %}
-```
-
-Only Vulnerability pages include a `### CVSS 3.1` section. For the other three tiers, severity is expressed qualitatively or omitted, and the page states which 5-axis property the finding affects in prose.
+Every threat page opens with a metadata line stating its tier and status. Only Vulnerability pages carry a CVSS 3.1 score and a Likelihood band; the other three tiers express severity qualitatively or omit it, and state which 5-axis property the finding affects in prose.
 
 ---
 
