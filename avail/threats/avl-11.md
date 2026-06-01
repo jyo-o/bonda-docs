@@ -1,0 +1,46 @@
+# AVL-11: Slashing Infrastructure Present but Never Triggered
+
+{% hint style="success" %}
+**Category**: Design Note · **Status**: verified
+{% endhint %}
+
+## Summary
+
+Avail's NPoS consensus includes complete slashing infrastructure in its runtime with 67 slash-related functions, but zero slashing events have occurred across 688 eras of operation. Validators face no real financial punishment for misbehavior despite slashing existing as a theoretical deterrent, weakening the economic security model that NPoS depends on.
+
+## Description
+
+The runtime metadata contains 67 references to slash-related functions, and the chain defines specific slashing parameters including a 27-era deferral period and 28-era bonding duration.
+
+```
+// Avail slashing infrastructure vs enforcement
+// Runtime slash references: 67 functions
+// SlashDeferDuration: 27 eras
+// BondingDuration: 28 eras
+// SessionsPerEra: 6
+// UnappliedSlashes at era 688: null — zero events in history
+// @audit 688 eras of operation with zero slashing enforcement.
+//        Infrastructure exists but has never been triggered.
+```
+
+The gap between implemented infrastructure and actual enforcement may reflect conditions that are too lenient, insufficient monitoring, or social dynamics within the validator set that discourage reporting. The practical consequence is that the economic deterrent that NPoS relies on to keep validators honest has never been exercised.
+
+## Proof of Concept
+
+On-chain state was queried via Avail Substrate RPC. See [Verification Evidence](../evidence.md#avail-chain-verification) for full commands and results.
+
+- `ActiveEra` storage returns 688 after SCALE decoding — 688 eras of operation with zero slashing events
+- `UnappliedSlashes` for era 688 returns null — no pending or historical slashes
+- Runtime metadata contains 67 slash-related function references, confirming infrastructure exists but has never been triggered
+
+## Impact
+
+Validators observing the lack of enforcement may be incentivized to take risks such as running on lower-quality infrastructure, double-signing to maximize rewards across forks, or engaging in collusion. The absence of real penalties erodes the economic deterrent that secures the network. This is an internal validator incentive concern rather than a direct external attack vector.
+
+Sets the Verifiability Design Baseline through the dishonesty-deterrent sub-property. Slashing infrastructure exists but has never been enforced, so the baseline cannot credit the deterrent.
+
+## Recommendation
+
+1. **Audit slashing trigger conditions**: Review whether the slashing conditions defined in the runtime are appropriate for the current validator set and network state, and adjust thresholds if they are too lenient.
+2. **Implement validator monitoring**: Deploy monitoring infrastructure that actively detects equivocation, downtime, and other slashable offenses, ensuring that slashing reports are submitted when warranted.
+3. **Publish slashing transparency reports**: Regularly publish reports on validator behavior and slashing-related metrics to increase accountability and demonstrate that the enforcement mechanism is actively monitored.

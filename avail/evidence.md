@@ -8,7 +8,7 @@ This page summarizes the on-chain verification evidence collected for Avail DA t
 
 ---
 
-## VectorX Single Relayer Verification (AVL-D01)
+## VectorX Single Relayer Verification (AVL-04)
 
 The VectorX DA attestation bridge operates with a single approved relayer EOA.
 
@@ -83,7 +83,7 @@ Source code analysis of `commitHeaderRange()` confirms:
 
 ---
 
-## SP1VerifierGateway Multisig Analysis (AVL-E01)
+## SP1VerifierGateway Multisig Analysis (AVL-07)
 
 The ZK proof verifier routing is controlled by a 2-of-3 multisig with key holder overlap.
 
@@ -106,7 +106,7 @@ Owner #2 (`0x72Ff...4f54`) is the same address as Avail Governance Multisig 1 ow
 
 ---
 
-## Governance Multisig Cross-Analysis (AVL-E02)
+## Governance Multisig Cross-Analysis (AVL-08)
 
 Three multisigs share overlapping key holders, reducing effective independence.
 
@@ -139,7 +139,7 @@ cast call 0x7F2f87B0Efc66Fea0b7c30C61654E53C37993666 \
 
 ---
 
-## Deployer Admin Role Verification (AVL-E03)
+## Deployer Admin Role Verification (AVL-06)
 
 The deployer EOA retains DEFAULT_ADMIN_ROLE, enabling a 2-transaction VectorX takeover.
 
@@ -201,7 +201,7 @@ cast call 0x45828180bbE489350D621d002968A0585406d487 \
 # Result: 86400 (24 hours)
 ```
 
-### AVAIL Token (AVL-T03)
+### AVAIL Token (AVL-09)
 
 ```bash
 # Token is immutable (no owner)
@@ -221,7 +221,7 @@ Mint/burn authority is restricted to the Bridge contract (0x054f...). A maliciou
 
 ## Avail Chain Verification
 
-### Validator Set (AVL-D02)
+### Validator Set (AVL-10)
 
 ```bash
 # Session.Validators storage
@@ -240,7 +240,7 @@ curl -s "https://avail-rpc.publicnode.com" \
 | Top validator share | 1.06% |
 | Max/min stake ratio | 1.20x (Phragmen equalization) |
 
-### Slashing Status (AVL-P01)
+### Slashing Status (AVL-11)
 
 ```bash
 # ActiveEra

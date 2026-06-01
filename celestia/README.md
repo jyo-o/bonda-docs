@@ -1,7 +1,7 @@
 # Celestia
 
 > **How to Read This Section**
-> This page gives you the full picture of Celestia's threat landscape in one place. Start with the architecture introduction to understand how Celestia works, then scan the threat summary table. Each threat ID links to a detailed write-up. All threats are scored using [CVSS 3.1](../methodology/cvss.md).
+> This page gives you the full picture of Celestia's threat landscape in one place. Start with the architecture introduction, then scan the threat summary table. Each finding is sorted into one of four [classification](../methodology/classification.md) tiers — Vulnerability, Operational Risk, Governance Observation, or Design Note. Only Vulnerabilities carry a [CVSS 3.1](../methodology/cvss.md) score; the other tiers are qualitative and feed the [5-axis model](../methodology/scoring.md). Each SID links to a detailed write-up.
 
 ## Architecture
 
@@ -32,46 +32,46 @@ One critical piece of context: after the shwap protocol transition, Celestia rem
 
 ## Key Numbers
 
-- **12** threats identified through STRIDE analysis, on-chain verification, and source code review
-- **1 High**, **8 Medium**, **3 Low**
+- **12** findings across source code review, on-chain verification, and design analysis
+- **4** Vulnerabilities (1 High, 3 Medium), **3** Operational Risks, **2** Governance Observations, **3** Design Notes
 - **94 / 100** active validators (near saturation)
 - **35.77%** voting power held by top 8 validators (exceeds the 33% censorship threshold)
 - **6 of top 8** validators are KYC-regulated entities in US, EU, Swiss, or HK jurisdictions
 
 ## Threat Summary
 
-| SID | Threat | Severity | Status |
-|-----|--------|----------|--------|
-| [CEL-D17](threats/cel-d17.md) | TxCache Key Mismatch Causing Permanent Cache Leak | High (7.5) | poc_verified |
-| [CEL-E01](threats/cel-e01.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | Medium (6.6) | verified |
-| [CEL-G01](threats/cel-g01.md) | KYC Validator Concentration Enabling Legal Censorship | Medium (6.5) | verified |
-| [CEL-D02](threats/cel-d02.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Medium (5.9) | verified |
-| [CEL-D15](threats/cel-d15.md) | Infinite Retry CPU Burn in blob.Subscribe | Medium (5.9) | verified |
-| [CEL-D03](threats/cel-d03.md) | Unbounded Memory Growth via Fake DataHash Injection | Medium (5.3) | poc_verified |
-| [CEL-D06](threats/cel-d06.md) | Peer Blacklisting Disabled by Default | Medium (5.3) | verified |
-| [CEL-D13](threats/cel-d13.md) | Commitment Computation Before Gas Metering in CheckTx | Medium (5.3) | verified |
-| [CEL-G02](threats/cel-g02.md) | Documentation vs Code Information Asymmetry | Medium (5.3) | verified |
-| [CEL-D05](threats/cel-d05.md) | ShrEx Client-side Unbounded Response Size | Low (3.7) | verified |
-| [CEL-P01](threats/cel-p01.md) | DAS-Only Safety Model After Fraud Proof Removal | Low (3.7) | verified |
-| [CEL-S01](threats/cel-s01.md) | DAS Selective Disclosure via Sybil Peers | Low (3.1) | verified |
+| SID | Threat | Category | Severity | Status |
+|-----|--------|----------|----------|--------|
+| [CEL-01](threats/cel-01.md) | TxCache Key Mismatch Causing Permanent Cache Leak | Vulnerability | High (7.5) | poc_verified |
+| [CEL-02](threats/cel-02.md) | Infinite Retry CPU Burn in blob.Subscribe | Vulnerability | Medium (5.9) | verified |
+| [CEL-03](threats/cel-03.md) | Unbounded Memory Growth via Fake DataHash Injection | Vulnerability | Medium (5.3) | poc_verified |
+| [CEL-04](threats/cel-04.md) | Commitment Computation Before Gas Metering in CheckTx | Vulnerability | Medium (5.3) | verified |
+| [CEL-05](threats/cel-05.md) | Large Blob Blockspace Monopoly via Low-Cost Congestion | Operational Risk | Medium | verified |
+| [CEL-06](threats/cel-06.md) | Peer Blacklisting Disabled by Default | Operational Risk | Medium | verified |
+| [CEL-07](threats/cel-07.md) | DAS Selective Disclosure via Sybil Peers | Operational Risk | Low | verified |
+| [CEL-08](threats/cel-08.md) | KYC Validator Concentration Enabling Legal Censorship | Governance Observation | — | verified |
+| [CEL-09](threats/cel-09.md) | SP1Blobstream Multisig Instant Upgrade Without Timelock | Governance Observation | — | verified |
+| [CEL-10](threats/cel-10.md) | Documentation vs Code Drift | Design Note | — | verified |
+| [CEL-11](threats/cel-11.md) | DAS-Only Safety Model After Fraud Proof Removal | Design Note | — | verified |
+| [CEL-12](threats/cel-12.md) | ShrEx Client-side Unbounded Response Size | Design Note | — | verified |
 
 ## Key Findings
 
-### CEL-E01: SP1Blobstream Multisig Can Upgrade Instantly (Medium, CVSS 6.6)
+### CEL-09: SP1Blobstream Multisig Can Upgrade Instantly (Governance Observation)
 
-The SP1Blobstream bridge contract on Ethereum is controlled by a 4-of-6 Gnosis Safe multisig. The problem is that the same multisig address holds three separate roles: guardian, timelock controller, and default admin. This means 4 signers can upgrade the bridge verifier and program keys instantly with no delay, no public review window, and no on-chain event emitted. Any rollup relying on SP1Blobstream for DA verification would have no warning before the bridge logic changes underneath them.
+The SP1Blobstream bridge contract on Ethereum is controlled by a 4-of-6 Gnosis Safe multisig. The same multisig address holds three separate roles: guardian, timelock controller, and default admin. This means 4 signers can upgrade the bridge verifier and program keys instantly with no delay, no public review window, and no on-chain event emitted. Any rollup relying on SP1Blobstream for DA verification would have no warning before the bridge logic changes underneath them. This is recorded against the Decentralization baseline and carries no score.
 
-### CEL-G01: Validator Set is Legally Concentrated (Medium, CVSS 6.5)
+### CEL-08: Validator Set is Legally Concentrated (Governance Observation)
 
-The top 8 validators control 35.77% of total voting power, which crosses the critical 33% threshold needed to censor transactions in CometBFT consensus. Six of those eight validators are KYC-regulated entities operating in US, EU, Swiss, or Hong Kong jurisdictions. This means a single coordinated legal order could compel enough validators to censor specific transactions without any validator acting maliciously. Anchorage Digital alone holds 11.08% of voting power. Because the validator cap is 100 and 94 slots are already filled, the set has limited room to diversify.
+The top 8 validators control 35.77% of total voting power, which crosses the critical 33% threshold needed to censor transactions in CometBFT consensus. Six of those eight validators are KYC-regulated entities operating in US, EU, Swiss, or Hong Kong jurisdictions. This means a single coordinated legal order could compel enough validators to censor specific transactions without any validator acting maliciously. Anchorage Digital alone holds 11.08% of voting power. Because the validator cap is 100 and 94 slots are already filled, the set has limited room to diversify. This concentration feeds the Decentralization baseline and carries no score.
 
-### CEL-D17: Transaction Cache Leak Leading to Validator Crash (High, PoC Verified)
+### CEL-01: Transaction Cache Leak Leading to Validator Crash (High, PoC Verified)
 
 When a blob transaction enters the mempool, CheckTx caches it using the hash of the inner SDK transaction. But when the block is finalized, FinalizeBlock looks up the cache using the hash of the full BlobTx wire bytes. Because the keys are different, cached entries are never cleaned up. The cache has no size limit and no expiration. A PoC confirmed that a 100 Mbps stream of rejected transactions leaks roughly 1 GB of memory every 160 seconds, eventually crashing the validator with an out-of-memory error.
 
 ## Attack Chains
 
-Several of these threats combine into compound attack chains that are more dangerous than any single threat alone. For example, disabled peer blacklisting (CEL-D06) amplifies both the DataHash memory leak (CEL-D03) and DAS selective disclosure (CEL-S01) because malicious peers can reconnect indefinitely after being detected.
+Several of these threats combine into compound attack chains that are more dangerous than any single threat alone. For example, disabled peer blacklisting (CEL-06) amplifies both the DataHash memory leak (CEL-03) and DAS selective disclosure (CEL-07) because malicious peers can reconnect indefinitely after being detected.
 
 For the full attack chain analysis, see [Attack Chains](attack-chains.md).
 

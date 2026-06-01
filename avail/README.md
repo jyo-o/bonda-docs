@@ -3,10 +3,10 @@
 {% hint style="info" %}
 **How to Read This Section**
 
-Each threat listed below has its own dedicated page with full technical details, on-chain evidence, and attack scenarios. Click any threat ID to dive deeper.
+Each finding listed below has its own dedicated page with full technical details, on-chain evidence, and attack scenarios. Click any SID to dive deeper.
 
-- Threats are scored using [CVSS 3.1](../methodology/cvss.md), the industry-standard vulnerability scoring system.
-- Verification status indicates whether the threat was confirmed through on-chain probing, source code review, or mainnet fork testing. Learn more about our [verification methodology](../methodology/verification.md).
+- Each finding is sorted into one of four [classification](../methodology/classification.md) tiers — Vulnerability, Operational Risk, Governance Observation, or Design Note. Only Vulnerabilities carry a [CVSS 3.1](../methodology/cvss.md) score; the other tiers are qualitative and feed the [5-axis model](../methodology/scoring.md).
+- Verification status indicates whether the finding was confirmed through on-chain probing, source code review, or mainnet fork testing. Learn more about our [verification methodology](../methodology/verification.md).
 {% endhint %}
 
 ## What is Avail?
@@ -42,9 +42,9 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 
 | Metric | Value |
 |--------|-------|
-| Total threats identified | 9 |
-| Verified | 9 |
-| Highest severity | High — 7.7, deployer retains admin role on VectorX |
+| Total findings | 12 |
+| Verification status | 9 verified, 3 poc_verified |
+| Highest severity | High (CVSS 8.5) |
 | Active validators | 105 out of 1,200 max |
 | Nakamoto coefficient | ~34 validators to control 33% of stake |
 | Governance multisig | 4/7 Gnosis Safe |
@@ -53,43 +53,46 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 
 ## Threat Summary
 
-9 threats identified through on-chain verification, source code analysis, and Anvil mainnet fork testing. All threats are scored using CVSS 3.1.
+12 findings identified through on-chain verification, source code analysis, and Anvil mainnet fork testing. Only Vulnerabilities carry a CVSS 3.1 score.
 
-| SID | Threat | Severity | Status |
-|-----|--------|----------|--------|
-| [AVL-E03](threats/avl-e03.md) | Deployer EOA retains admin role, can upgrade VectorX solo | High (7.7) | verified |
-| [AVL-D01](threats/avl-d01.md) | VectorX single relayer with no on-chain heartbeat or rate limit | High (7.5) | verified |
-| [AVL-T01](threats/avl-t01.md) | VectorX upgradeable instantly by 4/7 multisig, no timelock | Medium (5.4) | verified |
-| [AVL-D02](threats/avl-d02.md) | Only 105 of 1,200 validator slots are active | Medium (5.3) | verified |
-| [AVL-P01](threats/avl-p01.md) | Slashing exists but has never been triggered in 688 eras | Medium (4.3) | verified |
-| [AVL-E01](threats/avl-e01.md) | SP1 Verifier Gateway controlled by 2/3 multisig | Low (3.8) | verified |
-| [AVL-T03](threats/avl-t03.md) | AVAIL token unlimited mint possible via Bridge or VectorX upgrade | Low (3.8) | verified |
-| [AVL-P02](threats/avl-p02.md) | Block reconstruction incomplete, DAS guarantee is theoretical | Low (3.7) | verified |
-| [AVL-E02](threats/avl-e02.md) | Key holder overlap across Governance, Pauser, and SP1 multisigs | Low (2.7) | verified |
+| SID | Threat | Category | Severity | Status |
+|-----|--------|----------|----------|--------|
+| [AVL-01](threats/avl-01.md) | MultiAddress::Index Signing Causes Silent Bridge Proof Omission | Vulnerability | High (8.5) | poc_verified |
+| [AVL-02](threats/avl-02.md) | Proxy-Wrapped submitData Bypasses DA Extraction | Vulnerability | High (7.7) | poc_verified |
+| [AVL-03](threats/avl-03.md) | Kate RPC Unauthenticated KZG Computation | Vulnerability | Medium (5.3) | poc_verified |
+| [AVL-04](threats/avl-04.md) | Single Relayer Creates Bridge-Wide SPOF | Operational Risk | High | verified |
+| [AVL-05](threats/avl-05.md) | VectorX Upgradeable Instantly Without Timelock | Operational Risk | Medium | verified |
+| [AVL-06](threats/avl-06.md) | Deployer EOA Retains Admin Role on VectorX | Governance Observation | — | verified |
+| [AVL-07](threats/avl-07.md) | SP1VerifierGateway Route Manipulation via Multisig | Governance Observation | — | verified |
+| [AVL-08](threats/avl-08.md) | Key Holder Overlap Across Three Multisigs | Governance Observation | — | verified |
+| [AVL-09](threats/avl-09.md) | Unlimited Token Minting via Bridge or VectorX Upgrade | Governance Observation | — | verified |
+| [AVL-10](threats/avl-10.md) | Low Validator Utilization Concentrates Power | Design Note | — | verified |
+| [AVL-11](threats/avl-11.md) | Slashing Infrastructure Present but Never Triggered | Design Note | — | verified |
+| [AVL-12](threats/avl-12.md) | Incomplete Block Reconstruction Limits DAS | Design Note | — | verified |
 
 ## Key Findings
 
-### Deployer EOA Still Has Full Admin Access
+### Index-Addressed Submissions Are Silently Dropped from Bridge Proofs
 
-**AVL-E03** | High (7.7)
+**AVL-01** | Vulnerability, High (8.5)
 
-The deployer wallet that originally set up the VectorX contract still holds the most powerful admin role. This role was supposed to be revoked after deployment, but the revocation code was found commented out in the deployment script. Because this admin role governs all other roles, the deployer can grant itself upgrade permissions and replace the entire VectorX contract in just two transactions. This bypasses the 4/7 multisig governance entirely, meaning a single compromised key could take over the bridge.
+When a `submit_data` extrinsic is signed through a `MultiAddress::Index` origin, the caller resolves to `None` and the data leaf is dropped from the bridge proof while the submission still succeeds on-chain. An Ethereum-side consumer reconstructing the bridge root never sees the data, so a submission that looks committed on Avail is absent from what the bridge attests to. This is an integrity gap against the data-availability guarantee.
+
+### Proxy-Wrapped Submissions Bypass DA Extraction
+
+**AVL-02** | Vulnerability, High (7.7)
+
+Wrapping `submit_data` in `Proxy::proxy` with `AppId(0)` emits a successful `DataSubmitted` event while the data is never placed in the Kate commitment. Two defects combine: the recursive proxy guard lacks the `submit_data` block its batch counterpart enforces, and the transaction filter drops extraction for any wrapped call at depth greater than zero. Any account can produce data that appears committed but cannot be proven available.
 
 ### VectorX Runs on a Single Relayer
 
-**AVL-D01** | High (7.5)
+**AVL-04** | Operational Risk, High
 
-The entire bridge between Avail and Ethereum depends on a single relayer wallet. There is no backup relayer, no on-chain heartbeat monitoring, and no staleness detection. If this one wallet goes offline or its private key is compromised, DA attestation bridging to Ethereum stops completely. The relay interval is controlled purely on the client side with no on-chain enforcement, and there is no mechanism to propose replacement relayers through the contract.
+The entire bridge between Avail and Ethereum depends on a single relayer wallet. There is no backup relayer, no on-chain heartbeat monitoring, and no staleness detection. If this one wallet goes offline or its private key is compromised, DA attestation bridging to Ethereum stops completely. The relay interval is controlled purely on the client side with no on-chain enforcement, and there is no mechanism to propose replacement relayers through the contract. Tracked as an operational indicator, not a structural deduction.
 
-### Validator Set is Underutilized
+### Deployer EOA Still Has Full Admin Access
 
-**AVL-D02** | Medium (5.3)
+**AVL-06** | Governance Observation
 
-Avail supports up to 1,200 validators but only 105 are currently active, using just 8.75% of the available capacity. The Nakamoto coefficient is approximately 34, meaning an attacker would need to compromise or collude with 34 validators to control a third of the stake. On the positive side, Avail's NPoS Phragmen election algorithm achieves remarkably even stake distribution: the ratio between the largest and smallest validator stake is only 1.2x.
-
-### Multisig Key Holders Overlap Across Three Groups
-
-**AVL-E02** | Low (2.7)
-
-Three separate multisig wallets govern different parts of the system: Governance, Pauser, and SP1 Verifier. However, these are not truly independent. Four of the five Pauser multisig owners are the same people as Governance multisig owners, and one address appears in all three multisigs. This means compromising the Governance multisig effectively compromises the Pauser and partially compromises the SP1 verifier control as well.
+The deployer wallet that originally set up the VectorX contract still holds the most powerful admin role. The revocation code was found commented out in the deployment script. Because this admin role governs all other roles, the deployer can grant itself upgrade permissions and replace the entire VectorX contract in just two transactions, bypassing the 4/7 multisig governance entirely. This is recorded against the Decentralization baseline and carries no score.
 

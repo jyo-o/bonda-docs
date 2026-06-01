@@ -1,6 +1,6 @@
 # Methodology Overview
 
-BONDA provides systematic threat modeling for Data Availability (DA) layers that underpin Ethereum's rollup ecosystem. This section describes the analytical framework used to identify, score, and verify threats across EigenDA, Celestia, Avail, and Ethereum PeerDAS.
+BONDA provides systematic threat modeling for Data Availability (DA) layers that underpin Ethereum's rollup ecosystem. This section describes the analytical framework used to discover, classify, score, and verify threats across EigenDA, Celestia, Avail, and Ethereum PeerDAS.
 
 ---
 
@@ -12,25 +12,31 @@ Despite this critical dependency, most DA layers have not been subjected to stru
 
 ---
 
-## Three Pillars
+## Four Pillars
 
-BONDA's methodology rests on three pillars:
+BONDA's methodology rests on four pillars. Each finding moves through all four: it is discovered, classified into one of four tiers, scored or characterized according to its tier, and verified against primary sources.
 
-### 1. STRIDE Analysis
+### 1. Threat Discovery
 
-Each DA protocol is decomposed into a Data Flow Diagram (DFD) with explicit trust boundaries. Threats are enumerated using the STRIDE-per-element method — Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege — extended with two DA-specific categories: **Protocol Gap (P)** for missing design-level features and **Governance/Concentration (G)** for centralization risks.
+Each DA protocol is decomposed into a Data Flow Diagram (DFD) with explicit trust boundaries. Potential threats are enumerated using STRIDE-per-element — Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege — as a discovery aid that forces every process, data store, data flow, and external entity to be examined. STRIDE is used here to drive enumeration, not as a label attached to findings.
 
-See: [STRIDE for DA Layers](stride.md)
+See: [Threat Discovery](stride.md)
 
-### 2. CVSS 3.1 Scoring
+### 2. Threat Classification
 
-Findings are scored using CVSS 3.1 (Common Vulnerability Scoring System), the industry-standard framework used by NVD, major audit firms (Trail of Bits, ChainLight, Sigma Prime), and bug bounty platforms. Blockchain-specific context is captured in the metric rationale rather than custom metrics, ensuring scores are directly comparable across protocols and audit firms.
+Every finding is classified into one of four tiers: **Vulnerability**, **Operational Risk**, **Governance Observation**, or **Design Note**. The tier determines how a finding is treated — whether it carries a CVSS score, whether it sets a structural baseline, or whether it is a live operational measurement. This separation prevents architectural choices and trust-distribution observations from being mislabeled as exploitable bugs.
 
-See: [CVSS 3.1 Scoring](cvss.md)
+See: [Threat Classification](classification.md)
 
-### 3. Multi-Source Verification
+### 3. Severity & Scoring
 
-Every finding is traced to at least two independent primary sources. BONDA goes beyond static code review by combining source code audits (pinned to specific commits), on-chain state queries (via `cast` and RPC calls), and live network probes (gRPC/REST against mainnet nodes). Evidence is captured in reproducible artifacts — YAML evidence files, shell script PoCs, and command output logs.
+Findings in the Vulnerability tier are scored with CVSS 3.1, the industry-standard framework used by NVD and major audit firms. Across all four tiers, findings feed a 5-axis qualitative risk model — Retrievability, Verifiability, Liveness, Decentralization, Cost Efficiency — that evaluates each DA layer against the same criteria. The 5-axis model is explained here as a methodology; the computed per-DA values and pentagon charts are rendered in the BONDA dashboard.
+
+See: [CVSS 3.1 Scoring](cvss.md) · [5-Axis Risk Scoring](scoring.md)
+
+### 4. Multi-Source Verification
+
+Every finding is traced to at least two independent primary sources. BONDA combines source code audits pinned to specific commits, on-chain state queries via `cast` and RPC, and live network probes against mainnet nodes. Each finding is assigned a verification level reflecting the strength of its evidence.
 
 See: [Verification Approach](verification.md)
 
@@ -42,24 +48,24 @@ See: [Verification Approach](verification.md)
 
 **On-chain verification.** Access control configurations, multisig compositions, role assignments, and upgrade mechanisms are verified against live contract state rather than documentation or deployment scripts alone.
 
-**Cross-DA comparison.** The same analytical framework is applied uniformly across four DA protocols, enabling direct comparison of security properties. Common patterns (such as bridge multisig concentration or missing slashing mechanisms) are identified across protocol boundaries.
+**Tiered classification.** A code bug with a concrete exploit path and a documented architectural trade-off are fundamentally different findings. BONDA's four-tier system keeps them distinct, so that only genuine vulnerabilities carry numeric severity while design choices and governance concentration are characterized on their own terms.
 
-**Extended threat categories.** Classic STRIDE misses two critical risk classes in DA infrastructure: protocol-level design omissions (no slashing, no DAS) and governance centralization (single-entity multisig control, KYC validator concentration). BONDA's P and G categories capture these systematically.
+**Cross-DA comparison.** The same analytical framework is applied uniformly across four DA protocols, enabling direct comparison of security properties. The 5-axis model evaluates every DA against identical criteria, so comparison reflects architecture rather than the accident of where research effort was concentrated.
 
 ---
 
 ## Scope
 
-BONDA's threat model covers 38 threats across four DA protocols:
+BONDA's threat model covers 50 findings across four DA protocols:
 
-| Protocol | Threats | Scope Areas |
+| Protocol | Findings | Scope Areas |
 |----------|---------|-------------|
-| EigenDA | 13 | Disperser, Relay, Operator, governance |
+| EigenDA | 14 | Disperser, Relay, Operator, governance |
 | Celestia | 12 | Consensus, DAS, Blobstream bridge |
-| Avail | 9 | VectorX bridge, validator set, governance |
-| Ethereum / PeerDAS | 4 | Multi-client PeerDAS, KZG, custody groups |
+| Avail | 12 | VectorX bridge, validator set, runtime, Kate RPC |
+| Ethereum / PeerDAS | 12 | Column custody, sampling, multi-client, fee market |
 
-Each threat is classified by scope: **protocol** (core DA mechanism), **bridge** (L1-L2 communication), **rollup** (rollup-operator-facing surface), or **chain** (base layer consensus).
+Each finding is classified by scope: **protocol** (core DA mechanism), **bridge** (L1-L2 communication), **rollup** (rollup-operator-facing surface), or **chain** (base layer consensus), and by tier (Vulnerability, Operational Risk, Governance Observation, Design Note).
 
 ---
 

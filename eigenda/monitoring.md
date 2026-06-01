@@ -24,19 +24,19 @@ The monitoring backend runs a 7-worker pipeline that continuously collects, veri
 The dashboard surfaces the following real-time metrics derived from the threat model:
 
 ### Signing Stake Percentage
-The fraction of total quorum stake that signed each blob's attestation. Relates to **EDA-E03** (operator stake concentration) -- if signing stake drops below the confirmation threshold (55%), blob certification fails.
+The fraction of total quorum stake that signed each blob's attestation. Relates to **EDA-09** (operator stake concentration) -- if signing stake drops below the confirmation threshold (55%), blob certification fails.
 
 ### Nakamoto Coefficient
-The minimum number of operators needed to control 33% of stake in each quorum. Directly measures the **EDA-E03** collusion threshold. Current mainnet values: Q0 Nakamoto=3, Q1 Nakamoto=3.
+The minimum number of operators needed to control 33% of stake in each quorum. Directly measures the **EDA-09** collusion threshold. Current mainnet values: Q0 Nakamoto=3, Q1 Nakamoto=3.
 
 ### Dead Operators
-Operators with 0% chunk serving success rate over the monitoring window. Relates to **EDA-D12** (dead operators) and **EDA-P01** (no slashing incentive). Mainnet observation: 11 out of 79 probed operators at 0% success rate. These are free-rider candidates -- they sign BLS attestations but do not serve data.
+Operators with 0% chunk serving success rate over the monitoring window. Relates to **EDA-06** (dead operators) and **EDA-11** (no slashing incentive). Mainnet observation: 11 out of 79 probed operators at 0% success rate. These are free-rider candidates -- they sign BLS attestations but do not serve data.
 
 ### Relay Health
-Availability status of the single registered relay (EDA-D06). Since only 1 relay is registered on-chain (RelayRegistry nextRelayKey=1), any downtime directly affects the primary blob retrieval path.
+Availability status of the single registered relay (EDA-04). Since only 1 relay is registered on-chain (RelayRegistry nextRelayKey=1), any downtime directly affects the primary blob retrieval path.
 
 ### Ejection Activity
-Historical and real-time ejection events from the EjectionManager contract. Relates to **EDA-T09** (ejector role abuse). The ejector is a single EOA (0x8642...) that can remove up to 33.33% of quorum stake within a 3-day window.
+Historical and real-time ejection events from the EjectionManager contract. Relates to **EDA-08** (ejector role abuse). The ejector is a single EOA (0x8642...) that can remove up to 33.33% of quorum stake within a 3-day window.
 
 ## Threat Coverage
 
@@ -44,10 +44,10 @@ The monitoring system provides observability for the following threat findings:
 
 | Threat ID | Signal | Coverage |
 |---|---|---|
-| EDA-D06 | Relay uptime, retrieval latency | Direct monitoring |
-| EDA-D12 | Per-operator chunk serving success rate | Direct monitoring |
-| EDA-E03 | Stake distribution, Nakamoto coefficient, HHI | On-chain indexing |
-| EDA-T09 | Ejection event count, ejector address activity | On-chain indexing |
-| EDA-P01 | Slash event count (expected: 0) | On-chain indexing |
-| EDA-D03 | Disperser response times, error rates | Write probe data |
-| EDA-G01 | Operator IP/ASN diversity metrics | Operator probe metadata |
+| EDA-04 | Relay uptime, retrieval latency | Direct monitoring |
+| EDA-06 | Per-operator chunk serving success rate | Direct monitoring |
+| EDA-09 | Stake distribution, Nakamoto coefficient, HHI | On-chain indexing |
+| EDA-08 | Ejection event count, ejector address activity | On-chain indexing |
+| EDA-11 | Slash event count (expected: 0) | On-chain indexing |
+| EDA-02 | Disperser response times, error rates | Write probe data |
+| EDA-14 | Operator IP/ASN diversity metrics | Operator probe metadata |

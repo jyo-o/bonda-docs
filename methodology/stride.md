@@ -1,50 +1,34 @@
-# STRIDE for DA Layers
+# Threat Discovery
 
-BONDA uses the STRIDE-per-element method to systematically enumerate threats against Data Availability protocols. This page describes how the classic STRIDE framework is adapted for DA-specific infrastructure, including two additional threat categories and the Data Flow Diagram (DFD) decomposition approach.
-
----
-
-## STRIDE Framework
-
-STRIDE is a threat classification model originally developed at Microsoft. Each letter represents a category of threat:
-
-| Category | Threat | DA Layer Example |
-|----------|--------|-----------------|
-| **S** — Spoofing | Impersonating another identity | BLS signature replay across chains, DAS selective disclosure via Sybil peers |
-| **T** — Tampering | Modifying data or code in transit | Unauthorized contract upgrade via retained admin role, blob commitment manipulation |
-| **R** — Repudiation | Denying an action occurred | Equivocation detection failure, missing slashing evidence |
-| **I** — Information Disclosure | Exposing data to unauthorized parties | BLS private key exposure through misconfigured key stores |
-| **D** — Denial of Service | Disrupting availability | Unauthenticated compute-heavy endpoints, unbounded memory allocation, mempool flooding |
-| **E** — Elevation of Privilege | Gaining unauthorized access | Single multisig controlling core contracts, deployer EOA retaining admin roles |
+BONDA discovers threats by decomposing each DA protocol into a Data Flow Diagram and walking that diagram with the STRIDE-per-element method. This page describes how STRIDE is used as a discovery aid, how the DFD decomposition works, and how findings are scoped. STRIDE drives enumeration during discovery; it is not a label attached to the published findings. How findings are labeled is described in [Threat Classification](classification.md).
 
 ---
 
-## DA-Specific Extensions
+## STRIDE as a Discovery Aid
 
-Classic STRIDE was designed for enterprise software with well-defined user roles. DA layers introduce risks that do not map cleanly to the original six categories. BONDA adds two extensions:
+STRIDE is a threat-enumeration model originally developed at Microsoft. Each letter names a category of threat: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege. BONDA uses these six categories as prompts during discovery — for each element in the data flow diagram, the analyst asks whether each category of threat applies.
 
-### P: Protocol Gap
+| Category | Discovery Prompt | DA Layer Example Surfaced |
+|----------|------------------|---------------------------|
+| **Spoofing** | Can an identity be impersonated? | BLS signature replay across chains, Sybil peers in sampling |
+| **Tampering** | Can data or code be modified in transit or at rest? | Unauthorized contract upgrade via retained admin role |
+| **Repudiation** | Can an action be denied after the fact? | Missing equivocation evidence, indistinguishable nil-votes |
+| **Information Disclosure** | Can data reach unauthorized parties? | Key exposure through misconfigured key stores |
+| **Denial of Service** | Can availability be disrupted? | Unauthenticated compute-heavy endpoints, unbounded allocation |
+| **Elevation of Privilege** | Can authority be gained beyond what is granted? | Single multisig controlling core contracts |
 
-Protocol Gap captures design-level omissions — features that should exist for security but are entirely absent from the protocol specification or implementation.
+The value of STRIDE here is coverage: by applying every category to every element, the analyst is far less likely to overlook an attack surface. The categories are a checklist for the search, not a taxonomy for the results.
 
-**Examples across DA layers:**
+---
 
-- **EDA-P01**: EigenDA operator slashing is not implemented. Operators can serve zero chunks with no economic penalty.
-- **EDA-P02**: EigenDA has no Data Availability Sampling (DAS). Clients must trust the full quorum rather than sampling independently.
+## Why STRIDE Is Not Enough on Its Own
 
-Protocol Gap threats differ from Denial of Service or Tampering because the issue is not a flaw in existing logic but rather the absence of a necessary mechanism. These threats typically require protocol-level changes to address — they cannot be patched by fixing a bug.
+Classic STRIDE was designed for enterprise software with well-defined user roles. Applied to DA infrastructure, the discovery walk repeatedly surfaces two classes of finding that do not fit any of the six categories:
 
-### G: Governance / Concentration
+- **Design-level omissions** — a security-relevant mechanism is entirely absent from the specification or implementation. The absence of operator slashing, or the absence of data availability sampling, is not a flaw in existing logic; it is the considered absence of logic. These are not Denial of Service or Tampering bugs.
+- **Concentration and trust-distribution risks** — control over governance, operator sets, or infrastructure is concentrated in a few hands. An entity operating entirely within its granted authority can still cause systemic harm. This is not Elevation of Privilege, because no boundary is crossed.
 
-Governance and Concentration threats capture centralization risks in protocol governance, operator sets, or infrastructure dependencies.
-
-**Examples across DA layers:**
-
-- **CEL-G01**: Celestia's KYC-verified validator set creates a legal censorship vector — a single jurisdiction could compel coordinated censorship.
-- **EDA-G01**: EigenDA operator infrastructure concentrated among a small number of providers.
-- **CEL-G02**: Information asymmetry across Celestia's governance surfaces (forum, on-chain, GitHub).
-
-These threats are distinct from Elevation of Privilege because they do not involve unauthorized access. The concentration itself is the risk — entities operating within their granted authority can still cause systemic harm.
+Because these recur in every DA protocol, they cannot be treated as edge cases. BONDA captures them through its classification system rather than forcing them into a STRIDE letter: design-level omissions become **Design Notes**, and concentration risks become **Governance Observations**. See [Threat Classification](classification.md).
 
 ---
 
@@ -52,15 +36,15 @@ These threats are distinct from Elevation of Privilege because they do not invol
 
 Each DA protocol is decomposed into a Data Flow Diagram that maps:
 
-1. **Processes** — Active components that transform data (e.g., Disperser, Validator, Relay, Light Node)
-2. **Data Stores** — Persistent state (e.g., on-chain registries, blob storage, operator databases)
-3. **Data Flows** — Communication channels between components (e.g., gRPC streams, P2P gossip, on-chain transactions)
-4. **External Entities** — Actors outside the system boundary (e.g., rollup sequencers, end users, bridge contracts on L1)
-5. **Trust Boundaries** — Lines separating zones of different trust levels (e.g., operator-controlled vs. protocol-controlled, L1 vs. L2)
+1. **Processes** — Active components that transform data, such as Disperser, Validator, Relay, or Light Node.
+2. **Data Stores** — Persistent state, such as on-chain registries, blob storage, or operator databases.
+3. **Data Flows** — Communication channels between components, such as gRPC streams, P2P gossip, or on-chain transactions.
+4. **External Entities** — Actors outside the system boundary, such as rollup sequencers, end users, or bridge contracts on L1.
+5. **Trust Boundaries** — Lines separating zones of different trust levels, such as operator-controlled vs. protocol-controlled, or L1 vs. L2.
 
 ### Target Types
 
-Every threat in BONDA is tagged with one or more target types from the DFD:
+Every finding is associated with one or more target types from the DFD:
 
 | Target Type | Description | Example |
 |-------------|-------------|---------|
@@ -69,13 +53,13 @@ Every threat in BONDA is tagged with one or more target types from the DFD:
 | `DataFlow` | Communication channel | gRPC connection, P2P gossip, Ethereum calldata |
 | `ExternalEntity` | Actor outside the trust boundary | Rollup sequencer, end user, L1 bridge contract |
 
-STRIDE-per-element applies each threat category to each element type. Not all combinations are meaningful — for instance, Data Stores cannot be Spoofed in the identity sense, but they can be Tampered with. The DFD decomposition ensures that no component or interaction is analyzed in isolation.
+STRIDE-per-element applies each discovery prompt to each element type. Not all combinations are meaningful — a data store cannot be spoofed in the identity sense, but it can be tampered with. The DFD decomposition ensures that no component or interaction is analyzed in isolation.
 
 ---
 
 ## Scope Classification
 
-Each threat is classified by its blast radius:
+Each finding is classified by its blast radius:
 
 | Scope | Definition | Example |
 |-------|------------|---------|
@@ -84,34 +68,10 @@ Each threat is classified by its blast radius:
 | `rollup` | Affects rollup operators using the DA layer | Proxy rate limit absence impacting individual rollup sidecars |
 | `chain` | Affects base layer consensus | Validator OOM via mempool cache manipulation in Celestia |
 
-Scope classification drives prioritization. A `protocol`-scope threat potentially affects every consumer of the DA layer, while a `rollup`-scope threat may only impact operators who have misconfigured their local infrastructure.
+Scope classification drives prioritization. A `protocol`-scope finding potentially affects every consumer of the DA layer, while a `rollup`-scope finding may only impact operators who have misconfigured their local infrastructure.
 
 ---
 
-## Threat ID Convention
+## From Discovery to Classification
 
-Each threat is assigned a structured identifier:
-
-```
-{LAYER}-{CATEGORY}{NUMBER}
-```
-
-- **LAYER**: Protocol prefix (`EDA` for EigenDA, `CEL` for Celestia, `AVL` for Avail, `ETH` for Ethereum)
-- **CATEGORY**: STRIDE letter (S/T/R/I/D/E) or extension (P/G)
-- **NUMBER**: Sequential within that layer and category
-
-Governance/Concentration threats use the `G` category suffix within their protocol prefix (e.g., `CEL-G01`, `EDA-G01`).
-
----
-
-## Coverage Summary
-
-| Protocol | S | T | R | I | D | E | P | G | Total |
-|----------|---|---|---|---|---|---|---|---|-------|
-| EigenDA  | 1 | 1 | — | — | 5 | 3 | 2 | 1 | 13 |
-| Celestia | 1 | — | — | — | 7 | 1 | 1 | 2 | 12 |
-| Avail    | — | 2 | — | — | 2 | 3 | 2 | — | 9 |
-| Ethereum | — | 2 | — | — | 2 | — | — | — | 4 |
-| **Total**| **2** | **5** | **0** | **0** | **16** | **7** | **5** | **3** | **38** |
-
-Denial of Service (D) dominates across all protocols, reflecting the fundamental challenge of DA layers: they must remain available under adversarial conditions. Elevation of Privilege (E) and Tampering (T) are also prevalent, driven by the prevalence of upgradeable contracts and multisig governance structures in bridge components.
+Discovery produces a candidate list: every element, every applicable STRIDE prompt, every design omission and concentration risk surfaced along the way. Each candidate is then classified into one of four tiers and either scored or characterized accordingly. The next page, [Threat Classification](classification.md), defines those tiers and the criteria for assigning them.

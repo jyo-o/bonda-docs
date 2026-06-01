@@ -2,7 +2,7 @@
 
 > **How to Read This Section**
 >
-> Each threat is identified by an SID like `ETH-R01` and linked to a detailed write-up. Severity scores use [CVSS 3.1](../methodology/cvss.md) on a 0--10 scale. Status indicates verification depth: `verified` means the vulnerability was confirmed through source code analysis at a pinned commit.
+> Each threat is identified by an SID like `ETH-02` and linked to a detailed write-up. Every finding is sorted into one of four [classification](../methodology/classification.md) tiers — Vulnerability, Operational Risk, Governance Observation, or Design Note. Only Vulnerabilities carry a [CVSS 3.1](../methodology/cvss.md) score on a 0--10 scale; the other tiers are qualitative and feed the [5-axis model](../methodology/scoring.md) rather than a numeric severity. Status indicates verification depth: `verified` means the finding was confirmed through source code or specification analysis at a pinned commit or spec revision.
 
 ## Architecture
 
@@ -32,33 +32,42 @@ Data integrity in PeerDAS relies on KZG commitments, a cryptographic proof schem
 
 ## Key Numbers
 
-- **4** threats identified across the Ethereum DA stack
-- **1** Medium severity finding (ETH-R02: rate limit bypass)
-- **3** Low severity findings (ETH-R01: subgroup check, ETH-R03: incorrect timeout, ETH-R04: thread safety)
-- **2** source code repositories analyzed (c-kzg-4844, Prysm)
+- **12** findings across the Ethereum DA stack
+- **4** Vulnerabilities (ETH-01 through ETH-04), all client-implementation or library findings
+- **2** Operational Risks (ETH-05 reconstruction dependence, ETH-06 column-subnet eclipse)
+- **3** Governance Observations (ETH-07 custody self-reporting, ETH-08 builder/relay concentration, ETH-09 rising resource floor)
+- **3** Design Notes that set the PeerDAS baseline (ETH-10 1D coding, ETH-11 custody-based availability, ETH-12 EIP-7918 reserve)
 
 ## Threat Summary
 
-| SID | Threat | Severity | Status |
-|-----|--------|----------|--------|
-| [ETH-R02](threats/eth-r02.md) | Prysm DataColumnsByRange Rate Limit Bypass | Medium (5.3) | verified |
-| [ETH-R01](threats/eth-r01.md) | c-kzg-4844 load\_trusted\_setup Missing Subgroup Check | Low (3.8) | verified |
-| [ETH-R03](threats/eth-r03.md) | Prysm DataColumnsByRoot Incorrect Timeout | Low (3.7) | verified |
-| [ETH-R04](threats/eth-r04.md) | c-kzg-4844 Go Binding Thread Safety | Low (3.4) | verified |
+| SID | Threat | Category | Severity | Status |
+|-----|--------|----------|----------|--------|
+| [ETH-01](threats/eth-01.md) | Prysm DataColumnsByRange Rate-Limit Bypass | Vulnerability | Medium (5.3) | verified |
+| [ETH-02](threats/eth-02.md) | c-kzg-4844 load\_trusted\_setup Missing Subgroup Check | Vulnerability | Low (3.8) | verified |
+| [ETH-03](threats/eth-03.md) | Prysm DataColumnsByRoot Incorrect Timeout | Vulnerability | Low (3.7) | verified |
+| [ETH-04](threats/eth-04.md) | c-kzg-4844 Go Binding Thread Safety | Vulnerability | Low (3.4) | verified |
+| [ETH-05](threats/eth-05.md) | Reconstruction Depends on Half-Column Holders | Operational Risk | Medium | verified |
+| [ETH-06](threats/eth-06.md) | Per-Column Subnet Eclipse | Operational Risk | Medium | verified |
+| [ETH-07](threats/eth-07.md) | Self-Reported Custody Count Unverifiable | Governance Observation | — | verified |
+| [ETH-08](threats/eth-08.md) | Builder/Relay Publication Concentration | Governance Observation | — | verified |
+| [ETH-09](threats/eth-09.md) | Rising Node Resource Floor as Blobs Scale | Governance Observation | — | verified |
+| [ETH-10](threats/eth-10.md) | One-Dimensional Erasure Coding | Design Note | — | verified |
+| [ETH-11](threats/eth-11.md) | Fork-Choice Rests on Custody, Not Sampling | Design Note | — | verified |
+| [ETH-12](threats/eth-12.md) | EIP-7918 Blob Fee Reserve | Design Note | — | verified |
 
 ## Key Findings
 
-### ETH-R01: c-kzg-4844 Missing Subgroup Check -- Low (3.8)
-
-The `load_trusted_setup` function deserializes G1/G2 points without performing subgroup membership checks, while the runtime input path in the same codebase does perform this check. This validation asymmetry means a supply chain attack injecting tampered setup bytes could theoretically break pairing equation soundness, allowing forged proofs to be accepted. Since the setup is embedded at build time, this is not remotely triggerable.
-
-### ETH-R02: Prysm DataColumnsByRange Rate Limit Bypass -- Medium (5.3)
+### ETH-01: Prysm DataColumnsByRange Rate-Limit Bypass -- Vulnerability, Medium (5.3)
 
 Prysm's `DataColumnsByRange` RPC handler charges a constant cost of 1 to the rate limiter regardless of request size, while the equivalent `DataColumnsByRoot` handler correctly charges the actual number of columns. An unauthenticated P2P peer can exploit this asymmetry to amplify DB lookup and I/O workload on the target node, potentially degrading attestation and sync performance. The leaky bucket provides post-hoc throttling, bounding the impact to initial uncharged work amplification.
 
-### ETH-R04: c-kzg-4844 Go Binding Thread Safety -- Low (3.4)
+### ETH-11: Fork-Choice Rests on Custody, Not Sampling -- Design Note
 
-The c-kzg Go binding uses package-level globals without synchronization primitives, creating data race conditions under concurrent access. While standard usage loads the setup once at startup, the API contract gap means concurrent Load/verify/Free calls can theoretically cause undefined behavior, double initialization, or use-after-free. This is a formal Go memory model violation.
+The deployed PeerDAS fork-choice availability check verifies the column sidecars a node has retrieved for its own custody and confirms their KZG proofs. It does not invoke a probabilistic peer-sampling routine, so a node's availability decision rests on its custody set and KZG verification rather than randomized sampling. This is the documented basis of the Ethereum verifiability baseline and carries no score.
+
+### ETH-05: Reconstruction Depends on Half-Column Holders -- Operational Risk, Medium
+
+Full-data reconstruction requires at least 50 percent of the 128 columns, so recovery in practice leans on nodes that custody many columns, including supernodes. When such nodes are absent for a given block, the network may hold enough columns collectively yet still be unable to reconstruct without coordination. This is tracked as an operational indicator alongside the risk pentagon, not a deduction from the structural score.
 
 ## Referenced Repositories
 

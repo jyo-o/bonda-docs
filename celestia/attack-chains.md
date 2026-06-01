@@ -6,7 +6,7 @@ This page documents three concrete attack chains against Celestia, constructed b
 
 ## Attack Chain A: Zero-Cost Liveness Halt
 
-**Composed from:** CEL-G01 (KYC validator concentration and zero-cost prevote-nil censorship)
+**Composed from:** CEL-08 (KYC validator concentration and zero-cost prevote-nil censorship)
 
 ### Preconditions
 
@@ -47,7 +47,7 @@ This page documents three concrete attack chains against Celestia, constructed b
 
 ## Attack Chain B: Blobstream Relayer SPOF
 
-**Composed from:** CEL-E01 (SP1Blobstream multisig), Blobstream relayer architecture
+**Composed from:** CEL-09 (SP1Blobstream multisig), Blobstream relayer architecture
 
 ### Preconditions
 
@@ -88,7 +88,7 @@ This page documents three concrete attack chains against Celestia, constructed b
 
 ## Attack Chain C: Coordinated Safety Violation
 
-**Composed from:** CEL-G01 (validator concentration)
+**Composed from:** CEL-08 (validator concentration)
 
 ### Preconditions
 

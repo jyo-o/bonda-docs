@@ -27,7 +27,7 @@ Terms are grouped by category. For deeper context, follow the cross-references t
 
 | Term | Definition |
 |------|------------|
-| **STRIDE** | A threat classification framework developed by Microsoft. Each letter represents a category of threat. See the [STRIDE for DA Layers](stride.md) page for how BONDA extends this framework with DA-specific categories. |
+| **STRIDE** | A threat-enumeration framework developed by Microsoft. Each letter names a category of threat used as a discovery prompt against each element of a data flow diagram. BONDA uses STRIDE to drive enumeration during discovery, not as a label on published findings. See [Threat Discovery](stride.md). |
 | **Spoofing** | Pretending to be another entity. In DA contexts: forging operator identities, replaying cross-chain signatures, or impersonating disperser nodes. |
 | **Tampering** | Unauthorized modification of data or state. Examples include overwriting attestation records, altering blob encodings, or manipulating validator sets. |
 | **Repudiation** | The ability to deny having performed an action. In DA systems, weak logging or missing equivocation detection can allow nodes to deny misbehavior. |
@@ -36,11 +36,44 @@ Terms are grouped by category. For deeper context, follow the cross-references t
 | **Elevation of Privilege** | Gaining access or control beyond what is authorized. In DA layers, this includes multisig abuse, proxy upgrade hijacking, and role escalation through governance mechanisms. |
 | **CVSS** | Common Vulnerability Scoring System (version 3.1). The industry-standard severity scoring framework used by NVD, major audit firms, and bug bounty platforms. See [CVSS 3.1 Scoring](cvss.md). |
 | **DFD** | Data Flow Diagram. A visual representation of how data moves between components, processes, and data stores. DFDs are annotated with trust boundaries to identify where security transitions occur. |
-| **Trust Boundary** | A line in a DFD where data crosses between entities with different privilege levels. Threats are most likely to occur at trust boundaries, making them the primary focus of STRIDE analysis. |
+| **Trust Boundary** | A line in a DFD where data crosses between entities with different privilege levels. Threats are most likely to occur at trust boundaries, making them the primary focus of the discovery walk. |
 | **Attack Surface** | The sum of all points where an unauthorized actor can attempt to interact with a system. A larger attack surface generally means more potential entry points for exploitation. |
 | **Attack Chain** | A sequence of individually low-severity vulnerabilities that, when combined, produce a high-severity outcome. BONDA documents attack chains to show how threats can compound across trust boundaries. |
 | **Single Point of Failure (SPOF)** | A component whose failure causes the entire system or a critical subsystem to stop functioning. DA examples include sole-relayer bridges and single-disperser architectures. |
 | **Nakamoto Coefficient** | The minimum number of independent entities that must collude to disrupt a decentralized network. A higher coefficient indicates greater decentralization and resilience against coordinated attacks. |
+
+---
+
+## Classification Tiers
+
+Every finding is sorted into exactly one of four tiers. See [Threat Classification](classification.md).
+
+| Term | Definition |
+|------|------------|
+| **Vulnerability** | A concrete defect in deployed code or configuration with a demonstrable exploit path. The only tier that carries a CVSS 3.1 score and the only tier that produces a deduction in the 5-axis model. |
+| **Operational Risk** | A live operational condition or single point of failure that degrades the service without an attacker exploiting a bug. Rated qualitatively as High, Medium, or Low. |
+| **Governance Observation** | A concentration of control or trust where an authorized party operating within its rights could cause systemic harm. No boundary is crossed and no bug is exploited. Carries no score. |
+| **Design Note** | A documented architectural choice or specification-level property that bounds what the protocol can structurally guarantee. Carries no score; sets a baseline. |
+| **Acknowledged Choice** | A Design Note sub-type. The protocol deliberately omits or defers a property as a known, documented design decision. |
+| **Spec-Implementation Gap** | A Design Note sub-type. The specification or documentation claims a property the deployed implementation does not deliver, so the baseline cannot credit the claim. |
+
+---
+
+## 5-Axis Risk Model
+
+The model evaluates every DA layer against the same five properties. Per-DA scores and pentagon charts are rendered in the BONDA dashboard, not in this documentation. See [5-Axis Risk Scoring](scoring.md).
+
+| Term | Definition |
+|------|------------|
+| **Retrievability** | Axis. Whether data can be retrieved when needed, covering redundancy, retrieval path independence, and sampling. |
+| **Verifiability** | Axis. Whether a third party can independently prove data is available, covering verification mechanism, settlement-layer attestation, and dishonesty deterrents. |
+| **Liveness** | Axis. Whether the service keeps running under adversarial conditions, covering consensus continuity and write and read path resilience. |
+| **Decentralization** | Axis. How many parties must collude to break the system, covering operator distribution, governance concentration, and software and infrastructure diversity. |
+| **Cost Efficiency** | Axis. Whether the layer is affordable, predictable, and efficient, covering fee predictability, blockspace manipulation resistance, and throughput capacity. |
+| **Design Baseline** | Layer 1. The structural starting score for each axis, derived from specification and deployed design. Set by Design Notes and corrected for spec-implementation gaps. |
+| **Threat Deduction** | Layer 3. A reduction applied to an axis baseline by a Vulnerability while it remains unpatched, with magnitude derived from CVSS severity band. |
+| **Operational Indicator** | Layer 2. A live measurement shown alongside the pentagon as an alert, never folded into the structural score. |
+| **Sub-property** | One of the three components of an axis, scored on an integer 0–3 scale, summed and rescaled to the 0–10 baseline. |
 
 ---
 
@@ -72,8 +105,11 @@ Terms are grouped by category. For deeper context, follow the cross-references t
 | **VectorX** | Avail's ZK-based bridge contract that verifies Avail consensus proofs on Ethereum. VectorX uses SP1 proofs to validate GRANDPA and BABE state transitions without re-executing them on-chain. |
 | **SP1Blobstream** | Celestia's bridge contract that relays Celestia block commitments to Ethereum using SP1 zero-knowledge proofs. It enables Ethereum smart contracts to verify that data was made available on Celestia. |
 | **SP1** | Succinct Processor 1. A general-purpose ZK virtual machine developed by Succinct Labs. Both VectorX and SP1Blobstream use SP1 to generate zero-knowledge proofs of consensus and data availability. |
-| **PeerDAS** | Peer Data Availability Sampling. Ethereum's planned extension of EIP-4844 that distributes data columns across the peer-to-peer network and enables nodes to verify data availability through sampling rather than full download. |
-| **Custody Group** | In Ethereum's PeerDAS design, a set of data columns that a node is responsible for storing and serving. Custody group assignments are derived from a node's peer ID, making them a potential target for grinding attacks. |
+| **PeerDAS** | Peer Data Availability Sampling. Ethereum's extension of EIP-4844, specified in EIP-7594 and activated at the Fusaka fork, that distributes blob data as columns across the peer-to-peer network and lets nodes verify availability through sampling rather than full download. |
+| **Custody Group** | In Ethereum's PeerDAS design, a set of data columns that a node is responsible for storing and serving. Custody group assignments are derived from a node's identity, making them a potential target for grinding attacks. |
+| **Column Sidecar** | A `DataColumnSidecar` carries one of the 128 columns of an erasure-coded blob set together with its KZG commitments and proofs. Nodes gossip and serve sidecars for the columns in their custody group. |
+| **Supernode** | A PeerDAS node that custodies all 128 columns rather than the minimum custody requirement. Supernodes can reconstruct full blob data from sampled columns and are relied upon as a fallback retrieval and reconstruction path. |
+| **Sampling** | In PeerDAS, the act of requesting a random subset of columns to gain statistical confidence that the full blob set is available. Fork choice gates a block on a node having custodied its assigned columns rather than on sampling outcomes. |
 
 ---
 
@@ -82,8 +118,7 @@ Terms are grouped by category. For deeper context, follow the cross-references t
 | Term | Definition |
 |------|------------|
 | **verified** | Vulnerability existence confirmed through source code analysis, on-chain state queries, data measurement, or documentation review. Standard level for most findings. See [Verification Approach](verification.md). |
-| **poc_verified** | Attack reproduced end-to-end in a controlled environment such as an Anvil mainnet fork or testnet. Strongest evidence level. See [Verification Approach](verification.md). |
-| **unverified** | The target implementation does not yet exist or access is insufficient for verification. Analysis is based on design documents and specifications only. See [Verification Approach](verification.md). |
+| **poc_verified** | Attack reproduced end-to-end in a controlled environment such as an Anvil mainnet fork, an inabox deployment, or a live probe. Strongest evidence level. See [Verification Approach](verification.md). |
 | **PoC** | Proof of Concept. A minimal, reproducible demonstration that a vulnerability can be triggered. BONDA PoCs are typically shell scripts using Foundry tools or direct RPC/gRPC calls. |
 | **cast** | A command-line tool from the Foundry suite used to interact with Ethereum smart contracts. BONDA uses cast extensively to query on-chain state such as role assignments, multisig configurations, and proxy implementations. |
 | **Anvil** | A local Ethereum node provided by the Foundry suite. Anvil can fork mainnet state, allowing PoCs to simulate exploits against real contract deployments without affecting the live network. |

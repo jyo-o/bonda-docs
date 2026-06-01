@@ -1,0 +1,33 @@
+# AVL-12: Incomplete Block Reconstruction Limits DAS Security Guarantees
+
+{% hint style="success" %}
+**Category**: Design Note · **Status**: verified
+{% endhint %}
+
+## Summary
+
+Avail's Data Availability Sampling achieves high confidence at 99.84%, but the block reconstruction protocol that would allow reassembling complete blocks from sampled fragments is still under development. Until reconstruction is ready, data recoverability depends on approximately 40 full node peers rather than the DAS mechanism itself.
+
+## Description
+
+DAS allows light clients to verify data availability without downloading entire blocks. Observatory measurements confirm the sampling mechanism itself functions correctly with 99.84% confidence. However, DAS alone only proves data was available at the time of sampling.
+
+![DAS security gap — reconstruction protocol not ready](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/avl-12-das-gap.png)
+
+The block reconstruction protocol, which would allow full blocks to be reassembled from sampled fragments alone, is not yet production-ready. This means the complete DAS security guarantee where availability implies recoverability is currently theoretical rather than fully operational.
+
+## Proof of Concept
+
+No proof of concept was conducted for this threat. The finding is based on Observatory metrics showing DAS confidence of 99.84% and Avail documentation confirming the block reconstruction protocol is under active development and not yet production-ready. Independent verification through code review is not possible because the implementation is still in progress.
+
+## Impact
+
+If a significant number of the approximately 40 full nodes go offline simultaneously due to DDoS, infrastructure failure, or coordinated shutdown, light clients that confirmed data availability through DAS would be unable to reconstruct full block data for verification or dispute resolution. Data confirmed as "available" through sampling becomes practically irretrievable, undermining the core security guarantee of the data availability layer.
+
+Sets the Retrievability Design Baseline through the data-redundancy sub-property. This is a documented protocol property and carries no score.
+
+## Recommendation
+
+1. **Prioritize block reconstruction protocol completion**: Accelerate development of the reconstruction protocol to close the gap between sampling confidence and data recoverability.
+2. **Increase full node redundancy**: Incentivize more full node operators to join the network, reducing the risk that a simultaneous outage makes data unrecoverable.
+3. **Implement full node health monitoring**: Deploy monitoring for the full node peer set to detect significant drops in available nodes before they impact data recoverability.

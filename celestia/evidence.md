@@ -8,7 +8,7 @@ This page summarizes the on-chain verification and parameter measurement evidenc
 
 ---
 
-## SP1Blobstream Bridge Verification (CEL-E01)
+## SP1Blobstream Bridge Verification (CEL-09)
 
 The SP1Blobstream contract assigns all three access control roles to a single 4-of-6 Gnosis Safe, with no timelock on critical upgrade functions.
 
@@ -69,7 +69,7 @@ Etherscan proxy at `0x7Cf3876F681Dbb6EdA8f6FfC45D66b996Df08fAe` shows zero user-
 
 ---
 
-## Validator Set and Slashing Parameters (CEL-G01, CEL-G02)
+## Validator Set and Slashing Parameters (CEL-08, CEL-10)
 
 ### Slashing Parameters
 
@@ -92,11 +92,11 @@ Key findings:
 
 These parameters were updated in PR `celestia-app#7090` (merged 2026-04-17) with the description "to match mainnet governance."
 
-### Documentation Discrepancy (CEL-G02)
+### Documentation Discrepancy (CEL-10)
 
 The public documentation at `docs.celestia.org/operate/consensus-validators/slashing` states "25% of 5,000 blocks" while mainnet shows 0.1% of 10,000 blocks. This is a 250x discrepancy in the documented liveness threshold.
 
-### Validator Set Composition (CEL-G01)
+### Validator Set Composition (CEL-08)
 
 Mainnet staking data as of 2026-05-24:
 
@@ -115,7 +115,7 @@ Data cross-verified across three independent endpoints: publicnode, polkachu, po
 
 ---
 
-## Gas and Blockspace Parameters (CEL-D02, CEL-D13)
+## Gas and Blockspace Parameters (CEL-05, CEL-04)
 
 ```bash
 # Minimum gas price
@@ -141,7 +141,7 @@ At mainnet prices as of 2026-05-26:
 
 ## PoC Test Results
 
-### CEL-D17: TxCache Key Mismatch (poc_verified)
+### CEL-01: TxCache Key Mismatch (poc_verified)
 
 | Test | Result |
 |---|---|
@@ -151,6 +151,6 @@ At mainnet prices as of 2026-05-26:
 | **Projected leak rate** | ~1 GB per 160 seconds at 100 Mbps rejected tx rate |
 | **Existing test gap** | Production tests pass `blobTx.Tx` directly to `FinalizeBlock` instead of wrapped `BlobTx`, masking the key mismatch |
 
-### CEL-D03: blacklistedHashes Growth (poc_verified)
+### CEL-03: blacklistedHashes Growth (poc_verified)
 
 Local unit PoC confirmed: N unique fake hashes injected via shrexsub, after `cleanUp` the `blacklistedHashes` map length increases by N while pools are correctly deleted. The cleanup function is the only write path that sets `blacklistedHashes[h]=true`, and no deletion path exists anywhere in the codebase.
