@@ -1,10 +1,10 @@
-# BONDA Threat Model
+# Overview
 
 **Systematic threat modeling for the Data Availability layers powering Ethereum rollups.**
 
-BONDA analyzes the security of four major DA protocols by combining STRIDE-based threat modeling, on-chain verification, source code auditing, and mainnet fork testing. Every finding is traced back to primary sources: pinned source code commits, live on-chain contract state, and network endpoint probes.
+BONDA analyzes the security of four major DA protocols by combining STRIDE-based threat modeling, on-chain verification, source code auditing, and mainnet fork testing.&#x20;
 
----
+***
 
 ## What is This?
 
@@ -12,64 +12,66 @@ Data Availability is one of the most critical layers in the Ethereum rollup stac
 
 This documentation covers **38 threats** across four protocols, each with detailed analysis, on-chain evidence, and severity scoring.
 
----
+***
 
 ## Covered Protocols
 
-| Protocol | Description | Threats | Highest Severity |
-|----------|-------------|---------|-----------------|
-| [**EigenDA**](eigenda/) | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 13 | High (7.5) |
-| [**Celestia**](celestia/) | Modular DA layer with CometBFT consensus and light client DAS | 12 | High (8.7) |
-| [**Avail**](avail/) | Substrate-based DA chain with VectorX bridge to Ethereum | 9 | High (8.2) |
-| [**Ethereum / PeerDAS**](ethereum/) | KZG library and consensus client audit findings | 4 | Medium (5.3) |
+| Protocol                  | Description                                                                        | Threats | Highest Severity |
+| ------------------------- | ---------------------------------------------------------------------------------- | ------- | ---------------- |
+| [**Ethereum**](ethereum/) | KZG library and consensus client audit findings                                    | 4       | Medium (5.3)     |
+| [**EigenDA**](eigenda/)   | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 13      | High (7.5)       |
+| [**Celestia**](celestia/) | Modular DA layer with CometBFT consensus and light client DAS                      | 12      | High (8.7)       |
+| [**Avail**](avail/)       | Substrate-based DA chain with VectorX bridge to Ethereum                           | 9       | High (8.2)       |
 
----
+***
 
 ## Verification at a Glance
 
-| Metric | Count |
-|--------|-------|
-| Total threats | 38 |
-| Verified | 32 |
-| PoC verified | 2 |
-| Code review | 4 |
+| Metric        | Count |
+| ------------- | ----- |
+| Total threats | 38    |
+| Verified      | 32    |
+| PoC verified  | 2     |
+| Code review   | 4     |
 
 All verification levels are explained in the [Verification Methodology](methodology/verification.md).
 
----
+***
 
 ## Notable Findings
 
 ### High Severity
 
-| ID | Protocol | Finding |
-|----|----------|---------|
+| ID                                     | Protocol | Finding                                                                                                       |
+| -------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
 | [CEL-G01](celestia/threats/cel-g01.md) | Celestia | Top 8 validators hold 35.77% of voting power; 6 are KYC-regulated entities subject to legal censorship orders |
-| [AVL-E03](avail/threats/avl-e03.md) | Avail | Deployer EOA still holds admin role on VectorX, enabling solo bridge upgrade in 2 transactions |
-| [CEL-E01](celestia/threats/cel-e01.md) | Celestia | SP1Blobstream bridge can be instantly upgraded by a 4-of-6 multisig with no timelock |
-| [EDA-T09](eigenda/threats/eda-t09.md) | EigenDA | Single EOA can eject up to 33% of operator stake within a 3-day window |
-| [CEL-D13](celestia/threats/cel-d13.md) | Celestia | Pre-gas commitment computation with unlimited blob count in CheckTx |
+| [AVL-E03](avail/threats/avl-e03.md)    | Avail    | Deployer EOA still holds admin role on VectorX, enabling solo bridge upgrade in 2 transactions                |
+| [CEL-E01](celestia/threats/cel-e01.md) | Celestia | SP1Blobstream bridge can be instantly upgraded by a 4-of-6 multisig with no timelock                          |
+| [EDA-T09](eigenda/threats/eda-t09.md)  | EigenDA  | Single EOA can eject up to 33% of operator stake within a 3-day window                                        |
+| [CEL-D13](celestia/threats/cel-d13.md) | Celestia | Pre-gas commitment computation with unlimited blob count in CheckTx                                           |
 
----
+***
 
 ## Quick Navigation
 
 ### By Protocol
-- [EigenDA](eigenda/) — Disperser, Relay, Operator, and governance threats
-- [Celestia](celestia/) — Consensus, DAS, and Blobstream bridge threats
-- [Avail](avail/) — VectorX bridge, validator set, and governance threats
-- [Ethereum / PeerDAS](ethereum/) — KZG library and consensus client audit findings
+
+* [EigenDA](eigenda/) — Disperser, Relay, Operator, and governance threats
+* [Celestia](celestia/) — Consensus, DAS, and Blobstream bridge threats
+* [Avail](avail/) — VectorX bridge, validator set, and governance threats
+* [Ethereum / PeerDAS](ethereum/) — KZG library and consensus client audit findings
 
 ### By Topic
-- [Methodology](methodology/) — STRIDE framework, CVSS scoring, verification approach, terminology
-- [Cross-DA Comparison](comparison/) — Side-by-side analysis across all four protocols
-- [Terminology](methodology/terminology.md) — Glossary of terms used throughout this documentation
 
----
+* [Methodology](/broken/pages/MovNkR8Nfi5JK8MgI13N) — STRIDE framework, CVSS scoring, verification approach, terminology
+* [Cross-DA Comparison](comparison/) — Side-by-side analysis across all four protocols
+* [Terminology](methodology/terminology.md) — Glossary of terms used throughout this documentation
+
+***
 
 ## About BONDA
 
 BONDA is a security research project focused on DA layer threat assessment. This documentation serves as the public reference for the threat modeling work.
 
-- **Source**: [github.com/jyo-o/bonda-docs](https://github.com/jyo-o/bonda-docs)
-- **Dashboard**: [bonda.me](https://bonda.me)
+* **Source**: [github.com/jyo-o/bonda-docs](https://github.com/jyo-o/bonda-docs)
+* **Dashboard**: [bonda.me](https://bonda.me)

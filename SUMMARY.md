@@ -4,7 +4,6 @@
 
 ## Methodology
 
-* [Overview](methodology/README.md)
 * [STRIDE for DA Layers](methodology/stride.md)
 * [CVSS 3.1 Scoring](methodology/cvss.md)
 * [Verification Approach](methodology/verification.md)
@@ -64,10 +63,10 @@
 ## Ethereum / PeerDAS
 
 * [Overview](ethereum/README.md)
-* [ETH-T01: Missing Subgroup Check](ethereum/threats/eth-r01.md)
-* [ETH-D02: Rate Limit Bypass](ethereum/threats/eth-r02.md)
-* [ETH-D03: Incorrect Timeout](ethereum/threats/eth-r03.md)
-* [ETH-T04: Go Binding Thread Safety](ethereum/threats/eth-r04.md)
+* [ETH-R01: Missing Subgroup Check](ethereum/threats/eth-r01.md)
+* [ETH-R02: Rate Limit Bypass](ethereum/threats/eth-r02.md)
+* [ETH-R03: Incorrect Timeout](ethereum/threats/eth-r03.md)
+* [ETH-R04: Go Binding Thread Safety](ethereum/threats/eth-r04.md)
 
 ## Cross-DA Comparison
 
