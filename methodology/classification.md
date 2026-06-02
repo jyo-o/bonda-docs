@@ -6,12 +6,12 @@ Discovery produces a flat list of candidate findings. Classification sorts each 
 
 ## The Four Tiers
 
-| Tier | What It Is | Carries CVSS? | GitBook Hint Style |
-|------|------------|:-------------:|--------------------|
-| **Vulnerability** | A concrete defect in deployed code or configuration with a demonstrable exploit path | Yes (CVSS 3.1) | `warning` (High/Critical), `info` (Medium/Low), `danger` (Critical) |
-| **Operational Risk** | A live operational condition or single point of failure that degrades the service without an attacker exploiting a bug | No — qualitative High/Medium/Low | `warning` (High), `info` (Medium/Low) |
-| **Governance Observation** | A concentration of control or trust such that an authorized party could cause systemic harm | No | `info` |
-| **Design Note** | A documented architectural choice or specification-level property that bounds what the protocol can structurally guarantee | No | `success` |
+| Tier | What It Is | Rating |
+|------|------------|--------|
+| **Vulnerability** | A concrete defect in deployed code or configuration with a demonstrable exploit path | `cvss` — CVSS 3.1 score |
+| **Operational Risk** | A live operational condition or single point of failure that degrades the service without an attacker exploiting a bug | `quantitative` — High / Medium / Low |
+| **Governance Observation** | A concentration of control or trust such that an authorized party could cause systemic harm | `unrated` |
+| **Design Note** | A documented architectural choice or specification-level property that bounds what the protocol can structurally guarantee | `unrated` |
 
 ---
 

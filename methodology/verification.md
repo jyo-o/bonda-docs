@@ -10,8 +10,8 @@ Every finding is assigned one of two verification levels based on the strength o
 
 | Level | Label | Meaning |
 |:-----:|-------|---------|
-| L3 | `poc_verified` | Attack was reproduced in a controlled environment such as an Anvil fork, an inabox deployment, or a live probe. Strongest evidence. |
-| L2 | `verified` | Existence confirmed through source code analysis at a pinned commit, on-chain state queries, data measurement, or specification review. Standard level for most findings. |
+| L2 | `poc_verified` | Attack was reproduced in a controlled environment such as an Anvil fork, an inabox deployment, or a live probe. Strongest evidence. |
+| L1 | `verified` | Existence confirmed through source code analysis at a pinned commit, on-chain state queries, data measurement, or specification review. Standard level for most findings. |
 
 ```mermaid
 flowchart LR
@@ -66,10 +66,10 @@ rate limit. Confirmed active on a public mainnet RPC endpoint.
 
 | Protocol | Verified | PoC Verified | Total |
 |----------|:--------:|:------------:|:-----:|
+| Ethereum | 12 | 0 | 12 |
 | EigenDA  | 11 | 3 | 14 |
 | Celestia | 10 | 2 | 12 |
 | Avail    | 9  | 3 | 12 |
-| Ethereum | 12 | 0 | 12 |
 | **Total**| **42** | **8** | **50** |
 
 ---

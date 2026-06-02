@@ -69,7 +69,7 @@
 * [Attack Chains](avail/attack-chains.md)
 * [Verification Evidence](avail/evidence.md)
 
-## Ethereum / PeerDAS
+## Ethereum
 
 * [Overview](ethereum/README.md)
 * [ETH-01: DataColumnsByRange Rate-Limit Bypass](ethereum/threats/eth-01.md)

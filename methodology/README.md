@@ -1,6 +1,6 @@
 # Methodology Overview
 
-BONDA provides systematic threat modeling for Data Availability (DA) layers that underpin Ethereum's rollup ecosystem. This section describes the analytical framework used to discover, classify, score, and verify threats across EigenDA, Celestia, Avail, and Ethereum PeerDAS.
+BONDA provides systematic threat modeling for Data Availability (DA) layers that underpin Ethereum's rollup ecosystem. This section describes the analytical framework used to discover, classify, score, and verify threats across Ethereum, EigenDA, Celestia, and Avail.
 
 ---
 
@@ -56,10 +56,10 @@ BONDA's threat model covers 50 findings across four DA protocols:
 
 | Protocol | Findings | Scope Areas |
 |----------|---------|-------------|
+| Ethereum | 12 | Column custody, sampling, multi-client, fee market |
 | EigenDA | 14 | Disperser, Relay, Operator, governance |
 | Celestia | 12 | Consensus, DAS, Blobstream bridge |
 | Avail | 12 | VectorX bridge, validator set, runtime, Kate RPC |
-| Ethereum / PeerDAS | 12 | Column custody, sampling, multi-client, fee market |
 
 Each finding is classified by scope: **protocol** (core DA mechanism), **bridge** (L1-L2 communication), **rollup** (rollup-operator-facing surface), or **chain** (base layer consensus), and by tier (Vulnerability, Operational Risk, Governance Observation, Design Note).
 
