@@ -1,6 +1,6 @@
 # CVSS 3.1 Scoring
 
-BONDA scores **Vulnerability**-tier findings with the Common Vulnerability Scoring System (CVSS) version 3.1. CVSS is the industry-standard framework used by NVD, major audit firms such as Trail of Bits, ChainLight, and Sigma Prime, and bug bounty platforms. This page describes the scoring formula, vector components, severity ranges, and provides a worked example.
+BONDA scores **Vulnerability**-tier findings with the Common Vulnerability Scoring System (CVSS) version 3.1. CVSS is the industry-standard framework used by NVD, major audit firms and bug bounty platforms. This page describes the scoring formula, vector components, severity ranges, and provides a worked example.
 
 {% hint style="info" %}
 **CVSS applies only to the Vulnerability tier.** Operational Risks, Governance Observations, and Design Notes are not exploitable code defects, so a numeric exploit-severity score would misrepresent them. See [What Is Not Scored](cvss.md#what-is-not-scored) below and the [Threat Classification](classification.md) page.

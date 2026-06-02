@@ -1,8 +1,8 @@
-# Methodology Overview
+# Overview
 
 BONDA provides systematic threat modeling for Data Availability (DA) layers that underpin Ethereum's rollup ecosystem. This section describes the analytical framework used to discover, classify, score, and verify threats across Ethereum, EigenDA, Celestia, and Avail.
 
----
+***
 
 ## Why Threat Model DA Layers?
 
@@ -10,11 +10,9 @@ Rollups delegate data publication to DA layers, trusting them to guarantee that 
 
 Despite this critical dependency, most DA layers have not been subjected to structured adversarial analysis. Security audits focus on code correctness but rarely map trust boundaries, governance concentration, or protocol-level design gaps. BONDA fills this gap by applying threat modeling techniques adapted specifically for DA infrastructure.
 
----
+***
 
-## Four Pillars
-
-BONDA's methodology rests on four pillars. Each finding moves through all four: it is discovered, classified into one of four tiers, scored or characterized according to its tier, and verified against primary sources.
+## How can we do?
 
 ### 1. Threat Discovery
 
@@ -28,17 +26,11 @@ See: [Threat Classification](classification.md)
 
 ### 3. Severity & Scoring
 
-Findings in the Vulnerability tier are scored with CVSS 3.1, the industry-standard framework used by NVD and major audit firms. Across all four tiers, findings feed a 5-axis qualitative risk model — Retrievability, Verifiability, Liveness, Decentralization, Cost Efficiency — that evaluates each DA layer against the same criteria. The 5-axis model is explained here as a methodology; the computed per-DA values and pentagon charts are rendered in the BONDA dashboard.
+Findings in the Vulnerability tier are scored with CVSS 3.1, the industry-standard framework used by NVD and major audit firms. Across all four tiers, findings feed a 5-axis qualitative risk model — Retrievability, Verifiability, Liveness, Decentralization, Cost Efficiency — that evaluates each DA layer against the same criteria. The 5-axis model is explained here as a methodology; the computed per-DA values and pentagon charts are rendered in the [BONDA dashboard](https://www.bonda.me/)
 
 See: [CVSS 3.1 Scoring](cvss.md) · [5-Axis Risk Scoring](scoring.md)
 
-### 4. Multi-Source Verification
-
-Every finding is traced to at least two independent primary sources. BONDA combines source code audits pinned to specific commits, on-chain state queries via `cast` and RPC, and live network probes against mainnet nodes. Each finding is assigned a verification level reflecting the strength of its evidence.
-
-See: [Verification Approach](verification.md)
-
----
+***
 
 ## What Distinguishes BONDA
 
@@ -46,22 +38,18 @@ See: [Verification Approach](verification.md)
 
 **On-chain verification.** Access control configurations, multisig compositions, role assignments, and upgrade mechanisms are verified against live contract state rather than documentation or deployment scripts alone.
 
----
+***
 
 ## Scope
 
 BONDA's threat model covers 50 findings across four DA protocols:
 
-| Protocol | Findings | Scope Areas |
-|----------|---------|-------------|
-| Ethereum | 12 | Column custody, sampling, multi-client, fee market |
-| EigenDA | 14 | Disperser, Relay, Operator, governance |
-| Celestia | 12 | Consensus, DAS, Blobstream bridge |
-| Avail | 12 | VectorX bridge, validator set, runtime, Kate RPC |
-
-Each finding is classified by scope: **protocol** (core DA mechanism), **bridge** (L1-L2 communication), **rollup** (rollup-operator-facing surface), or **chain** (base layer consensus), and by tier (Vulnerability, Operational Risk, Governance Observation, Design Note).
-
----
+| Protocol | Findings | Scope Areas                                        |
+| -------- | -------- | -------------------------------------------------- |
+| Ethereum | 12       | Column custody, sampling, multi-client, fee market |
+| EigenDA  | 14       | Disperser, Relay, Operator, governance             |
+| Celestia | 12       | Consensus, DAS, Blobstream bridge                  |
+| Avail    | 12       | VectorX bridge, validator set, runtime, Kate RPC   |
 
 ## Reference
 
