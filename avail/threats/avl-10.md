@@ -1,0 +1,39 @@
+# AVL-10: Low Validator Utilization Concentrates Consensus Power
+
+{% hint style="success" %}
+**Category**: Design Note · **Status**: verified
+{% endhint %}
+
+## Summary
+
+Avail's mainnet runs only 105 validators out of a maximum 1,200 slots, utilizing less than 9% of available capacity. While the NPoS Phragmen election produces remarkably even stake distribution across validators, the small active set means fewer independent operators need to be compromised for a consensus attack.
+
+## Description
+
+The validator set operates at low utilization with 105 of 1,200 available slots filled. The total staked amount is approximately 4.794 billion AVAIL, representing roughly 48% of the 10 billion total supply. The Nakamoto coefficient is approximately 34, meaning an attacker would need to compromise at least 34 validators to disrupt consensus.
+
+![AVL-10 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: BABE.*
+
+The Phragmen election algorithm achieves remarkably even stake distribution, making it significantly harder for any small group to accumulate disproportionate influence. However, the small absolute number of active validators means fewer independent operators need to be compromised for a consensus attack.
+
+## Proof of Concept
+
+On-chain state and Subscan Era #688 data were analyzed. See [Verification Evidence](../evidence.md#avail-chain-verification) for full commands and results.
+
+- `Session.Validators` storage query returns 105 active validators out of 1,200 slots
+- Nakamoto coefficient of ~34 calculated from stake distribution; max/min stake ratio of 1.20x confirms Phragmen equalization
+- Top validator holds 1.06% of total stake (50.79M AVAIL)
+
+## Impact
+
+An attacker controlling 34 or more validators, representing roughly 33% of total stake, could block finality by refusing to vote on blocks. With 70 or more compromised validators at roughly 67% of stake, the attacker could seize full control of finality, potentially censoring transactions, reorganizing blocks, or halting the chain entirely. However, the even Phragmen distribution requires targeting many validators with similar stake levels rather than focusing on a few high-stake validators.
+
+Sets the Decentralization Design Baseline through the operator-distribution sub-property. This is a documented structural property and carries no score.
+
+## Recommendation
+
+1. **Incentivize validator set growth**: Implement mechanisms to attract more validators toward the 1,200 slot capacity, increasing the Nakamoto coefficient and the practical cost of collusion.
+2. **Monitor stake concentration metrics**: Continuously track the Nakamoto coefficient and flag any significant changes in validator set composition or stake distribution.
+3. **Implement validator diversity requirements**: Consider geographic or organizational diversity requirements to reduce the risk of coordinated compromise across the validator set.

@@ -9,7 +9,7 @@ This page summarizes the on-chain verification and data analysis evidence collec
 
 ---
 
-## Ejector Role Parameters (EDA-T09)
+## Ejector Role Parameters (EDA-08)
 
 The `EjectionManager` contract delegates ejection authority to EOA addresses with rate-limited parameters.
 
@@ -64,7 +64,7 @@ Source: Blockscout transaction history for EjectionManager (`0x130d8E...`).
 
 ---
 
-## Governance Multisig Configuration (EDA-E02)
+## Governance Multisig Configuration (EDA-07)
 
 A single Gnosis Safe controls eight core EigenDA contracts with no timelock.
 
@@ -116,7 +116,7 @@ The CertVerifier at `0x61692e...` is an exception: `owner()` reverts, confirming
 
 ---
 
-## Operator Stake Distribution (EDA-E03)
+## Operator Stake Distribution (EDA-09)
 
 Stake distribution was queried at block 25101686 to measure concentration against safety and liveness thresholds.
 
@@ -143,7 +143,7 @@ cast call 0x0BAAc79acD45A023E19345c352d8a7a83C4e5656 \
 
 Data source: EigenDA DataAPI `signing-info` endpoint (120 operator-quorum pairs, 84 unique operators).
 
-**Quorum 0 (ETH)** — 58 operators, total stake `2.368e24`:
+**Quorum 0 (ETH)** — 58 operators, total stake `2.368 × 10²⁴` (≈ 2.37 million units at 18-decimal stake weight):
 
 | Rank | Top-k Cumulative | Threshold |
 |------|------------------|-----------|
@@ -151,7 +151,7 @@ Data source: EigenDA DataAPI `signing-info` endpoint (120 operator-quorum pairs,
 | Top 4 | 48.16% | > 45% liveness |
 | Top 5 | 55.25% | > 55% confirmation |
 
-**Quorum 1 (EIGEN)** — 62 operators, total stake `2.727e26`:
+**Quorum 1 (EIGEN)** — 62 operators, total stake `2.727 × 10²⁶` (≈ 272.7 million units at 18-decimal stake weight):
 
 | Rank | Top-k Cumulative | Threshold |
 |------|------------------|-----------|
@@ -169,7 +169,7 @@ Data source: EigenDA DataAPI `signing-info` endpoint (120 operator-quorum pairs,
 
 ---
 
-## Slashing Absence Verification (EDA-P01)
+## Slashing Absence Verification (EDA-11)
 
 A comprehensive audit confirmed that EigenDA has no active slashing mechanism.
 
@@ -215,7 +215,7 @@ A `grep` across all EigenDA core Solidity contracts (`contracts/src/core/`) foun
 
 ---
 
-## Relay Registry Single Point of Failure (EDA-D06)
+## Relay Registry Single Point of Failure (EDA-04)
 
 The RelayRegistry confirms only one relay is registered on mainnet.
 
@@ -248,7 +248,7 @@ The registered relay URL is `relay-0-mainnet-ethereum.eigenda.xyz`. DNS resolves
 
 ---
 
-## Infrastructure Concentration Analysis (EDA-G01)
+## Infrastructure Concentration Analysis (EDA-14)
 
 ASN aggregation analysis of 78 operator host classes reveals systemic provider concentration.
 
@@ -291,7 +291,7 @@ ASN aggregation analysis of 78 operator host classes reveals systemic provider c
 
 ---
 
-## Dead Operator Measurement (EDA-D12)
+## Dead Operator Measurement (EDA-06)
 
 A 24-hour prober measurement of 79 EigenDA operators identified chronic non-serving behavior.
 
@@ -320,13 +320,13 @@ Three operators showed 0% signing rate across both 1h and 24h windows (47,502 ba
 | `0x46b3...AB82` | 0.0% | 0.0% | 0.668% |
 | `0x0141...31c7` | N/A | 0.0% | 0.003% |
 
-### DataAPI Limitations
+### Measurement Window
 
-The `signing-info` endpoint becomes unreliable beyond 24-hour windows. Requests with `interval=172800` (48h) and above consistently return HTTP 502/504/429 errors. This limits real-time monitoring to 24-hour snapshots, requiring external probers for longer-term observation.
+BLS signing data is reliable only over 24-hour windows; longer intervals are not available, so real-time monitoring relies on 24-hour snapshots and external probers for longer-term observation.
 
 ---
 
-## Proxy Admin and Upgrade Authority (EDA-E02 supplementary)
+## Proxy Admin and Upgrade Authority (EDA-07 supplementary)
 
 All 12 upgradeable proxy contracts share a single ProxyAdmin, which is owned by the same DA Ops Multisig.
 
@@ -369,7 +369,7 @@ All 12 proxies share a single ProxyAdmin (`0x8247ef...2e99`), owned by the DA Op
 
 ---
 
-## Unpauser and Pauser Structure (EDA-E02 supplementary)
+## Unpauser and Pauser Structure (EDA-07 supplementary)
 
 The pause/unpause authority is separated from the DA Ops Multisig via a dedicated PauserRegistry.
 
@@ -442,7 +442,7 @@ The Unpauser Safe has never executed an `execTransaction` (nonce = 30 from setup
 
 ---
 
-## Dispersal Client Centralization (EDA-D06 supplementary)
+## Dispersal Client Centralization (EDA-04 supplementary)
 
 Analysis of 3,695 blobs from the DataAPI `blobs/feed` endpoint reveals extreme dispersal concentration.
 
@@ -479,30 +479,179 @@ The reservation was set by the DA Ops Multisig via `setReservation()` on Payment
 
 ---
 
-## Relay Latency Spike Observation (EDA-D06 supplementary)
+## Relay Bandwidth Starvation Test (EDA-05)
 
-A naturally occurring latency inflation event on the single relay was observed by the BONDA prober.
+A controlled bandwidth-starvation test was run against the Relay `GetBlob` path at commit `61019b4e9f91cbbb3dc05ed758674e4bdfeee20e` to confirm that the global-only rate limiter lets one client starve another.
 
-### Baseline vs Spike
+### Test Setup
 
-| Period | Window (UTC) | Requests | Avg Latency | P95 Latency |
+The Relay charges the global bandwidth bucket before the cache lookup, so an attacker repeatedly requesting an already-cached blob consumes the shared budget at near-zero backend cost.
+
+```go
+// relay/server.go:245-250
+// @audit bandwidth charged before the cache lookup — cached reads still drain the global bucket
+err = s.blobRateLimiter.RequestGetBlobBandwidth(uint32(len(data)))
+if err != nil {
+    return nil, err
+}
+data, err = s.blobProvider.GetBlob(ctx, blobKey)
+// https://github.com/Layr-Labs/eigenda/blob/61019b4e9f91cbbb3dc05ed758674e4bdfeee20e/relay/server.go#L245-L250
+```
+
+### Results
+
+`TestPoCVariantABandwidthStarvation`: one attacker at 6 requests/second and one legitimate victim at 1 request/second, both requesting a cached blob, sharing one global bucket.
+
+| Client | Rate | Requests | Rejected | Rejection Rate |
 |---|---|---|---|---|
-| Baseline | 06:30-06:37 | 472 | 599 ms | 999 ms |
-| Spike | 06:40-06:47 | 471 | 2,449 ms | 4,076 ms |
+| Victim | 1 RPS | 11 | 6 | 55% |
+| Attacker | 6 RPS | 84 | 30 | 36% |
 
-Latency inflated 4.1x during the spike, with peak individual retrievals reaching 6,094 ms. The spike was not explained by blob size shift (average blob size identical in both windows) or local infrastructure issues.
+The bucket was scaled down 20x for the test (1 MiB/s versus the 20 MiB/s production default). The same starvation holds at production scale, requiring proportionally more attacker throughput. The victim losing more than half of its requests confirms that legitimate clients have no priority over anonymous traffic under the global-only scheme.
 
-### Spike Minute-Level Detail
+---
 
-| Minute (UTC) | Requests | Avg (ms) | P95 (ms) | >2s | >5s |
-|---|---|---|---|---|---|
-| 06:39 | 59 | 835 | 2,205 | 4 | 0 |
-| 06:40 | 63 | 2,639 | 4,257 | 45 | 0 |
-| 06:41 | 78 | 2,386 | 3,916 | 38 | 2 |
-| 06:42 | 69 | 2,730 | 4,542 | 49 | 1 |
-| 06:43 | 61 | 2,560 | 3,745 | 44 | 0 |
-| 06:44 | 58 | 2,099 | 3,223 | 23 | 0 |
-| 06:45 | 59 | 2,402 | 3,888 | 30 | 2 |
-| 06:46 | 83 | 2,327 | 4,031 | 46 | 0 |
+## GetChunks Cold-Miss CPU Exhaustion (EDA-01)
 
-All 471 spike-window retrievals went through relay key 0 (the only registered relay). The proxy default relay timeout is 10 seconds, meaning sustained latency above this would cause complete retrieval failures.
+A load test was run against the operator Retrieval `GetChunks` path on an `inabox` local deployment to confirm that unauthenticated random-key requests drive a cold-miss lookup on every call and saturate operator CPU.
+
+### Test Setup
+
+The operator ran on a GCP host matching the Large operator class in the published system requirements. The deployment was the EigenDA `inabox` harness with four validators, one disperser, one encoder, one controller, one relay, one churner, and one proxy, all built from the EigenDA master branch at commit `61019b4`.
+
+| Component | Value |
+|---|---|
+| Instance | GCP `n2-standard-16` (16 vCPU / 64 GB) |
+| Boot disk | pd-ssd 200 GB |
+| OS | Ubuntu 24.04 LTS |
+| Runtime | Docker 29.1.3, docker-compose v2.40 |
+| Go | 1.24.13 |
+| forge | 1.4.4 |
+| grpcurl | 1.9.3 |
+| EigenDA | master branch, commit `61019b4` |
+
+The interceptor passes every method except `StoreChunks`, so Retrieval calls reach the handler without authentication or rate limiting, and a cold-miss lookup returns before any rate-limit token is debited.
+
+```go
+// node/validator_store.go:262-274
+// @audit a random blob key yields exists=false and returns with no token debit, so cold reads are never throttled
+coldReadsExhausted := s.coldReadRateLimiter.Tokens() <= 0
+bundle, exists, hot, err := s.chunkTable.CacheAwareGet(bundleKey, coldReadsExhausted)
+if !exists {
+    return nil, false, nil // returns before reserving any token
+}
+// https://github.com/Layr-Labs/eigenda/blob/61019b4/node/validator_store.go
+```
+
+A single request with a random 32-byte blob key reaches the cold-miss path and returns the `not found` error mapped through `validator_store.go` → `server_v2.go` → `api/errors.go` to a gRPC `Internal` code:
+
+```bash
+# Single GetChunks call with a random 32-byte blob key
+grpcurl -plaintext -max-time 5 \
+  -d "{\"blob_key\":\"$B64KEY\",\"quorum_id\":0}" \
+  $TARGET validator.Retrieval/GetChunks
+# Result:
+#   Code: Internal
+#   Message: failed to get chunks: failed to get chunks: not found
+```
+
+### Results
+
+Scenarios were run sequentially against operator `opr0` with a 30-second gap between each:
+
+| ID | Load | Duration | Purpose |
+|---|---|---|---|
+| BL-idle | none | 60 s | baseline |
+| BL-1 | 100 sequential RPCs (1 conn, 1 worker) | ~30 ms | single-request RTT |
+| S1 | 100 req/s rate cap | 60 s | normal-user level |
+| S2 | 1,000 req/s rate cap | 60 s | first saturation check |
+| S3 | client max (200 inflight) | 60 s | saturation point |
+| S4 | client max | 10 min | sustained load |
+
+CPU was exhausted while disk I/O showed little change:
+
+| Scenario | RPS | Process CPU avg (max) % | Δ GetChunks (Prometheus) |
+|---|---|---|---|
+| BL-idle | 0 | 2.7 (4.0) | 0 |
+| BL-1 | 100 sequential | — | 0 |
+| S1 (100 rps) | 102 | 5.0 (7.0) | 6,094 |
+| S2 (1k rps) | 1,017 | 21.1 (23.0) | 60,953 |
+| S3 (max, 60 s) | 82,029 | 447.97 (463) | 4,850,103 |
+| S4 (max, 10 min) | 83,490 | 458.35 (469) | 50,023,312 |
+
+| Resource | S3 measured | BL-idle |
+|---|---|---|
+| Disk read | 0 kB/s | 0 kB/s |
+| Disk write | 662 kB/s | 25 kB/s |
+| Disk IOPS | 3.4 | 0.6 |
+
+A single attacker drove the EigenDA process to an average of 447.97 percent CPU and a peak of 469 percent, roughly 4.5 cores, while client-side resource use converged toward zero. A 4 vCPU operator with a 400 percent ceiling is fully saturated by one attacker; a 16 vCPU operator absorbs about 28 percent from one attacker and reaches saturation under parallel attackers.
+
+---
+
+## GetBlobCommitment Unauthenticated Compute (EDA-02)
+
+Two layers of verification confirm that the Disperser V2 `GetBlobCommitment` endpoint performs unauthenticated KZG (MSM) work: an in-process measurement of the KZG cost an attacker can trigger, and a live-endpoint check across operational environments.
+
+### Test Setup
+
+The compute cost was measured in-process by directly invoking `committer.GetCommitmentsForPaddedLength`, the same function the handler at `server_v2.go:309` calls, with the mainnet SRS configuration of `SRSNumberToLoad = 524288` (2^19).
+
+| Item | Value |
+|---|---|
+| OS / Arch | darwin / arm64 |
+| CPU | Apple M5, 10 cores (GOMAXPROCS=10) |
+| Go | 1.26.1 |
+| EigenDA source | commit `61019b4e9f91cbbb3dc05ed758674e4bdfeee20e` |
+| KZG library | gnark-crypto (BN254 curve) |
+| SRS files | `g1.point` (16 MiB), `g2.point` (32 MiB), `g2.trailing.point` (32 MiB) |
+| `SRSNumberToLoad` | 524,288 (2^19, mainnet limit) |
+| SRS load time | 13.5 s (one-time at startup) |
+
+`GetCommitments` runs G1 MSM x1 + G2 MSM x2 sequentially, and each MSM alone saturates all cores:
+
+```go
+// encoding/v2/kzg/committer/committer.go:159-176
+// @audit G1 + 2xG2 MSM computed sequentially — each saturates all cores
+commit, err := c.computeCommitmentV2(inputFr)
+lengthCommitment, err := c.computeLengthCommitmentV2(inputFr)
+lenProof, err := c.computeLengthProofV2(inputFr)
+// https://github.com/Layr-Labs/eigenda/blob/61019b4e9f91cbbb3dc05ed758674e4bdfeee20e/encoding/v2/kzg/committer/committer.go#L123-L177
+```
+
+### Results
+
+Single-request KZG cost scales nearly linearly with the symbol count, reaching about 14 core-seconds at the 16 MiB mainnet limit:
+
+| Blob | N (symbols) | run1 | run2 | run3 | avg wall | core-seconds (x10 cores) |
+|---|---|---|---|---|---|---|
+| 2 MiB | 65,536 (2^16) | 214 ms | 219 ms | 216 ms | 216 ms | 2.16 |
+| 8 MiB | 262,144 (2^18) | 737 ms | 753 ms | 745 ms | 745 ms | 7.45 |
+| 16 MiB | 524,288 (2^19) | 1.393 s | 1.418 s | 1.407 s | 1.406 s | 14.06 |
+
+Concurrent 16 MiB requests scale almost linearly in per-request wall time, confirming that requests serialize because one MSM occupies every core:
+
+| Concurrency | per-request avg wall | max wall | vs concurrency 1 |
+|---|---|---|---|
+| 1 | 1.431 s | 1.431 s | 1.0x (baseline) |
+| 2 | 2.675 s | 2.76 s | 1.87x |
+| 4 | 5.556 s | 5.611 s | 3.88x |
+
+A live-endpoint check confirmed the endpoint is active and anonymously callable. The probe sends a 32-byte payload only to check liveness; a real attack would send a 16 MiB blob:
+
+```bash
+# Liveness probe (32-byte payload, no credentials)
+B64=$(head -c 32 /dev/zero | base64)
+grpcurl -max-time 15 -d "{\"blob\":\"$B64\"}" <endpoint>:443 \
+    disperser.v2.Disperser/GetBlobCommitment
+# Result: blobCommitment returned (commitment, lengthCommitment, lengthProof, length=1)
+```
+
+| Environment | Endpoint | Status |
+|---|---|---|
+| Mainnet | `disperser.eigenda.xyz:443` | active |
+| Testnet (Sepolia) | `disperser-testnet-sepolia.eigenda.xyz:443` | active |
+| Testnet (Hoodi) | `disperser-hoodi.eigenda.xyz:443` | active |
+| Preprod (Hoodi v2) | `disperser-v2-preprod-hoodi.eigenda.xyz:443` | active |
+
+A disabled endpoint would instead return `Unimplemented: GetBlobCommitment is deprecated and has been disabled`, confirming the `DISABLE_GET_BLOB_COMMITMENT` flag is inactive in all four environments. All four endpoints resolve to Cloudflare IPs (`104.18.0.169`, `104.18.1.169`), but Cloudflare does not block algorithmic-complexity DoS, so there is no effective protection against this vector. The request context is not propagated into `GetCommitmentsForPaddedLength`, so a short client deadline or early disconnect does not abort the server-side MSM work.

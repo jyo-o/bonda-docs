@@ -1,10 +1,27 @@
-# Overview
+# EigenDA
 
-> **How to Read This Section** This page introduces EigenDA's architecture and summarizes all 13 identified threats. Each threat ID links to a dedicated page with full analysis, evidence, and scoring details. Start here for the big picture, then dive into individual threats as needed.
+> **How to Read This Section**
+> This page introduces EigenDA's architecture and summarizes all 14 findings. Each finding is sorted into one of four [classification](../methodology/classification.md) tiers — Vulnerability, Operational Risk, Governance Observation, or Design Note. Only Vulnerabilities carry a [CVSS 3.1](../methodology/cvss.md) score; the other tiers are qualitative and feed the [5-axis model](../methodology/scoring.md). Each SID links to a dedicated page with full analysis and evidence.
 
 ## Architecture
 
 ![EigenDA Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/eigenda-architecture.svg)
+
+## Data Flow
+
+The diagrams below trace how a blob moves through EigenDA. The master view shows the full system; the dispersal and retrieval views isolate the write and read paths.
+
+![EigenDA data flow — full system](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-master.png)
+
+*Full system: dispersal and retrieval paths combined.*
+
+![EigenDA data flow — dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Dispersal (write): Rollup payload → Proxy → Disperser → Encoder chunking → Operators store and BLS-sign → CertVerifier checks the DA certificate on Ethereum L1.*
+
+![EigenDA data flow — retrieval path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-retrieval.png)
+
+*Retrieval (read): Rollup cert-URL → CertVerifier → Relay GetBlob → Operators GetChunks fallback → payload reconstruction.*
 
 ## Architecture Introduction
 
@@ -18,61 +35,64 @@ One important architectural note: EigenDA does not implement Data Availability S
 
 ## System Components
 
-| Component              | Role                                                                                                                                           | Trust Level                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Disperser              | Receives blobs from clients, erasure-codes them into chunks, distributes chunks to operators, and collects BLS signatures into DA certificates | Centralized, trusted operator (run by EigenLabs)                |
-| Relay                  | Serves stored blobs to clients for retrieval; primary read path                                                                                | Centralized, single instance on mainnet                         |
-| Operators              | Store assigned chunks and produce BLS signatures attesting to data availability                                                                | Semi-trusted; rely on restaked collateral and quorum thresholds |
-| DA Proxy               | Sidecar that translates rollup DA calls into EigenDA API calls                                                                                 | Untrusted edge component; no authentication on POST endpoints   |
-| EigenDA Core Contracts | On-chain verification of DA certificates, quorum configuration, and operator registration                                                      | Controlled by a single 3-of-4 multisig                          |
-| EigenLayer AVS         | Manages operator restaking, delegation, and quorum membership for EigenDA                                                                      | Shared trust layer across all AVSs                              |
-| EjectionManager        | Allows forced removal of operators from quorums within configurable stake and rate limits                                                      | Controlled by a single EOA                                      |
+| Component | Role | Trust Level |
+|-----------|------|-------------|
+| Disperser | Receives blobs from clients, erasure-codes them into chunks, distributes chunks to operators, and collects BLS signatures into DA certificates | Centralized, trusted operator (run by EigenLabs) |
+| Relay | Serves stored blobs to clients for retrieval; primary read path | Centralized, single instance on mainnet |
+| Operators | Store assigned chunks and produce BLS signatures attesting to data availability | Semi-trusted; rely on restaked collateral and quorum thresholds |
+| DA Proxy | Sidecar that translates rollup DA calls into EigenDA API calls | Untrusted edge component; no authentication on POST endpoints |
+| EigenDA Core Contracts | On-chain verification of DA certificates, quorum configuration, and operator registration | Controlled by a single 3-of-4 multisig |
+| EigenLayer AVS | Manages operator restaking, delegation, and quorum membership for EigenDA | Shared trust layer across all AVSs |
+| EjectionManager | Allows forced removal of operators from quorums within configurable stake and rate limits | Controlled by a single EOA |
 
 ## Key Numbers
 
-| Metric                     | Value                                       |
-| -------------------------- | ------------------------------------------- |
-| Total threats identified   | 13                                          |
-| Verification status        | 13 verified                                 |
-| Highest severity           | Medium (CVSS 6.1)                           |
-| Relay instances on mainnet | 1                                           |
-| Core contract governance   | Single 3-of-4 multisig controls 8 contracts |
+| Metric | Value |
+|--------|-------|
+| Total findings | 14 |
+| Verification status | 11 verified, 3 poc_verified |
+| Highest severity | High (CVSS 8.6) |
+| Registered operators | 272 |
+| Dead operators (0% chunk serving) | 11 |
+| Relay instances on mainnet | 1 |
+| Core contract governance | Single 3-of-4 multisig controls 8 contracts |
 
 ## Threat Summary
 
-| SID                           | Threat                                                   | Severity     | Status   |
-| ----------------------------- | -------------------------------------------------------- | ------------ | -------- |
-| [EDA-E02](threats/eda-e02.md) | Single 3-of-4 Multisig Controls 8 Core Contracts         | Medium (6.1) | verified |
-| [EDA-D03](threats/eda-d03.md) | Disperser V2 KZG Compute Exposed Without Auth            | Medium (5.9) | verified |
-| [EDA-T09](threats/eda-t09.md) | Ejector Role Abuse to Remove Honest Operators            | Medium (5.9) | verified |
-| [EDA-D06](threats/eda-d06.md) | Relay Single Point of Failure (1 Mainnet Instance)       | Medium (5.3) | verified |
-| [EDA-D07](threats/eda-d07.md) | GetBlob No Authentication                                | Medium (5.3) | verified |
-| [EDA-D12](threats/eda-d12.md) | 11 Dead Operators, 0% Chunk Serving                      | Medium (5.3) | verified |
-| [EDA-E03](threats/eda-e03.md) | Operator Stake Concentration Exceeding Safety Thresholds | Medium (4.8) | verified |
-| [EDA-P01](threats/eda-p01.md) | Operator Slashing Not Implemented                        | Medium (4.8) | verified |
-| [EDA-P02](threats/eda-p02.md) | DAS Absent, Clients Fully Depend on Quorum Trust         | Medium (4.8) | verified |
-| [EDA-E01](threats/eda-e01.md) | DisableAnchorSignatureVerification Flag Bypass           | Low (3.8)    | verified |
-| [EDA-D02](threats/eda-d02.md) | Proxy Rate Limit Absence                                 | Low (3.7)    | verified |
-| [EDA-G01](threats/eda-g01.md) | Operator Infrastructure Concentration                    | Low (3.7)    | verified |
-| [EDA-S03](threats/eda-s03.md) | Cross-chain Signature Replay                             | Low (3.5)    | verified |
+| SID | Threat | Category | Severity | Status |
+|-----|--------|----------|----------|--------|
+| [EDA-01](threats/eda-01.md) | Unauthenticated GetChunks Cold-Miss CPU Exhaustion | Vulnerability | High (8.6) | poc_verified |
+| [EDA-02](threats/eda-02.md) | Disperser V2 KZG Compute Exposed Without Auth | Vulnerability | High (8.6) | poc_verified |
+| [EDA-03](threats/eda-03.md) | Cross-Chain Signature Replay | Vulnerability | Low (3.5) | verified |
+| [EDA-04](threats/eda-04.md) | Relay Single Point of Failure (1 Mainnet Instance) | Operational Risk | High | verified |
+| [EDA-05](threats/eda-05.md) | GetBlob Global-Only Rate Limiting | Operational Risk | High | poc_verified |
+| [EDA-06](threats/eda-06.md) | Dead Operators Serving Zero Chunks | Operational Risk | Medium | verified |
+| [EDA-07](threats/eda-07.md) | Single Multisig Controls All Core Contracts | Governance Observation | — | verified |
+| [EDA-08](threats/eda-08.md) | Ejector Role Can Force-Remove Honest Operators | Governance Observation | — | verified |
+| [EDA-09](threats/eda-09.md) | Operator Stake Concentration | Governance Observation | — | verified |
+| [EDA-10](threats/eda-10.md) | Anchor Signature Verification Disable Flag | Governance Observation | — | verified |
+| [EDA-11](threats/eda-11.md) | Operator Slashing Not Implemented | Design Note | — | verified |
+| [EDA-12](threats/eda-12.md) | No Data Availability Sampling | Design Note | — | verified |
+| [EDA-13](threats/eda-13.md) | Proxy HTTP Server Missing Rate Limiting | Design Note | — | verified |
+| [EDA-14](threats/eda-14.md) | Operator Infrastructure Concentration | Design Note | — | verified |
 
 ## Key Findings
 
-### EDA-T09: Ejector Role Abuse (Medium, CVSS 5.9)
+### EDA-01: Unauthenticated GetChunks Cold-Miss CPU Exhaustion (Vulnerability, CVSS 8.6)
 
-The EjectionManager contract allows a single EOA address to forcibly remove up to 33.33% of quorum stake within a 3-day rolling window. On-chain data shows 150 ejection transactions from just 2 EOA addresses over 16 months. This matters because ejection is currently the only enforcement mechanism in EigenDA, since slashing has not been implemented. A compromised or malicious ejector key could systematically remove honest operators from quorums, degrading data availability guarantees with no on-chain recourse for the ejected parties.
+The operator `GetChunks` read path is unauthenticated, and a cold cache miss returns without debiting a rate-limit token. A single attacker sustains roughly 4.5 cores of work per targeted operator by requesting chunks that miss the cache, driving operators toward missing the 67% confirmation threshold. Because no credential or payment is required and the cost is algorithmic, front-tier rate limits do not contain it.
 
-### EDA-E03: Operator Stake Concentration (Medium, CVSS 4.8)
+### EDA-02: Disperser V2 KZG Compute Exposed Without Auth (Vulnerability, CVSS 8.6)
 
-On-chain verification confirmed that stake is dangerously concentrated. In quorum Q0 (ETH), the top 3 operators hold 39.8% of stake, exceeding the 33% safety threshold. In Q1 (EIGEN), the top 3 hold 35.6% and the top 5 hold 51.7%, breaching both the safety and liveness thresholds. In Q2 (Custom), a single entity (AltLayer) holds 52.6% alone. This means a Nakamoto coefficient of just 3: three colluding operators could compromise safety guarantees across the system.
+The `GetBlobCommitment` endpoint computes full KZG commitments (G1 + 2xG2 MSM) for any caller with no authentication or prepayment, and is enabled by default. A single 16 MiB request costs about 14 core-seconds, so a few concurrent callers saturate the Disperser. The endpoint was confirmed live and anonymously callable on Mainnet and every test environment, and the request context is not propagated to the computation, so client-side timeouts and WAF/CDN filtering do not stop the work.
 
-### EDA-D06: Relay Single Point of Failure (Medium, CVSS 5.3)
+### EDA-07: Single Multisig Controls All Core Contracts (Governance Observation)
 
-The on-chain RelayRegistry shows only one relay registered on mainnet. The Relay is the primary read path for blob retrieval, meaning all clients depend on this single instance to access stored data. If the Relay goes down, retrieval degrades to the slower operator-direct GetChunks fallback, where clients must contact individual operators and reconstruct blobs from chunks. This single point of failure creates an availability bottleneck for every consumer of EigenDA.
+A single 3-of-4 EOA Gnosis Safe owns eight core contracts and, through one shared ProxyAdmin, can upgrade any of twelve proxies in a single transaction with no timelock. The same multisig set the dominant disperser's reservation, which it can revoke to instantly halt 98.65% of mainnet traffic. This is the concentration baseline recorded against the Decentralization axis; it carries no score.
 
-### EDA-P01: Slashing Not Implemented (Medium, CVSS 4.8)
+### EDA-11: Slashing Not Implemented (Design Note)
 
-No slash or freeze functions exist in EigenDA's core contracts. The EigenLayer AllocationManager returns zero operator sets for EigenDA, confirming that the slashing infrastructure is entirely absent. Operators earn restaking rewards but face no penalty for dishonest behavior such as failing to store chunks or producing false attestations. This incentive asymmetry directly contributes to the 11 dead operators observed in EDA-D12, who remain registered and collect rewards while serving 0% of their assigned chunks.
+No slash or freeze functions exist in EigenDA's core contracts, and the EigenLayer AllocationManager returns zero operator sets for EigenDA, confirming the slashing infrastructure is absent. Operators earn restaking rewards but face no penalty for dishonest behavior, an incentive asymmetry that underlies the dead operators observed in EDA-06. As an acknowledged property of the deployed design, it sets the baseline rather than deducting from the score.
 
 ## Verification Evidence
 
