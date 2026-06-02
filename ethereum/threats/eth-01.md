@@ -10,6 +10,10 @@ Prysm's `DataColumnsByRange` RPC handler charges a constant cost of 1 to the rat
 
 ## Description
 
+![ETH-01 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: PeerDAS.*
+
 The ByRange handler uses a hardcoded constant for rate limiting, while the ByRoot handler sums the actual requested column count:
 
 ```go
@@ -44,6 +48,8 @@ No exploit reproduction was conducted. A devnet measurement was not performed in
 ## Impact
 
 An attacker connecting as a P2P peer can bypass the rate limit and exhaust a single Prysm node's CPU/disk I/O, degrading attestation and sync performance. At Prysm's market share (~19%), simultaneous attacks on multiple nodes could reduce attestation participation rates, potentially delaying finality.
+
+Affects the **Liveness** axis, where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

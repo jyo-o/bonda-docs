@@ -10,6 +10,10 @@ The `DataColumnsByRoot` handler uses `ttfbTimeout` (time-to-first-byte, 5 second
 
 ## Description
 
+![ETH-03 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: PeerDAS.*
+
 The ByRoot handler wraps its entire response transmission in a context using `ttfbTimeout`, which semantically means time until first byte. The correct constant for full response completion is `respTimeout`:
 
 ```go
@@ -37,6 +41,8 @@ No exploit reproduction was conducted. The finding is established through code c
 ## Impact
 
 Large ByRoot responses are truncated when the context expires at 5 seconds. Peers receive incomplete responses and retry, causing minor network load amplification. No crash, data corruption, or consensus impact occurs.
+
+Affects the **Retrievability** axis — premature truncation degrades column retrieval during sampling — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

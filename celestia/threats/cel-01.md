@@ -10,6 +10,10 @@ celestia-app's `TxCache` uses different keys for storing and deleting blob trans
 
 ## Description
 
+![CEL-01 data flow — Celestia Consensus path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-consensus.png)
+
+*Data flow — Celestia Consensus: Mempool / CheckTx.*
+
 The key mismatch originates from the re-serialization of blob transactions during block building:
 
 ```go
@@ -68,6 +72,8 @@ End-to-end reproduction confirmed the key mismatch. See [Verification Evidence](
 ## Impact
 
 Validator and consensus node memory exhaustion leading to OOM crash and consensus participation halt. The accumulation is irreversible without a restart. Simultaneous attacks on multiple validators could cause one-third departure from the validator set, threatening chain liveness. The rejected transaction path enables the attack at zero cost.
+
+Affects the **Liveness** axis, where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

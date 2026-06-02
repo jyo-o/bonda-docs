@@ -10,6 +10,10 @@ Multiple user-facing documentation surfaces -- including official specifications
 
 ## Description
 
+![CEL-10 data flow — Celestia Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Data flow — Celestia Read: DAS.*
+
 This is a structural pattern rather than an isolated oversight: when parameter changes or safety model modifications are merged via pull requests, accompanying documentation updates are not required.
 
 **Identified Stale Surfaces**

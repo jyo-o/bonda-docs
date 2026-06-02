@@ -10,6 +10,10 @@ PeerDAS distributes columns across 128 gossip subnets, and a minimum-custody nod
 
 ## Description
 
+![ETH-06 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: PeerDAS.*
+
 ```mermaid
 flowchart TD
     V[Victim node subscribes to its custody subnets]

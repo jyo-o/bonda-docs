@@ -10,6 +10,10 @@ The ShrEx client reads peer responses using `bytes.Buffer.ReadFrom` without `io.
 
 ## Description
 
+![CEL-12 data flow — Celestia Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Data flow — Celestia Read: Bridge Node.*
+
 The ShrEx protocol handles share exchange between Celestia nodes. While the server side applies `ReserveMemory`, per-peer stream caps, and rate limits, the client side has no byte ceiling beyond stream deadlines of 60 to 120 seconds. Four code defects are identified:
 
 **Defect 1: Unbounded `bytes.Buffer` in GetEDS**

@@ -10,6 +10,10 @@ A selective disclosure attack exploits Celestia's non-anonymous P2P transport to
 
 ## Description
 
+![CEL-07 data flow — Celestia Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Data flow — Celestia Read: Light Node / DAS.*
+
 The attack leverages the non-anonymous nature of Celestia's P2P layer, which allows an attacker to identify which node is making a sample request and provide targeted responses:
 
 ```go

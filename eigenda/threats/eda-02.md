@@ -10,6 +10,10 @@ Two gRPC surfaces on the Disperser V2 server expose computationally expensive KZ
 
 ## Description
 
+![EDA-02 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Disperser.*
+
 ### Case #1: `GetBlobCommitment` Unauthenticated Compute
 
 The V2 gRPC server registers only a metrics interceptor in its unary chain. There is no authentication or authorization middleware:
@@ -114,6 +118,8 @@ See [Verification Evidence](../evidence.md#getblobcommitment-unauthenticated-com
 ## Impact
 
 An attacker can exhaust the Disperser's CPU resources by sending repeated `GetBlobCommitment` or crafted `DisperseBlob` requests, each triggering full KZG commitment computations (G1 + 2xG2 MSM) without authentication. A single 16 MiB `GetBlobCommitment` call costs about 14 core-seconds of work and roughly 1.15 seconds of wall time, so a small number of concurrent callers saturates every core on the Disperser and stalls legitimate dispersals. No authentication is required for `GetBlobCommitment`, and the endpoint is enabled by default. For `DisperseBlob`, the attacker must construct a valid blob, header, and signature, but the KZG work is consumed before payment rejection. Because the cost asymmetry is algorithmic and the request context is not propagated to the computation, neither WAF/CDN filtering nor client-side timeouts curb the load.
+
+Affects the **Liveness** axis, where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

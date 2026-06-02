@@ -10,6 +10,10 @@ Avail's NPoS consensus includes complete slashing infrastructure in its runtime 
 
 ## Description
 
+![AVL-11 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: BABE / GRANDPA.*
+
 The runtime metadata contains 67 references to slash-related functions, and the chain defines specific slashing parameters including a 27-era deferral period and 28-era bonding duration.
 
 ```

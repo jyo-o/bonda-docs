@@ -10,6 +10,10 @@ Each PeerDAS node advertises its custody group count through the `cgc` field in 
 
 ## Description
 
+![ETH-07 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: PeerDAS.*
+
 The custody count is carried in the ENR and consumed as an advertised value.
 
 - The ENR includes `custody_group_count: uint64`, abbreviated `cgc`. Clients may reject peers whose value is below `CUSTODY_REQUIREMENT`. Source: [p2p-interface.md](https://github.com/ethereum/consensus-specs/blob/master/specs/fulu/p2p-interface.md).

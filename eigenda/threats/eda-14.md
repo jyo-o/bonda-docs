@@ -14,6 +14,10 @@ A single cloud region or provider outage could take offline enough operators to 
 
 ## Description
 
+![EDA-14 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Operators.*
+
 ASN aggregation analysis of operator infrastructure reveals systemic provider concentration.
 
 **Quorum 0 (ETH)** stake by provider:

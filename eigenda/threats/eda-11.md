@@ -12,6 +12,10 @@ The root cause is that slashing integration with EigenLayer has not been activat
 
 ## Description
 
+![EDA-11 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Operators.*
+
 A comprehensive search across all EigenDA core contracts found:
 
 - Zero slash or freeze functions

@@ -10,6 +10,10 @@ The SHREX peer manager maintains a `blacklistedHashes` map (`map[string]bool`) t
 
 ## Description
 
+![CEL-03 data flow — Celestia Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Data flow — Celestia Read: Light Node.*
+
 The unbounded growth is caused by a cleanup function that adds to the blacklist but never removes from it:
 
 ```go
@@ -78,6 +82,8 @@ Local unit PoC confirmed. See [Verification Evidence](../evidence.md#cel-03-blac
 ## Impact
 
 Light node memory exhaustion leading to DAS sampling halt and loss of DA verification capability for that node. Bridge nodes are unaffected. The attack requires no fees and can be sustained indefinitely from a single peer due to disabled blacklisting (CEL-06).
+
+Affects the **Verifiability** axis — unbounded memory growth halts the light node's data availability sampling — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

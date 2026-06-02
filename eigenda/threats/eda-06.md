@@ -14,6 +14,10 @@ The current 13.9% non-response rate remains below the Reed-Solomon erasure codin
 
 ## Description
 
+![EDA-06 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Operators.*
+
 Prober measurement results across 79 operators:
 
 - 11 operators: completely dead (0.0% success rate)

@@ -12,7 +12,9 @@ Avail's Data Availability Sampling achieves high confidence at 99.84%, but the b
 
 DAS allows light clients to verify data availability without downloading entire blocks. Observatory measurements confirm the sampling mechanism itself functions correctly with 99.84% confidence. However, DAS alone only proves data was available at the time of sampling.
 
-![DAS security gap — reconstruction protocol not ready](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/avl-12-das-gap.png)
+![AVL-12 data flow — Avail Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-read.png)
+
+*Data flow — Avail Read: DHT/RPC Fetch.*
 
 The block reconstruction protocol, which would allow full blocks to be reassembled from sampled fragments alone, is not yet production-ready. This means the complete DAS security guarantee where availability implies recoverability is currently theoretical rather than fully operational.
 

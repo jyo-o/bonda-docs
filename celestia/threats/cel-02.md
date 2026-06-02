@@ -10,6 +10,10 @@ The `Subscribe` method in celestia-node's `blob/service.go` contains an infinite
 
 ## Description
 
+![CEL-02 data flow — Celestia Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Data flow — Celestia Read: Bridge Node.*
+
 The retry loop in the `Subscribe` method uses a bare `for` loop with no delay between iterations:
 
 ```go
@@ -60,6 +64,8 @@ No exploit reproduction was conducted. This finding is based on source code anal
 ## Impact
 
 Light node CPU exhaustion leading to DAS sampling halt and loss of DA verification capability for that node. The attack persists until the subscription context is cancelled or the peer connection drops.
+
+Affects the **Verifiability** axis — the CPU burn disables the light node's data availability sampling, its means of independently verifying availability — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

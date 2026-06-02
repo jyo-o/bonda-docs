@@ -14,7 +14,9 @@ If 3 operators in Q0 or Q1 collude, they can sign invalid data availability cert
 
 ## Description
 
-![Stake concentration — top 3 operators exceed 33% safety threshold](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/eda-09-stake-concentration.png)
+![EDA-09 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Operators.*
 
 Stake distribution was queried at block 25097183 using `StakeRegistry.getCurrentStake()` across 120 operators.
 

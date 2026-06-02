@@ -10,6 +10,10 @@ The EigenDA Proxy REST server lacks rate limiter middleware, accepting an unlimi
 
 ## Description
 
+![EDA-13 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Proxy.*
+
 The Proxy server initializes a plain `http.Server` with no rate limiting or authentication middleware. The only configured parameters are timeouts:
 
 ```go

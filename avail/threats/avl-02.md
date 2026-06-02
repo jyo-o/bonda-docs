@@ -10,6 +10,10 @@ When `DataAvailability::submit_data` is wrapped in `Proxy::proxy`, the Avail run
 
 ## Description
 
+![AVL-02 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: BABE.*
+
 ```mermaid
 flowchart TD
     A[Register proxy: addProxy Bob, Any] --> B["Proxy::proxy { submit_data, AppId=0 }"]
@@ -79,6 +83,8 @@ End-to-end reproduction confirmed the bypass on an Avail development network run
 ## Impact
 
 The chain emits `DataSubmitted` for data that is absent from the Kate commitment, so any L2 or client that trusts the event without independently verifying the Kate proof will rely on data that cannot be proven available. The impact is bounded to event-only consumers; an L2 that verifies the Kate proof directly is unaffected. There is no direct theft of funds and no chain-wide outage, but the integrity guarantee that a `DataSubmitted` event implies retrievable data is broken, and the attack is available to any account at the cost of the proxy deposit and gas.
+
+Affects the **Verifiability** axis — a success event is emitted for data absent from the Kate commitment, so availability cannot be independently proven — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

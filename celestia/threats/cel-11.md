@@ -10,6 +10,10 @@ Since the transition to the shwap protocol, Bad Encoding Fraud Proofs (BEFPs) ne
 
 ## Description
 
+![CEL-11 data flow — Celestia Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Data flow — Celestia Read: DAS.*
+
 The current light node security model relies exclusively on DAS with 16 random samples (`DefaultSampleAmount=16` at `celestia-node/share/availability/light/options.go:10`), which verifies data availability only. There is no mechanism for light nodes to verify data correctness (encoding validity).
 
 **Collective DAS Guarantee is Unrealized**

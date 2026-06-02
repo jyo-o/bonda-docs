@@ -52,7 +52,7 @@ flowchart LR
 
 ### Layer 3 — Threat Deductions
 
-*How much can an attacker degrade this property right now?* Only **Vulnerability**-tier findings produce deductions, and only while the vulnerability remains unpatched. Each vulnerability is mapped to the axis its exploit most directly degrades. The deduction magnitude combines two independent dimensions — **impact** and **likelihood** — explained in [Impact and Likelihood](#impact-and-likelihood) below.
+*How much can an attacker degrade this property right now?* Only **Vulnerability**-tier findings produce deductions, and only while the vulnerability remains unpatched. Each vulnerability is mapped to the axis its exploit most directly degrades. Axes with no genuinely matching vulnerability take no deduction — Decentralization and Cost Efficiency are baseline-only for this reason, never assigned a forced mapping. The deduction magnitude combines two independent dimensions — **impact** and **likelihood** — explained in [Impact and Likelihood](#impact-and-likelihood) below.
 
 ### Layer 2 — Operational Indicators
 

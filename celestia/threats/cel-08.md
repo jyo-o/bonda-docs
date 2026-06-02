@@ -10,6 +10,10 @@ Celestia's validator set is highly concentrated: only 8 validators are needed to
 
 ## Description
 
+![CEL-08 data flow — Celestia Consensus path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-consensus.png)
+
+*Data flow — Celestia Consensus: Validator Set.*
+
 The root cause is a combination of validator set concentration, regulatory surface area, and the absence of any on-chain mechanism to detect or penalize censorship behavior.
 
 **Voting Power Concentration**

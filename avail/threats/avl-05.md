@@ -10,6 +10,10 @@ VectorX uses the UUPS proxy pattern and can be upgraded instantly by the Governa
 
 ## Description
 
+![AVL-05 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: Ethereum L1.*
+
 VectorX is the ZK light-client bridge contract that verifies Avail block headers on Ethereum. It uses the UUPS proxy pattern where upgrade logic lives inside the implementation contract. The EIP-1967 admin slot is set to `0x0`, confirming this UUPS design.
 
 ```solidity

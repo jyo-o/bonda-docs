@@ -10,6 +10,10 @@ In celestia-app, the `handleBlobCheckTx` function executes `ValidateBlobTx` and 
 
 ## Description
 
+![CEL-04 data flow — Celestia Consensus path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-consensus.png)
+
+*Data flow — Celestia Consensus: Mempool / CheckTx.*
+
 The ante handler chain in `celestia-app/app/ante/ante.go` runs in the order: `SetUpContext` -> `DeductFee` -> `SigVerify` -> `MinGasPFB` -> `BlobShare`. However, commitment computation occurs before this entire chain:
 
 ```go
@@ -76,6 +80,8 @@ No exploit reproduction was conducted. This finding is based on source code anal
 ## Impact
 
 Validator CPU exhaustion leading to mempool processing delays and reduced consensus throughput. The attack requires no on-chain cost when using the rejected transaction path (invalid signature or zero fee). An attacker with RPC or P2P access can repeatedly submit crafted transactions to consume significant validator CPU resources.
+
+Affects the **Liveness** axis, where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

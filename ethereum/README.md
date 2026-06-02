@@ -8,6 +8,18 @@
 
 ![Ethereum PeerDAS Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/ethereum-architecture.svg)
 
+## Data Flow
+
+The diagrams below trace how blob data moves through Ethereum's PeerDAS — the write path that builds and propagates blob columns, and the read path where nodes sample and reconstruct columns from custody peers.
+
+![Ethereum PeerDAS data flow — write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-write.png)
+
+*Write: L2 Rollup blob-tx → Blobpool validate → Engine API forward → CL Builder → KZG commit → PeerDAS column gossip → Blob Storage.*
+
+![Ethereum PeerDAS data flow — read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Read: Validators sample → PeerDAS → DA Checker → Reconstruction from custody peers → Blob Storage read-shards → L2 Consumer.*
+
 ## What is PeerDAS?
 
 PeerDAS stands for Peer Data Availability Sampling. It is Ethereum's data availability scaling upgrade activated on mainnet via the Fusaka hard fork on December 3, 2025, defined in EIP-7594. Before PeerDAS, every Ethereum node had to download and store all blob data attached to blocks. PeerDAS changes this by splitting blob data into 128 columns and distributing the storage responsibility across the network. Each validator only needs to hold a small subset of columns rather than the full dataset.

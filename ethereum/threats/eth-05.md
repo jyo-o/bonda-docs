@@ -10,6 +10,10 @@ PeerDAS reconstructs the full data matrix only when a node obtains at least 50 p
 
 ## Description
 
+![ETH-05 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: Reconstruction.*
+
 ```mermaid
 flowchart LR
     subgraph Regular["Regular nodes (custody 4 groups)"]

@@ -10,7 +10,9 @@ The EigenDA mainnet operates with only a single Relay registered in the `RelayRe
 
 ## Description
 
-![Relay single point of failure — primary vs fallback retrieval path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/eda-04-relay-spof.png)
+![EDA-04 data flow — EigenDA Retrieval path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-retrieval.png)
+
+*Data flow — EigenDA Retrieval: Relay.*
 
 On-chain queries to the `RelayRegistry` contract confirm the single-relay configuration:
 

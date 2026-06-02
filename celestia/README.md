@@ -7,6 +7,22 @@
 
 ![Celestia Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/celestia-architecture.svg)
 
+## Data Flow
+
+The diagrams below trace how rollup data moves through Celestia — the write path that commits blobs and bridges them to Ethereum, the read path where light nodes verify availability through sampling, and the consensus path that produces and finalizes blocks.
+
+![Celestia data flow — write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-write.png)
+
+*Write: Rollup submit → Mempool CheckTx → Validators build the Extended Data Square → Blobstream commit → SP1 Prover → Ethereum L1.*
+
+![Celestia data flow — read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Read: Bridge Node header → Light Node DAS sampling → shrex share fetch → EDS Store serve → Consumer.*
+
+![Celestia data flow — consensus path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-consensus.png)
+
+*Consensus: Mempool CheckTx admission → Proposer PrepareProposal/ProcessProposal → Prevote/Precommit → Commit → block propagation to the Validator Set.*
+
 ## Architecture Introduction
 
 Celestia is a modular data availability layer purpose-built for rollups. Instead of executing transactions itself, Celestia focuses on one job: making sure rollup data is published and available for anyone to download. Rollups post their data to Celestia, and Celestia's job is to guarantee that data was actually made available to the network.

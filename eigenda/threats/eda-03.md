@@ -12,6 +12,10 @@ The root cause is that the anchor signature mechanism, introduced following the 
 
 ## Description
 
+![EDA-03 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: CertVerifier.*
+
 The anchor signature non-enforcement exists at two independent layers.
 
 **Server configuration** -- The Disperser has two relevant flags. `TolerateMissingAnchorSignature` defaults to `true`, allowing requests that omit the anchor signature to proceed without error. `DisableAnchorSignatureVerification` defaults to `false`.
@@ -79,6 +83,8 @@ An ephemeral wallet sent a `DisperseBlob` request without an anchor signature. T
 Cross-chain replay is possible because the chain-binding protection that anchor signatures provide is not enforced. An attacker can capture a valid dispersal request from one chain and replay it on a different chain or EigenDA deployment. The request will not be rejected for missing anchor data, as confirmed by live testing.
 
 However, on-chain BLS verification still applies as a secondary defense layer, and the attacker needs a valid ECDSA signature for the dispersal request. Payment validation may also block the replayed request if no reservation exists on the target chain.
+
+Affects the **Verifiability** axis — anchor signatures that bind a dispersal to its chain are not enforced — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

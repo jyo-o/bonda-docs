@@ -10,6 +10,10 @@ The Relay's `GetBlob` endpoint has no authentication requirement, and the rate l
 
 ## Description
 
+![EDA-05 data flow — EigenDA Retrieval path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-retrieval.png)
+
+*Data flow — EigenDA Retrieval: Relay (GetBlob).*
+
 The `GetBlob` endpoint exhibits two deficiencies.
 
 **No authentication.** Mainnet testing confirmed that `GetBlob` accepts unauthenticated access. Calling the endpoint without credentials returns `NotFound` for non-existent blob keys, not `Unauthorized`. This means the server does not check caller identity at all.

@@ -10,6 +10,10 @@ When `Vector::send_message` is submitted under a `MultiAddress::Index(n)` signat
 
 ## Description
 
+![AVL-01 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: VectorX Relayer.*
+
 ```mermaid
 flowchart TD
     A[Sign send_message as Address::Id] --> B[Rewrite address bytes to Index n]
@@ -69,6 +73,8 @@ End-to-end reproduction confirmed the silent omission on an Avail development ne
 ## Impact
 
 The bridge records a message as sent while no proof is ever produced, so the on-chain success event and the verifiable bridge state diverge. A relayer that subscribes to `MessageSubmitted` requests a proof that does not exist, producing failed lookups and retry loops. Funds committed on the Avail side become stuck without a corresponding proof on the destination chain. The attacker bears the index deposit and gas on every attempt and gains no direct theft of third-party funds, which limits the economic incentive, but the integrity gap between the emitted event and the missing proof is real and reachable by any account able to claim an index.
+
+Affects the **Verifiability** axis — a success event is emitted while the bridge proof is never produced — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

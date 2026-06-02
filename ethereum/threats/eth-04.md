@@ -10,6 +10,10 @@ The c-kzg Go binding uses package-level globals (`settings` and `loaded`) that a
 
 ## Description
 
+![ETH-04 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: DA Checker.*
+
 The Go binding exposes 13 public functions that reference global mutable state without synchronization:
 
 ```go
@@ -42,6 +46,8 @@ No exploit reproduction was conducted. If performed, `go test -race` on the `bin
 
 Non-standard concurrent usage triggers data races that can cause undefined behavior, memory corruption, or node crashes. Incorrect KZG verification results could accept invalid proofs or reject valid ones.
 
+Affects the **Verifiability** axis — unsynchronized state can yield incorrect KZG verification results — where it produces a Layer 3 deduction while unpatched.
+
 ### CVSS 3.1
 
 **Score**: 3.4/10 (Low)
@@ -49,14 +55,14 @@ Non-standard concurrent usage triggers data races that can cause undefined behav
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
-| AV (Attack Vector) | L (Local) | Exploiting client divergence requires local access to a specific client implementation's processing pipeline |
-| AC (Attack Complexity) | H (High) | Requires identifying a parsing divergence across multiple client implementations and crafting input that triggers differential behavior |
-| PR (Privileges Required) | L (Low) | Requires ability to submit blobs as a regular network participant |
+| AV (Attack Vector) | L (Local) | The race is on package-level globals inside the process; triggering it requires running code in the same process as the binding, with no network-reachable trigger |
+| AC (Attack Complexity) | H (High) | Requires non-standard concurrent calls to `LoadTrustedSetup`/verify/`FreeTrustedSetup` that interleave on the unsynchronized globals — a window standard single-goroutine startup never opens |
+| PR (Privileges Required) | L (Low) | Requires the ability to invoke the binding's functions concurrently from within the host process |
 | UI (User Interaction) | N (None) | No user interaction required |
-| S (Scope) | U (Unchanged) | Impact is confined to nodes running the specific client implementation with the divergent behavior |
+| S (Scope) | U (Unchanged) | Impact is confined to the process that loaded the binding |
 | C (Confidentiality) | N (None) | No confidentiality impact |
-| I (Integrity) | L (Low) | Client divergence may cause inconsistent DA attestations across implementations, but multi-client redundancy limits systemic impact |
-| A (Availability) | L (Low) | Affected client instances may temporarily reject valid data or accept invalid data, causing partial availability degradation |
+| I (Integrity) | L (Low) | A race on `settings` can yield incorrect KZG verification results, accepting invalid or rejecting valid proofs |
+| A (Availability) | L (Low) | A use-after-free or half-initialized `settings` can crash the node |
 
 ## Recommendation
 

@@ -10,6 +10,10 @@ The Avail full node Kate RPC endpoints `kate_queryProof`, `kate_queryMultiProof`
 
 ## Description
 
+![AVL-03 data flow — Avail Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-read.png)
+
+*Data flow — Avail Read: Full Node.*
+
 Each `kate_queryProof` call drives the server through the full proof pipeline with no per-request reuse of prior work.
 
 ```rust
@@ -47,6 +51,8 @@ Cost-scaling and cache-absence behavior were measured against a local developmen
 ## Impact
 
 A node with Kate RPC enabled can have its CPU exhausted by unauthenticated proof requests, degrading or interrupting light-client data availability sampling that the node serves. The attacker pays only the cost of HTTP requests and needs no account or tokens. The impact is confined to individual nodes and does not affect chain consensus. Current mainnet blocks are mostly small, so per-request cost is presently low, but the cost scales with block utilization, and the absence of any handler-level defense is a definite gap. Against an enabled node serving full 4 MB blocks the availability impact rises toward High under the vector `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`.
+
+Affects the **Liveness** axis — unauthenticated KZG computation exhausts the node serving sampling — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

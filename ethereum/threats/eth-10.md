@@ -10,6 +10,10 @@ PeerDAS extends each blob with a one-dimensional erasure code at an extension fa
 
 ## Description
 
+![ETH-10 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: Reconstruction.*
+
 ```mermaid
 flowchart LR
     B[Blob: 64 field-element cells per row] -->|1D Reed-Solomon, factor 2| E[Extended row: 128 cells]

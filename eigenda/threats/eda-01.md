@@ -10,6 +10,10 @@ The operator Retrieval `GetChunks` endpoint can be driven to exhaust node CPU by
 
 ## Description
 
+![EDA-01 data flow — EigenDA Retrieval path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-retrieval.png)
+
+*Data flow — EigenDA Retrieval: Operators.*
+
 ```mermaid
 sequenceDiagram
     participant A as Attacker
@@ -75,6 +79,8 @@ See [Verification Evidence](../evidence.md#getchunks-cold-miss-cpu-exhaustion-ed
 ## Impact
 
 The attack targets the certificate verification threshold. The EigenDA certificate verifier requires signatures from 67 percent of stake, so saturating enough operators to pull the signing-stake fraction below that threshold halts certificate issuance for new batches. An L2 rollup that relies on EigenDA then has to pause sequencing or fall back to the more expensive L1 calldata path. The cost is borne almost entirely by the operators: a single unauthenticated attacker consumes about 4.5 cores while spending negligible client-side resources, the defining shape of an asymmetric denial-of-service condition.
+
+Affects the **Liveness** axis, where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 

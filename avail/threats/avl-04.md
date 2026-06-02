@@ -10,6 +10,10 @@ The VectorX bridge contract submits Avail block header commitments to Ethereum t
 
 ## Description
 
+![AVL-04 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: VectorX Relayer.*
+
 The VectorX contract enforces relayer access control through an `approvedRelayers` mapping with `checkRelayer` enabled. Only the single approved relayer at 0x27BF...787D can call `commitHeaderRange()`, which posts ZK-verified block headers that the bridge depends on.
 
 ```solidity

@@ -23,6 +23,18 @@ Avail is built on **Substrate** and uses **Nominated Proof-of-Stake** for consen
 
 ![Avail Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/avail-architecture.svg)
 
+## Data Flow
+
+The diagrams below trace how data moves through Avail — the write path that commits rollup data and bridges it to Ethereum, and the read path where light clients verify availability through sampling.
+
+![Avail data flow — write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Write: L2 Batcher submit → Mempool → BABE block production → Erasure + KZG encoding → GRANDPA finality → VectorX Relayer → SP1 Prover → Ethereum L1.*
+
+![Avail data flow — read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-read.png)
+
+*Read: Full Node header → Sample Planner → DHT/RPC Fetch → KZG Verifier → Confidence accumulation → L2 Contract.*
+
 ## System Components
 
 | Component | Role | Trust Level |

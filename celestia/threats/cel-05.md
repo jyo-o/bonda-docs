@@ -10,6 +10,10 @@ Celestia's block structure allows a single PayForBlobs (PFB) transaction to occu
 
 ## Description
 
+![CEL-05 data flow — Celestia Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-write.png)
+
+*Data flow — Celestia Write: Mempool.*
+
 The blockspace monopoly is enabled by the ratio between maximum transaction size and block size:
 
 ```go

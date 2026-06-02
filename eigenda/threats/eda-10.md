@@ -12,6 +12,10 @@ The root cause is the existence of a flag that can disable a critical security c
 
 ## Description
 
+![EDA-10 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Disperser.*
+
 Two configuration flags control anchor signature behavior in the Disperser's `ServerConfig` struct:
 
 ```go

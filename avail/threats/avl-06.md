@@ -10,6 +10,10 @@ The deployer EOA still holds DEFAULT_ADMIN_ROLE on the VectorX bridge contract. 
 
 ## Description
 
+![AVL-06 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: Ethereum L1.*
+
 VectorX uses OpenZeppelin's AccessControl system to manage permissions across roles including DEFAULT_ADMIN_ROLE, TIMELOCK_ROLE, and GUARDIAN_ROLE. The deployment script Guardian.s.sol contains code to revoke DEFAULT_ADMIN_ROLE from the deployer, but that code is commented out and was never executed on-chain.
 
 ```solidity

@@ -10,6 +10,10 @@ SP1Blobstream's on-chain bridge contract assigns all three critical access contr
 
 ## Description
 
+![CEL-09 data flow — Celestia Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-write.png)
+
+*Data flow — Celestia Write: Blobstream.*
+
 The SP1Blobstream contract at `sp1-blobstream/contracts/src/SP1Blobstream.sol` contains multiple access control and structural defects:
 
 **Case #1: Role Concentration**

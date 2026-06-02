@@ -10,6 +10,10 @@ The SP1VerifierGateway contract controls which ZK verifier validates proofs on A
 
 ## Description
 
+![AVL-07 data flow — Avail Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
+
+*Data flow — Avail Write: SP1 Prover.*
+
 The SP1VerifierGateway at 0xCafEf00d...6878 determines whether zero-knowledge proofs submitted to the bridge are accepted as valid. Its ownership is controlled by a Gnosis Safe with a 2-of-3 signing threshold.
 
 ```

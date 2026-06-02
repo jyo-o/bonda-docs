@@ -12,6 +12,10 @@ The root cause is a conscious architectural decision not to adopt DAS, unlike Ce
 
 ## Description
 
+![EDA-12 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: CertVerifier.*
+
 The absence of DAS manifests at multiple levels.
 
 **On-chain verification** -- Certificate verification in `EigenDACertVerificationLib.sol` checks only BLS aggregate signatures and the 55% stake threshold. No sampling-based verification exists.

@@ -10,6 +10,10 @@
 
 ## Description
 
+![ETH-02 data flow — Ethereum PeerDAS Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-write.png)
+
+*Data flow — Ethereum PeerDAS Write: KZG.*
+
 `blst_p1_uncompress` / `blst_p2_uncompress` only verify that a point lies on the curve but do not verify subgroup membership. The runtime input path calls `blst_p1_in_g1()` after uncompression, but the setup loading path omits this call. The client embeds the setup at build time (Go `go:embed`, Rust `include_bytes!`), so injecting a malicious setup requires build/deployment pipeline compromise.
 
 ```c
@@ -41,6 +45,8 @@ No exploit reproduction was conducted. The trusted setup is fixed at build time,
 
 A supply chain compromise injecting tampered trusted setup bytes would cause `load_trusted_setup` to accept points outside the subgroup without verification. This breaks pairing equation soundness, allowing forged proofs to pass `verify_kzg_proof`. All L2 rollups depending on EIP-4844 blob verification would have their data integrity compromised.
 
+Affects the **Verifiability** axis — a tampered trusted setup would let forged proofs pass verification — where it produces a Layer 3 deduction while unpatched.
+
 ### CVSS 3.1
 
 **Score**: 3.8/10 (Low)
@@ -48,14 +54,14 @@ A supply chain compromise injecting tampered trusted setup bytes would cause `lo
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
-| AV (Attack Vector) | P (Physical) | Requires physical compromise of validator hardware running the BLS signing key |
-| AC (Attack Complexity) | H (High) | Requires BLS key extraction plus crafting a valid slashable message that bypasses local slashing protection |
-| PR (Privileges Required) | H (High) | Requires validator operator-level access to the signing infrastructure |
+| AV (Attack Vector) | P (Physical) | The setup is embedded at build time (`go:embed` / `include_bytes!`); injecting a tampered setup requires compromising the build or release pipeline rather than any network-reachable interface |
+| AC (Attack Complexity) | H (High) | Requires crafting setup points that lie outside the prime-order subgroup yet still pass the on-curve uncompress check, then getting them into the embedded setup |
+| PR (Privileges Required) | H (High) | Requires control over the build/deployment pipeline that produces the embedded trusted setup |
 | UI (User Interaction) | N (None) | No user interaction required |
-| S (Scope) | U (Unchanged) | Impact is confined to the compromised validator's stake |
+| S (Scope) | U (Unchanged) | Impact is confined to the client instance that loads the tampered setup |
 | C (Confidentiality) | N (None) | No confidentiality impact |
-| I (Integrity) | H (High) | Crafted equivocating messages directly violate consensus integrity for the affected validator |
-| A (Availability) | N (None) | No availability impact beyond the slashed validator itself |
+| I (Integrity) | H (High) | A tampered setup that skips the subgroup check breaks pairing-equation soundness, letting forged KZG proofs pass `verify_kzg_proof` |
+| A (Availability) | N (None) | No availability impact |
 
 ## Recommendation
 

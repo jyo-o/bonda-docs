@@ -10,6 +10,10 @@ Fusaka introduces Blob Parameter Only forks, configuration-only forks that raise
 
 ## Description
 
+![ETH-09 data flow — Ethereum PeerDAS Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-write.png)
+
+*Data flow — Ethereum PeerDAS Write: Blob Storage.*
+
 Blob capacity is scaled through the Blob Parameter Only mechanism rather than through changes to the data availability code.
 
 - Blob Parameter Only forks are defined in [EIP-7892](https://eips.ethereum.org/EIPS/eip-7892) as config-only forks that change the blob target, maximum, and base-fee update fraction.

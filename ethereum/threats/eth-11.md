@@ -10,6 +10,10 @@ In the deployed PeerDAS design, the fork-choice availability check verifies the 
 
 ## Description
 
+![ETH-11 data flow — Ethereum PeerDAS Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-read.png)
+
+*Data flow — Ethereum PeerDAS Read: DA Checker.*
+
 ```mermaid
 flowchart TD
     OB[on_block] --> IDA{is_data_available?}

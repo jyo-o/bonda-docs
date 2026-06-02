@@ -10,6 +10,10 @@ The SHREX peer manager's `EnableBlackListing` flag defaults to `false`, meaning 
 
 ## Description
 
+![CEL-06 data flow — Celestia Read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/celestia/assets/dfd/celestia-read.png)
+
+*Data flow — Celestia Read: Light Node.*
+
 The blacklisting mechanism exists in code but is disabled by default:
 
 ```go

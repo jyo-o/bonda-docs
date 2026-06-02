@@ -10,6 +10,10 @@ EIP-7918 introduces a reserve price that couples the blob base fee to execution 
 
 ## Description
 
+![ETH-12 data flow — Ethereum PeerDAS Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-write.png)
+
+*Data flow — Ethereum PeerDAS Write: Blobpool.*
+
 The reserve rule changes how `excess_blob_gas` evolves when blob demand is low.
 
 - EIP-7918 adds a floor so that the blob base fee cannot remain negligible while execution gas is expensive. When `BLOB_BASE_COST * base_fee_per_gas > GAS_PER_BLOB * get_base_fee_per_blob_gas(parent)`, the excess blob gas for the child is computed without subtracting the target blob gas. Source: [EIP-7918](https://eips.ethereum.org/EIPS/eip-7918).

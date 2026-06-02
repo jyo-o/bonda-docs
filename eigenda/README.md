@@ -7,6 +7,22 @@
 
 ![EigenDA Architecture](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/assets/eigenda-architecture.svg)
 
+## Data Flow
+
+The diagrams below trace how a blob moves through EigenDA. The master view shows the full system; the dispersal and retrieval views isolate the write and read paths.
+
+![EigenDA data flow — full system](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-master.png)
+
+*Full system: dispersal and retrieval paths combined.*
+
+![EigenDA data flow — dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Dispersal (write): Rollup payload → Proxy → Disperser → Encoder chunking → Operators store and BLS-sign → CertVerifier checks the DA certificate on Ethereum L1.*
+
+![EigenDA data flow — retrieval path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-retrieval.png)
+
+*Retrieval (read): Rollup cert-URL → CertVerifier → Relay GetBlob → Operators GetChunks fallback → payload reconstruction.*
+
 ## Architecture Introduction
 
 EigenDA is a data availability (DA) system built as an Actively Validated Service (AVS) on EigenLayer. Operators who have restaked ETH or EIGEN on EigenLayer can opt into EigenDA to store and serve data on behalf of rollups and other consumers.

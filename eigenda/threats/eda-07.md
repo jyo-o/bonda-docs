@@ -12,7 +12,9 @@ The root cause is the concentration of all governance authority in a single Safe
 
 ## Description
 
-![Governance centralization — single multisig controls all contracts](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/eda-07-governance-map.png)
+![EDA-07 data flow — EigenDA Dispersal path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/eigenda/assets/dfd/eigenda-dispersal.png)
+
+*Data flow — EigenDA Dispersal: Governance.*
 
 The multisig (`0x002721...`) owns the following eight core contracts:
 

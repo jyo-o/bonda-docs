@@ -10,6 +10,10 @@ Under proposer-builder separation, a small set of external builders and relays p
 
 ## Description
 
+![ETH-08 data flow — Ethereum PeerDAS Write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/ethereum/assets/dfd/ethereum-write.png)
+
+*Data flow — Ethereum PeerDAS Write: CL Builder.*
+
 PeerDAS requires that a block's data be split into 128 columns and published as column sidecars across the gossip subnets. When a block is built externally and delivered through a relay, the construction of the block and its associated blobs sits with the builder, and the proposer commits to the builder's payload without locally holding all of the underlying data.
 
 - Column sidecars are published per column across `DATA_COLUMN_SIDECAR_SUBNET_COUNT` subnets. Source: [p2p-interface.md](https://github.com/ethereum/consensus-specs/blob/master/specs/fulu/p2p-interface.md).
