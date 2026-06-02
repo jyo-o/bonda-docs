@@ -20,8 +20,6 @@ BONDA's methodology rests on four pillars. Each finding moves through all four: 
 
 Each DA protocol is decomposed into a Data Flow Diagram (DFD) with explicit trust boundaries. Potential threats are enumerated using STRIDE-per-element — Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege — as a discovery aid that forces every process, data store, data flow, and external entity to be examined. STRIDE is used here to drive enumeration, not as a label attached to findings.
 
-See: [Threat Discovery](stride.md)
-
 ### 2. Threat Classification
 
 Every finding is classified into one of four tiers: **Vulnerability**, **Operational Risk**, **Governance Observation**, or **Design Note**. The tier determines how a finding is treated — whether it carries a CVSS score, whether it sets a structural baseline, or whether it is a live operational measurement. This separation prevents architectural choices and trust-distribution observations from being mislabeled as exploitable bugs.
