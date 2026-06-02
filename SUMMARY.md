@@ -9,8 +9,23 @@
 * [Severity & Scoring](methodology/scoring.md)
 * [CVSS 3.1 Scoring](methodology/cvss.md)
 * [Verification Approach](methodology/verification.md)
-* [Threat Discovery](methodology/stride.md)
 * [Terminology](methodology/terminology.md)
+
+## Ethereum
+
+* [Overview](ethereum/README.md)
+* [ETH-01: DataColumnsByRange Rate-Limit Bypass](ethereum/threats/eth-01.md)
+* [ETH-02: c-kzg Missing Subgroup Check](ethereum/threats/eth-02.md)
+* [ETH-03: DataColumnsByRoot Incorrect Timeout](ethereum/threats/eth-03.md)
+* [ETH-04: c-kzg Go Binding Thread Safety](ethereum/threats/eth-04.md)
+* [ETH-05: Reconstruction Depends on Half-Column Holders](ethereum/threats/eth-05.md)
+* [ETH-06: Per-Column Subnet Eclipse](ethereum/threats/eth-06.md)
+* [ETH-07: Self-Reported Custody Count Unverifiable](ethereum/threats/eth-07.md)
+* [ETH-08: Builder/Relay Publication Concentration](ethereum/threats/eth-08.md)
+* [ETH-09: Rising Node Resource Floor](ethereum/threats/eth-09.md)
+* [ETH-10: One-Dimensional Erasure Coding](ethereum/threats/eth-10.md)
+* [ETH-11: Fork-Choice Rests on Custody](ethereum/threats/eth-11.md)
+* [ETH-12: EIP-7918 Blob Fee Reserve](ethereum/threats/eth-12.md)
 
 ## EigenDA
 
@@ -68,22 +83,6 @@
 * [AVL-12: Incomplete Block Reconstruction](avail/threats/avl-12.md)
 * [Attack Chains](avail/attack-chains.md)
 * [Verification Evidence](avail/evidence.md)
-
-## Ethereum / PeerDAS
-
-* [Overview](ethereum/README.md)
-* [ETH-01: DataColumnsByRange Rate-Limit Bypass](ethereum/threats/eth-01.md)
-* [ETH-02: c-kzg Missing Subgroup Check](ethereum/threats/eth-02.md)
-* [ETH-03: DataColumnsByRoot Incorrect Timeout](ethereum/threats/eth-03.md)
-* [ETH-04: c-kzg Go Binding Thread Safety](ethereum/threats/eth-04.md)
-* [ETH-05: Reconstruction Depends on Half-Column Holders](ethereum/threats/eth-05.md)
-* [ETH-06: Per-Column Subnet Eclipse](ethereum/threats/eth-06.md)
-* [ETH-07: Self-Reported Custody Count Unverifiable](ethereum/threats/eth-07.md)
-* [ETH-08: Builder/Relay Publication Concentration](ethereum/threats/eth-08.md)
-* [ETH-09: Rising Node Resource Floor](ethereum/threats/eth-09.md)
-* [ETH-10: One-Dimensional Erasure Coding](ethereum/threats/eth-10.md)
-* [ETH-11: Fork-Choice Rests on Custody](ethereum/threats/eth-11.md)
-* [ETH-12: EIP-7918 Blob Fee Reserve](ethereum/threats/eth-12.md)
 
 ## Cross-DA Comparison
 

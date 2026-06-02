@@ -1,8 +1,8 @@
 # BONDA Threat Model
 
-**Systematic threat modeling for the Data Availability layers powering Ethereum rollups.**
+**Systematic threat modeling for the Data Availability layers powering rollups.**
 
-BONDA analyzes the security of four major DA protocols by combining STRIDE-guided threat discovery, a four-tier classification of every finding, and a five-axis qualitative scoring model, backed by on-chain verification, source code auditing, and mainnet fork testing. Every finding is traced back to primary sources: pinned source code commits, live on-chain contract state, and network endpoint probes.
+BONDA analyzes the security of four major DA protocols, with every finding traced back to primary sources: pinned source code commits, live on-chain contract state, and network endpoint probes.
 
 ---
 
@@ -18,10 +18,10 @@ This documentation covers **50 findings** across four protocols. Each finding is
 
 | Protocol | Description | Findings | Highest CVSS |
 |----------|-------------|---------|-----------------|
+| [**Ethereum**](ethereum/) | PeerDAS custody/sampling design, consensus clients, and KZG library | 12 | Medium (5.3) |
 | [**EigenDA**](eigenda/) | AVS-based DA on EigenLayer with centralized disperser and quorum-based attestation | 14 | High (8.6) |
 | [**Celestia**](celestia/) | Modular DA layer with CometBFT consensus and light client DAS | 12 | High (7.5) |
 | [**Avail**](avail/) | Substrate-based DA chain with VectorX bridge to Ethereum | 12 | High (8.5) |
-| [**Ethereum / PeerDAS**](ethereum/) | PeerDAS custody/sampling design, consensus clients, and KZG library | 12 | Medium (5.3) |
 
 ---
 
@@ -62,10 +62,10 @@ All 50 findings are confirmed through source code analysis, on-chain state queri
 ## Quick Navigation
 
 ### By Protocol
+- [Ethereum](ethereum/) — KZG library and consensus client audit findings
 - [EigenDA](eigenda/) — Disperser, Relay, Operator, and governance threats
 - [Celestia](celestia/) — Consensus, DAS, and Blobstream bridge threats
 - [Avail](avail/) — VectorX bridge, validator set, and governance threats
-- [Ethereum / PeerDAS](ethereum/) — KZG library and consensus client audit findings
 
 ### By Topic
 - [Methodology](methodology/) — threat discovery, four-tier classification, five-axis scoring, CVSS, verification approach, terminology

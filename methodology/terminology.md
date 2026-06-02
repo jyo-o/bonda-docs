@@ -27,7 +27,7 @@ Terms are grouped by category. For deeper context, follow the cross-references t
 
 | Term | Definition |
 |------|------------|
-| **STRIDE** | A threat-enumeration framework developed by Microsoft. Each letter names a category of threat used as a discovery prompt against each element of a data flow diagram. BONDA uses STRIDE to drive enumeration during discovery, not as a label on published findings. See [Threat Discovery](stride.md). |
+| **STRIDE** | A threat-enumeration framework developed by Microsoft. Each letter names a category of threat used as a discovery prompt against each element of a data flow diagram. BONDA uses STRIDE to drive enumeration during discovery, not as a label on published findings. |
 | **Spoofing** | Pretending to be another entity. In DA contexts: forging operator identities, replaying cross-chain signatures, or impersonating disperser nodes. |
 | **Tampering** | Unauthorized modification of data or state. Examples include overwriting attestation records, altering blob encodings, or manipulating validator sets. |
 | **Repudiation** | The ability to deny having performed an action. In DA systems, weak logging or missing equivocation detection can allow nodes to deny misbehavior. |

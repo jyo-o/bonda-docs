@@ -6,7 +6,7 @@ This section compares threat modeling results across all four Data Availability 
 
 ## Protocol Overview
 
-| | EigenDA | Celestia | Avail | Ethereum PeerDAS |
+| | EigenDA | Celestia | Avail | Ethereum |
 |---|---------|----------|-------|-----------------|
 | **Architecture** | AVS on EigenLayer | Standalone L1 | Standalone L1 | Native Ethereum upgrade |
 | **Consensus** | Quorum-based BLS | CometBFT (94 validators) | NPoS BABE+GRANDPA (105 validators) | Beacon Chain PoS |
@@ -68,7 +68,7 @@ Learn more about verification levels in the [Verification Methodology](../method
 - **EigenDA** findings span the unauthenticated compute surface (Disperser, Relay, operator read path) and a concentrated governance layer where a single 3-of-4 multisig controls the core contracts.
 - **Celestia** splits between implementation bugs in celestia-core/celestia-node and structural properties such as the DAS-only safety model after fraud-proof removal.
 - **Avail** concentrates at the VectorX bridge trust boundary and in the runtime's data-extraction path, where two integrity gaps let submissions appear committed without being provable.
-- **Ethereum PeerDAS** combines client-implementation Vulnerabilities (Prysm, c-kzg-4844) with Design Notes that set the baseline: one-dimensional coding, custody-based availability, and the EIP-7918 fee reserve.
+- **Ethereum** combines client-implementation Vulnerabilities (Prysm, c-kzg-4844) with Design Notes that set the baseline: one-dimensional coding, custody-based availability, and the EIP-7918 fee reserve.
 
 ---
 
