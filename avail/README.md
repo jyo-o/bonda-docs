@@ -1,12 +1,11 @@
-# Avail
+# Overview
 
 {% hint style="info" %}
 **How to Read This Section**
 
 Each finding listed below has its own dedicated page with full technical details, on-chain evidence, and attack scenarios. Click any SID to dive deeper.
 
-- Each finding is sorted into one of four [classification](../methodology/classification.md) tiers — Vulnerability, Operational Risk, Governance Observation, or Design Note. Only Vulnerabilities carry a [CVSS 3.1](../methodology/cvss.md) score; the other tiers are qualitative and feed the [5-axis model](../methodology/scoring.md).
-- Verification status indicates whether the finding was confirmed through on-chain probing, source code review, or mainnet fork testing. Learn more about our [verification methodology](../methodology/verification.md).
+* Each finding is sorted into one of four [classification](../methodology/classification.md) tiers — Vulnerability, Operational Risk, Governance Observation, or Design Note. Only Vulnerabilities carry a [CVSS 3.1](../methodology/cvss.md) score; the other tiers are qualitative and feed the [5-axis model](../methodology/scoring.md).
 {% endhint %}
 
 ## What is Avail?
@@ -29,58 +28,58 @@ The diagrams below trace how data moves through Avail — the write path that co
 
 ![Avail data flow — write path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-write.png)
 
-*Write: L2 Batcher submit → Mempool → BABE block production → Erasure + KZG encoding → GRANDPA finality → VectorX Relayer → SP1 Prover → Ethereum L1.*
+_Write: L2 Batcher submit → Mempool → BABE block production → Erasure + KZG encoding → GRANDPA finality → VectorX Relayer → SP1 Prover → Ethereum L1._
 
 ![Avail data flow — read path](https://raw.githubusercontent.com/jyo-o/bonda-docs/main/avail/assets/dfd/avail-read.png)
 
-*Read: Full Node header → Sample Planner → DHT/RPC Fetch → KZG Verifier → Confidence accumulation → L2 Contract.*
+_Read: Full Node header → Sample Planner → DHT/RPC Fetch → KZG Verifier → Confidence accumulation → L2 Contract._
 
 ## System Components
 
-| Component | Role | Trust Level |
-|-----------|------|-------------|
-| **Avail DA Chain** | Orders transaction data and produces KZG commitments | Decentralized — NPoS with 105 active validators, Nakamoto coefficient ~34 |
-| **Light Clients** | Sample random data chunks to verify availability | Trustless — anyone can run one |
-| **VectorX** | Relays Avail commitments to Ethereum via ZK proofs | Single relayer EOA — centralized, no on-chain heartbeat |
-| **SP1 Verifier Gateway** | Verifies ZK proofs of Avail state on Ethereum | Smart contract controlled by 2/3 multisig |
-| **Bridge Contract** | Mints/burns AVAIL token, verifies attestations | Upgradeable with 24h timelock, controlled by 4/7 multisig |
-| **AVAIL Token** | ERC-20 on Ethereum, ~791M supply | Immutable contract, mint/burn only via Bridge |
-| **TimelockController** | Enforces 24h delay on Bridge upgrades | 86,400s delay, proposer/executor = Governance Multisig |
-| **Governance Multisig** | Controls Bridge and VectorX upgrades | 4/7 Gnosis Safe |
-| **Pauser Multisig** | Emergency pause capability | 3/5 Gnosis Safe — 4 of 5 owners overlap with Governance |
-| **Technical Committee** | Runtime upgrades on Avail chain | 5/7 consensus required |
+| Component                | Role                                                 | Trust Level                                                                |
+| ------------------------ | ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Avail DA Chain**       | Orders transaction data and produces KZG commitments | Decentralized — NPoS with 105 active validators, Nakamoto coefficient \~34 |
+| **Light Clients**        | Sample random data chunks to verify availability     | Trustless — anyone can run one                                             |
+| **VectorX**              | Relays Avail commitments to Ethereum via ZK proofs   | Single relayer EOA — centralized, no on-chain heartbeat                    |
+| **SP1 Verifier Gateway** | Verifies ZK proofs of Avail state on Ethereum        | Smart contract controlled by 2/3 multisig                                  |
+| **Bridge Contract**      | Mints/burns AVAIL token, verifies attestations       | Upgradeable with 24h timelock, controlled by 4/7 multisig                  |
+| **AVAIL Token**          | ERC-20 on Ethereum, \~791M supply                    | Immutable contract, mint/burn only via Bridge                              |
+| **TimelockController**   | Enforces 24h delay on Bridge upgrades                | 86,400s delay, proposer/executor = Governance Multisig                     |
+| **Governance Multisig**  | Controls Bridge and VectorX upgrades                 | 4/7 Gnosis Safe                                                            |
+| **Pauser Multisig**      | Emergency pause capability                           | 3/5 Gnosis Safe — 4 of 5 owners overlap with Governance                    |
+| **Technical Committee**  | Runtime upgrades on Avail chain                      | 5/7 consensus required                                                     |
 
 ## Key Numbers
 
-| Metric | Value |
-|--------|-------|
-| Total findings | 12 |
-| Verification status | 9 verified, 3 poc_verified |
-| Highest severity | High (CVSS 8.5) |
-| Active validators | 105 out of 1,200 max |
-| Nakamoto coefficient | ~34 validators to control 33% of stake |
-| Governance multisig | 4/7 Gnosis Safe |
-| Bridge upgrade delay | 24 hours |
-| VectorX upgrade delay | None — instant with 4/7 multisig |
+| Metric                | Value                                   |
+| --------------------- | --------------------------------------- |
+| Total findings        | 12                                      |
+| Verification status   | 9 verified, 3 poc\_verified             |
+| Highest severity      | High (CVSS 8.5)                         |
+| Active validators     | 105 out of 1,200 max                    |
+| Nakamoto coefficient  | \~34 validators to control 33% of stake |
+| Governance multisig   | 4/7 Gnosis Safe                         |
+| Bridge upgrade delay  | 24 hours                                |
+| VectorX upgrade delay | None — instant with 4/7 multisig        |
 
 ## Threat Summary
 
 12 findings identified through on-chain verification, source code analysis, and Anvil mainnet fork testing. Only Vulnerabilities carry a CVSS 3.1 score.
 
-| SID | Threat | Category | Severity | Status |
-|-----|--------|----------|----------|--------|
-| [AVL-01](threats/avl-01.md) | MultiAddress::Index Signing Causes Silent Bridge Proof Omission | Vulnerability | High (8.5) | poc_verified |
-| [AVL-02](threats/avl-02.md) | Proxy-Wrapped submitData Bypasses DA Extraction | Vulnerability | High (7.7) | poc_verified |
-| [AVL-03](threats/avl-03.md) | Kate RPC Unauthenticated KZG Computation | Vulnerability | Medium (5.3) | poc_verified |
-| [AVL-04](threats/avl-04.md) | Single Relayer Creates Bridge-Wide SPOF | Operational Risk | High | verified |
-| [AVL-05](threats/avl-05.md) | VectorX Upgradeable Instantly Without Timelock | Operational Risk | Medium | verified |
-| [AVL-06](threats/avl-06.md) | Deployer EOA Retains Admin Role on VectorX | Governance Observation | — | verified |
-| [AVL-07](threats/avl-07.md) | SP1VerifierGateway Route Manipulation via Multisig | Governance Observation | — | verified |
-| [AVL-08](threats/avl-08.md) | Key Holder Overlap Across Three Multisigs | Governance Observation | — | verified |
-| [AVL-09](threats/avl-09.md) | Unlimited Token Minting via Bridge or VectorX Upgrade | Governance Observation | — | verified |
-| [AVL-10](threats/avl-10.md) | Low Validator Utilization Concentrates Power | Design Note | — | verified |
-| [AVL-11](threats/avl-11.md) | Slashing Infrastructure Present but Never Triggered | Design Note | — | verified |
-| [AVL-12](threats/avl-12.md) | Incomplete Block Reconstruction Limits DAS | Design Note | — | verified |
+| SID                         | Threat                                                          | Category               | Severity     | Status        |
+| --------------------------- | --------------------------------------------------------------- | ---------------------- | ------------ | ------------- |
+| [AVL-01](threats/avl-01.md) | MultiAddress::Index Signing Causes Silent Bridge Proof Omission | Vulnerability          | High (8.5)   | poc\_verified |
+| [AVL-02](threats/avl-02.md) | Proxy-Wrapped submitData Bypasses DA Extraction                 | Vulnerability          | High (7.7)   | poc\_verified |
+| [AVL-03](threats/avl-03.md) | Kate RPC Unauthenticated KZG Computation                        | Vulnerability          | Medium (5.3) | poc\_verified |
+| [AVL-04](threats/avl-04.md) | Single Relayer Creates Bridge-Wide SPOF                         | Operational Risk       | High         | verified      |
+| [AVL-05](threats/avl-05.md) | VectorX Upgradeable Instantly Without Timelock                  | Operational Risk       | Medium       | verified      |
+| [AVL-06](threats/avl-06.md) | Deployer EOA Retains Admin Role on VectorX                      | Governance Observation | —            | verified      |
+| [AVL-07](threats/avl-07.md) | SP1VerifierGateway Route Manipulation via Multisig              | Governance Observation | —            | verified      |
+| [AVL-08](threats/avl-08.md) | Key Holder Overlap Across Three Multisigs                       | Governance Observation | —            | verified      |
+| [AVL-09](threats/avl-09.md) | Unlimited Token Minting via Bridge or VectorX Upgrade           | Governance Observation | —            | verified      |
+| [AVL-10](threats/avl-10.md) | Low Validator Utilization Concentrates Power                    | Design Note            | —            | verified      |
+| [AVL-11](threats/avl-11.md) | Slashing Infrastructure Present but Never Triggered             | Design Note            | —            | verified      |
+| [AVL-12](threats/avl-12.md) | Incomplete Block Reconstruction Limits DAS                      | Design Note            | —            | verified      |
 
 ## Key Findings
 
@@ -107,4 +106,3 @@ The entire bridge between Avail and Ethereum depends on a single relayer wallet.
 **AVL-06** | Governance Observation
 
 The deployer wallet that originally set up the VectorX contract still holds the most powerful admin role. The revocation code was found commented out in the deployment script. Because this admin role governs all other roles, the deployer can grant itself upgrade permissions and replace the entire VectorX contract in just two transactions, bypassing the 4/7 multisig governance entirely. This is recorded against the Decentralization baseline and carries no score.
-
