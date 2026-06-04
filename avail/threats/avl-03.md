@@ -41,12 +41,17 @@ The endpoint is confirmed reachable without authentication on mainnet: `kate_blo
 
 ## Proof of Concept
 
-Cost-scaling and cache-absence behavior were measured against a local development network and the public mainnet RPC. Measurements were taken under ARM64 emulation, so absolute timings are indicative of scaling rather than native throughput.
+The asymmetry was measured on a native x86 GCP host (n2-standard-16, 16 vCPU, not emulated) against a self-hosted node serving a full 4 MB block (256 x 512 grid), using `perf` for CPU-time.
 
-- **No server-side caching**: repeated `kate_queryProof` calls against the same mainnet block returned near-identical cold and warm timings, confirming the grid is rebuilt each time.
-- **Cost scales with block size**: per-request time for a single cell rose from about 5 ms at 1 KB to about 96 ms at 1 MB on the local network.
-- **Concurrency saturation**: 50 concurrent requests against a 1 MB block raised wall-clock time to roughly 8.4 times the sequential baseline, indicating CPU saturation.
-- **Mainnet exposure**: `kate_queryProof` returned a valid KZG proof from `mainnet-rpc.avail.so` with no authentication.
+- **One cheap request forces a full grid build**: a single 1-cell `kate_queryProof` on the 4 MB block costs 0.197 core-seconds (median wall 197.9 ms, one core fully busy).
+- **Cost is independent of cells requested**: 1 cell and 64 cells cost almost the same (199 ms vs 269 ms), so the grid build dominates and per-cell extraction is negligible.
+- **No caching**: repeated requests with distinct cells all cost ~199 ms; every request rebuilds the grid.
+- **Linearly stackable to saturation**: node CPU scales at ~100% per connection; ~16 unauthenticated connections pin all 16 cores, after which co-tenant RPC latency degrades ~1180x, with a sub-millisecond `system_health` check taking over a second.
+- **Mainnet exposure**: `kate_queryProof` is reachable without authentication on `mainnet-rpc.avail.so`.
+
+The per-request cost is modest in absolute terms, around 0.2 core-seconds and roughly 70x cheaper than the EigenDA GetBlobCommitment path; the severity is the asymmetry and the absence of any handler-level rate limit, not a single-request kill.
+
+See [Verification Evidence](../evidence.md#kate-rpc-unauthenticated-kzg-computation-avl-03) for the full setup, perf measurements, and concurrency tables.
 
 ## Impact
 
