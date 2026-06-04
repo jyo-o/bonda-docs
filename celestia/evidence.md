@@ -151,6 +151,43 @@ At mainnet prices as of 2026-05-26:
 | **Projected leak rate** | ~1 GB per 160 seconds at 100 Mbps rejected tx rate |
 | **Existing test gap** | Production tests pass `blobTx.Tx` directly to `FinalizeBlock` instead of wrapped `BlobTx`, masking the key mismatch |
 
-### CEL-03: blacklistedHashes Growth (poc_verified)
+### CEL-03: ShrEx Unvalidated Pool and Blacklist Exhaustion (poc_verified)
 
-Local unit PoC confirmed: N unique fake hashes injected via shrexsub, after `cleanUp` the `blacklistedHashes` map length increases by N while pools are correctly deleted. The cleanup function is the only write path that sets `blacklistedHashes[h]=true`, and no deletion path exists anywhere in the codebase.
+A live isolated-network reproduction drove a memory-capped light node to a kernel OOM kill from a single attacker peer broadcasting random 32-byte DataHashes. Two memory paths were measured: immediate `m.pools` growth and permanent `blacklistedHashes` accumulation.
+
+#### Test Setup
+
+| Item | Value |
+|---|---|
+| Victim | GCP n2-standard-8 (8 vCPU, 31 GB), Ubuntu 22.04.5, memory cgroup-capped to mirror the ~500 MB light-node hardware recommendation |
+| Attacker | GCP e2-standard-4 (4 vCPU, 16 GB), Ubuntu 22.04 |
+| celestia-node | `1016cc36` (v0.29.3-arabica-107) plus a read-only length log, no behavior change |
+| celestia-app | go.mod commit `b2c8d9c29491` (module v9) |
+| Params | PoolValidationTimeout=2m, GcInterval=30s, EnableBlackListing=false, PeerCooldown=3s |
+| Topology | single-validator devnet + 1 bridge + 1 light (victim), ~1 s blocks |
+
+The attacker uses the production `shrexsub` package to broadcast unique random 32-byte DataHashes; each reaches the victim's `getOrCreatePool`.
+
+#### Path 1 — m.pools growth (fast OOM)
+
+| Scenario | Load | m.pools peak | OOM | Victim memory | CPU |
+|---|---|---|---|---|---|
+| S1 (model check) | 1,000/s, 300 s, uncapped | 145,532 | none | 145 to 427 MB | 66.9 CPU-s |
+| S2-net | 5,000/s, cap 600 MB | 388,116 | **t ≈ 79 s** | RSS ~597 MB (≈cap) | 75.8 CPU-s / 2.12x10^11 cyc |
+
+#### Path 2 — blacklistedHashes growth (permanent, not reclaimed)
+
+| Scenario | Load | blacklist peak | OOM | Victim memory | CPU |
+|---|---|---|---|---|---|
+| V2-net | 5,000/s, 240 s, uncapped | 1,146,154 | none | idle 171 MB to 1.49 GB; **~1.18 GB still resident after stop** | 237 CPU-s / 6.6x10^11 cyc |
+| V2-net-OOM | 4,000/s, cap 1.4 GB | 2,594,020 | **t ≈ 865 s** | anon-rss ~1.36 GB (≈cap) | 673 CPU-s / 1.89x10^12 cyc |
+
+#### Kernel OOM-kill (raw)
+
+```text
+oom-kill:constraint=CONSTRAINT_MEMCG, oom_memcg=/t13victim, task=celestia, pid=51127
+Memory cgroup out of memory: Killed process 51127 (celestia)
+  total-vm:5914504kB, anon-rss:1429392kB(~1.36GB), file-rss:95872kB ... UID:1001
+```
+
+The pool path reaches OOM fastest (79 s); the blacklist path accumulates permanently and is never reclaimed without a restart. The attacker pays only hash generation and broadcast bandwidth.

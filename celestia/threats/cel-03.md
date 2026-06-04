@@ -1,12 +1,12 @@
 # CEL-03: Unbounded blacklistedHashes Growth Causing Light Node OOM
 
-{% hint style="info" %}
-**Severity**: Medium (5.3/10) · **Likelihood**: Low · **Category**: Vulnerability · **Status**: poc_verified
+{% hint style="warning" %}
+**Severity**: High (7.5/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary
 
-The SHREX peer manager maintains a `blacklistedHashes` map (`map[string]bool`) that tracks DataHashes identified as invalid. This map has addition paths but no deletion paths anywhere in the codebase. An attacker can inject unique fake 32-byte DataHashes via shrexsub messages that each create unvalidated pools; after the validation timeout, pools are cleaned up but hashes accumulate permanently in the blacklist map, eventually exhausting light node memory.
+The SHREX peer manager creates an unvalidated `syncPool` for every DataHash in an inbound shrexsub message before checking whether the hash exists on-chain, and the `blacklistedHashes` map that absorbs timed-out pools has no deletion path. An attacker broadcasting unique fake 32-byte DataHashes exhausts a light node's memory along two paths: `m.pools` grows immediately during the flood, and `blacklistedHashes` accumulates permanently afterward. A live reproduction drove a memory-capped light node to a kernel OOM kill in 79 seconds via the pool path.
 
 ## Description
 
@@ -73,22 +73,39 @@ func (v ValidatorFn) validate(ctx context.Context, p peer.ID, msg *pubsub.Messag
 }
 ```
 
+Because validation never checks chain existence, `Manager.Validate()` calls `getOrCreatePool()` for every fake hash before the data is known to exist, allocating a roughly 1.5 KB `syncPool` per unique hash. This is the faster of the two memory-exhaustion paths: `m.pools` grows immediately during the flood, while `blacklistedHashes` accumulates permanently after each pool's 2-minute validation timeout.
+
+```go
+// celestia-node/share/shwap/p2p/shrex/peers/manager.go — getOrCreatePool
+// @audit a new ~1.5 KB syncPool is allocated per unique DataHash before any chain-existence check; m.pools has no cap
+// https://github.com/celestiaorg/celestia-node/blob/main/share/shwap/p2p/shrex/peers/manager.go
+p, ok := m.pools[datahash]
+if !ok {
+    p = &syncPool{height: height, pool: newPool(m.params.PeerCooldown), createdAt: time.Now()}
+    m.pools[datahash] = p // no global or per-height cap
+}
+```
+
 Bridge nodes are not affected because they do not use the `WithShrexSubPools` path at `celestia-node/nodebuilder/share/p2p_constructors.go:58`. The attack targets Light nodes exclusively. Since `EnableBlackListing` defaults to `false` (see CEL-06), the attacking peer is never blocked and can inject hashes indefinitely.
 
 ## Proof of Concept
 
-Local unit PoC confirmed. See [Verification Evidence](../evidence.md#cel-03-blacklistedhashes-growth-poc_verified) for details. N unique fake hashes were injected; after `cleanUp`, the `blacklistedHashes` map length increased by N while pools were correctly deleted. Isolated Light node network PoC is feasible but was not executed.
+A live isolated-network reproduction drove a memory-capped light node to a kernel OOM kill from a single unauthenticated attacker peer. See [Verification Evidence](../evidence.md#cel-03-shrex-unvalidated-pool-and-blacklist-exhaustion-poc_verified) for the full setup and measurements.
+
+- **Pool path (fast)**: at 5,000 fake hashes/s against a 600 MB-capped light node, `m.pools` peaked at 388,116 entries and the kernel OOM-killer terminated the node at t ≈ 79 s.
+- **Blacklist path (permanent)**: at 4,000/s against a 1.4 GB cap, `blacklistedHashes` reached 2,594,020 entries and OOM-killed the node at t ≈ 865 s; uncapped, roughly 1.18 GB stays resident after the attack stops and is never reclaimed.
+- **Asymmetry**: the attacker only generates and broadcasts random 32-byte hashes; one peer is sufficient because peer blacklisting is disabled by default (CEL-06).
 
 ## Impact
 
-Light node memory exhaustion leading to DAS sampling halt and loss of DA verification capability for that node. Bridge nodes are unaffected. The attack requires no fees and can be sustained indefinitely from a single peer due to disabled blacklisting (CEL-06).
+A single unauthenticated peer exhausts a light node's memory and triggers a kernel OOM kill, halting that node's DAS sampling and DA verification. A live reproduction reached OOM in 79 seconds via the pool path and in roughly 14 minutes via the blacklist path; the blacklist memory is never reclaimed without a restart. Bridge nodes are unaffected. shrexsub uses FloodSub, so an attacker connected to many light nodes can drive the same flood into all of them at once, degrading network-wide DAS coverage, though the impact does not self-propagate because victims return ValidationIgnore.
 
-Affects the **Verifiability** axis — unbounded memory growth halts the light node's data availability sampling — where it produces a Layer 3 deduction while unpatched.
+Affects the **Verifiability** axis — memory exhaustion halts the light node's data availability sampling — where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 
-**Score**: 5.3/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L`
+**Score**: 7.5/10 (High)
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -99,7 +116,7 @@ Affects the **Verifiability** axis — unbounded memory growth halts the light n
 | S (Scope) | U (Unchanged) | Impact is confined to the targeted light node |
 | C (Confidentiality) | N (None) | No confidentiality impact |
 | I (Integrity) | N (None) | No integrity impact |
-| A (Availability) | L (Low) | Light node memory exhaustion is gradual; the 2-minute cleanup cycle and per-hash overhead mean OOM takes sustained effort |
+| A (Availability) | H (High) | A single peer drives a memory-capped light node to a kernel OOM kill in 79 seconds via the pool path; the node crashes and the blacklist memory is not reclaimed without a restart |
 
 ## Recommendation
 
