@@ -655,3 +655,55 @@ grpcurl -max-time 15 -d "{\"blob\":\"$B64\"}" <endpoint>:443 \
 | Preprod (Hoodi v2) | `disperser-v2-preprod-hoodi.eigenda.xyz:443` | active |
 
 A disabled endpoint would instead return `Unimplemented: GetBlobCommitment is deprecated and has been disabled`, confirming the `DISABLE_GET_BLOB_COMMITMENT` flag is inactive in all four environments. All four endpoints resolve to Cloudflare IPs (`104.18.0.169`, `104.18.1.169`), but Cloudflare does not block algorithmic-complexity DoS, so there is no effective protection against this vector. The request context is not propagated into `GetCommitmentsForPaddedLength`, so a short client deadline or early disconnect does not abort the server-side MSM work.
+
+---
+
+## DisperseBlob Commitment-Before-Payment (EDA-02)
+
+The second surface of EDA-02: `DisperseBlob` recomputes the KZG commitment inside `validateDispersalRequest` before `AuthorizePayment`, so an attacker with only a self-signed EOA and no payment authorization forces full KZG work that is discarded at commitment rejection. A live `inabox` reproduction measured the rejection wall time, which equals the KZG cost, confirming KZG runs before payment.
+
+### Test Setup
+
+| Item | Value |
+|---|---|
+| Cloud / instance | GCP n2-standard-16 (16 vCPU, 62 GB, 96 GB SSD), Ubuntu 24.04.4 LTS |
+| Harness | EigenDA `inabox` full stack: disperser V2 API + controller + encoder + relay + operator in-process; anvil + LocalStack (S3/DynamoDB) + Graph node in Docker |
+| EigenDA source | commit `61019b4` |
+| Tools | Go 1.24.0, Node v20.20.2, Foundry anvil v1.7.1, Docker 29.5.2, LocalStack 2026.5.0 |
+
+The attacker generates a random EOA, signs a 16 MiB random blob carrying a valid-but-mismatched commitment, and calls `DisperseBlob`. `AuthenticateBlobRequest` only checks that the signature matches the header `AccountID`, not that the account has payment authorization, so the request passes auth and the server runs the full KZG recomputation before rejecting at `commitments.Equal` (`disperse_blob_v2.go:262`).
+
+### Single Request (raw)
+
+```text
+Round 1: wall=1.582s  code=InvalidArgument
+Round 2: wall=1.596s  code=InvalidArgument
+Round 3: wall=1.563s  code=InvalidArgument
+avg=1.58s
+msg="failed to validate request: invalid blob commitment: commitments are different:
+     [238 93 184 21 ...]   <- server-recomputed commitment
+     vs
+     [64 0 0 0 ...]"       <- attacker's fake commitment
+```
+
+The ~1.58 s rejection wall time equals the KZG cost (G1 MSM x1 + G2 MSM x2, each saturating all cores), confirming the commitment is recomputed before payment is checked.
+
+### Concurrency (one attacker degrades legitimate dispersal)
+
+A legitimate victim issuing a real `DisperseBlob` while N attackers flood fake-commitment 16 MiB blobs:
+
+| Attackers | Victim wall | vs baseline | Attacker ops in 8 s |
+|---|---|---|---|
+| 0 | 1.572 s | 1.0x | — |
+| 1 | 2.893 s | 1.8x | 3 |
+| 2 | 4.430 s | 2.8x | 4 |
+| 4 | 7.398 s | 4.7x | 8 |
+
+### CPU Utilization (16 vCPU)
+
+| Phase | avg CPU% | cores (of 16) | max CPU% |
+|---|---|---|---|
+| Baseline (no attacker, 5 s) | 2.6% | 0.03 | — |
+| Attack (1 attacker, 60 s) | 1,343.2% | 13.4 (84%) | 1,504% (15/16, 94%) |
+
+A single attacker drove the disperser to 516x baseline CPU and pinned 13 to 15 of 16 cores with nothing but self-signed ECDSA requests. The attacker cost is one ECDSA signature per request, the server cost is several core-seconds of KZG, an extreme asymmetry; a short client gRPC deadline does not abort the server-side work.

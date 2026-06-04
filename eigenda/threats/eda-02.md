@@ -113,7 +113,9 @@ A single 16 MiB blob submitted to `GetBlobCommitment` drives roughly 1.15 second
 
 The gRPC request context is not propagated into `GetCommitmentsForPaddedLength`, so a short client deadline or an early disconnect does not abort the server-side computation. Front-tier protections such as Cloudflare do not mitigate this: the requests are well-formed and individually inexpensive to issue, and the cost asymmetry is algorithmic rather than volumetric, so rate-based or signature-based WAF rules do not block it.
 
-See [Verification Evidence](../evidence.md#getblobcommitment-unauthenticated-compute-eda-02) for the full reproduction environment, commands, and measurements.
+The `DisperseBlob` surface was reproduced live on an `inabox` full stack. An attacker holding only a self-signed random EOA, with no payment authorization, sent a 16 MiB blob with a mismatched commitment and forced the full KZG recomputation before payment rejection. The rejection wall time averaged 1.58 s, a single attacker drove the disperser to 1,343% CPU (516x baseline, 13 to 15 of 16 cores), and four concurrent attackers degraded a legitimate dispersal 4.7x.
+
+See [GetBlobCommitment Unauthenticated Compute](../evidence.md#getblobcommitment-unauthenticated-compute-eda-02) and [DisperseBlob Commitment-Before-Payment](../evidence.md#disperseblob-commitment-before-payment-eda-02) in the Verification Evidence for the full reproduction environments, commands, and measurements.
 
 ## Impact
 
