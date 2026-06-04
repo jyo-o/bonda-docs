@@ -70,6 +70,8 @@ End-to-end reproduction confirmed the silent omission on an Avail development ne
 - **Attack**: the same call signed as `Address::Index(0)` emitted `MessageSubmitted` while `kate_queryDataProof` returned no bridge proof.
 - **Mainnet preconditions**: `state_getRuntimeVersion` on `mainnet-rpc.avail.so` reports specVersion 51, the `Indices` and `Vector` pallets are present, and `vector.whitelistedDomains()` returns an active domain. Claiming an index requires a 10 AVAIL deposit.
 
+See [Verification Evidence](../evidence.md#multiaddress-index-bridge-proof-omission-avl-01) for the reproduction command and raw baseline-vs-attack output.
+
 ## Impact
 
 The bridge records a message as sent while no proof is ever produced, so the on-chain success event and the verifiable bridge state diverge. A relayer that subscribes to `MessageSubmitted` requests a proof that does not exist, producing failed lookups and retry loops. Funds committed on the Avail side become stuck without a corresponding proof on the destination chain. The attacker bears the index deposit and gas on every attempt and gains no direct theft of third-party funds, which limits the economic incentive, but the integrity gap between the emitted event and the missing proof is real and reachable by any account able to claim an index.

@@ -79,6 +79,9 @@ End-to-end reproduction confirmed the bypass on an Avail development network run
 - **Baseline**: a direct `submitData` call emitted `DataSubmitted` and produced a proof retrievable via `kate_queryDataProof`.
 - **Attack**: `Proxy::proxy { submitData }` under `AppId=0` emitted `DataSubmitted` while `kate_queryDataProof` returned `Cannot fetch tx data at tx index 1`.
 - **Mainnet preconditions**: `state_getRuntimeVersion` on `mainnet-rpc.avail.so` reports specVersion 51, the `Proxy` and `DataAvailability` pallets are present, and `AppId(0)` is freely usable. Registering a proxy requires roughly 13 AVAIL in deposits.
+- **Scope**: the same wrapper applied to `send_message` is rejected at validation, so only `submit_data` slips through the proxy path. See AVL-01 for the bridge-proof omission path.
+
+See [Verification Evidence](../evidence.md#proxy-wrapped-submitdata-da-bypass-avl-02) for the reproduction command and raw baseline-vs-attack output.
 
 ## Impact
 
