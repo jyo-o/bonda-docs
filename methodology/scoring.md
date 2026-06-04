@@ -1,18 +1,22 @@
 # 5-Axis Risk Scoring
 
-CVSS scores individual vulnerabilities. It does not answer the question a rollup operator actually asks: *how does this DA layer compare to that one, across everything that matters?* BONDA's 5-axis model answers that question by evaluating every DA layer against the same five properties, using the same rubric.
+BONDA evaluates every DA layer on **five axes** and classifies every finding into one of **four tiers**. The axes and the findings are presented as separate results, side by side:
 
-This page explains the model: the five axes, the layered architecture that keeps structural properties separate from live measurements, the sub-property rubrics, and how the four classification tiers feed in. 
+- **Structural baseline** — the five-axis posture defined here; per-DA levels and evidence on [Structural Baselines](../comparison/baselines.md).
+- **Vulnerability burden** — the open exploitable defects, on [Vulnerability Burden](../comparison/vulnerability-burden.md).
+- **Live signals** — operational health from live feeds, on the dashboard.
+
+This page defines the rubric.
 
 {% hint style="info" %}
-**Per-DA scores and pentagon charts live in the BONDA dashboard, not in this documentation.** This page defines *how* the model works. The dashboard renders the computed values for each DA layer. Keeping the methodology and the numbers separate means the rubric can be reviewed on its own terms, and the dashboard can update measurements without rewriting the documentation.
+**Each figure corresponds to one kind of evidence.** An axis band describes structural design. Open vulnerabilities appear in a separate list, annotated with the axis they pressure. Live measurements are served from the dashboard. Because the three are kept distinct, each can be verified on its own terms.
 {% endhint %}
 
 ---
 
-## The Five Axes
+## The five axes
 
-Each axis answers one question a DA user would ask.
+Each axis corresponds to one question a DA user would ask.
 
 | Axis | Question |
 |------|----------|
@@ -22,187 +26,128 @@ Each axis answers one question a DA user would ask.
 | **Decentralization** | How many parties would need to collude to break it? |
 | **Cost Efficiency** | Is it affordable, predictable, and efficient for the throughput I need? |
 
-These five capture the dimensions on which DA layers genuinely differ. A DA layer can be cheap but centralized, or decentralized but slow to retrieve from; one number cannot express that trade-off, but a pentagon can.
+These five capture the dimensions on which DA layers genuinely differ. A layer can be cheap yet centralized, or decentralized yet slow to retrieve from, and the five axes keep each of those trade-offs in view.
 
 ---
 
-## Layered Architecture
+## Scoring an axis
 
-A naive model would map each finding to an axis and subtract. That produces a number nobody can explain, because it mixes four different kinds of analysis: what the protocol structurally guarantees, what an attacker can degrade today, what the system is currently measuring, and whether the protocol delivers what it claims. BONDA separates them into four layers.
+Each axis has three sub-properties. Each sub-property takes an **observable 0–3 level** — a condition checkable from primary sources:
 
-```mermaid
-flowchart LR
-    L1["<b>Layer 1</b><br/>Design Baseline<br/>0–10 per axis"] --> Score["<b>Displayed Axis Score</b><br/>Baseline − Deductions"]
-    L3["<b>Layer 3</b><br/>Threat Deductions<br/>from Vulnerabilities"] --> Score
-    L4["<b>Layer 4</b><br/>Spec-Implementation<br/>Gap correction"] -.corrects.-> L1
-    Score --> Pentagon["Pentagon chart<br/>(dashboard)"]
-    L2["<b>Layer 2</b><br/>Operational Indicators<br/>live measurements"] -.shown alongside.-> Pentagon
+- **0** — property absent or fundamentally broken
+- **1** — present, with a significant structural limitation
+- **2** — implemented with minor gaps / demonstrated in spec, not in production
+- **3** — fully implemented and production-verified
 
-    style L1 fill:#d3f9d8,color:#1a1a1a,stroke:#2b8a3e
-    style L3 fill:#ffe3e3,color:#1a1a1a,stroke:#c92a2a
-    style L4 fill:#a5d8ff,color:#1a1a1a,stroke:#1971c2
-    style L2 fill:#fff3bf,color:#1a1a1a,stroke:#e67700
-    style Score fill:#e8e8e8,color:#1a1a1a,stroke:#999
-    style Pentagon fill:#e8e8e8,color:#1a1a1a,stroke:#999
-```
+The three levels sum to 0–9 and map to a qualitative **axis band**, which is the reported result:
 
-### Layer 1 — Design Baseline
+| Sum of 3 levels (0–9) | Axis band |
+|---|---|
+| 8–9 | Strong |
+| 5–7 | Moderate |
+| 2–4 | Limited |
+| 0–1 | Weak |
 
-*What does the protocol's architecture structurally guarantee?* Determined by the specification and the deployed design. It changes only when the protocol upgrades. Each axis baseline is built from three sub-properties, each scored 0–3, summed and rescaled to 0–10.
+Each level is assigned from cited primary sources against the observable anchors below and remains open to challenge on the same evidence. The per-DA levels and their sources appear on [Structural Baselines](../comparison/baselines.md). A sub-property with a documentary basis only for a lower level is recorded at that level; Levels 2 and 3 require documented and production-observed evidence respectively, and a sub-property with no such basis is recorded as unscored and omitted from the band.
 
-### Layer 3 — Threat Deductions
+### Sub-property anchors
 
-*How much can an attacker degrade this property right now?* Only **Vulnerability**-tier findings produce deductions, and only while the vulnerability remains unpatched. Each vulnerability is mapped to the axis its exploit most directly degrades. Axes with no genuinely matching vulnerability take no deduction — Decentralization and Cost Efficiency are baseline-only for this reason, never assigned a forced mapping. The deduction magnitude combines two independent dimensions — **impact** and **likelihood** — explained in [Impact and Likelihood](#impact-and-likelihood) below.
+**Retrievability**
 
-### Layer 2 — Operational Indicators
+| # | Sub-property | 0 | 1 | 2 | 3 |
+|---|---|---|---|---|---|
+| R1 | Data redundancy | No erasure coding | Erasure-coded, no subset reconstruction | k-of-n reconstruction specified, not production-demonstrated | Subset reconstruction demonstrated on mainnet |
+| R2 | Retrieval path independence | Single path/provider | Single primary path, manual fallback only | ≥2 paths but one dominant/centralized | ≥2 independent paths, no single operator required |
+| R3 | Sampling vs full download | Full download required | Sampling specified but not enforced by clients | Sampling implemented, partial coverage | Light-client DAS in production with measured confidence |
 
-*Is the system currently performing as designed?* Live measurements from monitoring — dead-operator ratios, stake concentration, latency. These are displayed alongside the pentagon as color-coded alerts but are **not** folded into the score. This prevents a moving measurement from appearing to change a structural property.
+**Verifiability**
 
-### Layer 4 — Spec-Implementation Gap correction
+| # | Sub-property | 0 | 1 | 2 | 3 |
+|---|---|---|---|---|---|
+| V1 | Independent verification | Operators fully trusted | Quorum attestation only, no client-side check | Client-side proofs/sampling, partial | Independent cryptographic verification in production |
+| V2 | Bridge / settlement verification | None | Trusted relayer asserts state | On-chain verification with trust assumptions (single relayer / multisig) | Validity/ZK proof verified on settlement layer, no trusted relayer |
+| V3 | Dishonesty deterrent | No penalty | Slashing in code but never applied / unparameterized | Penalty for liveness only, not DA dishonesty | Enforced economic penalty for DA dishonesty demonstrated |
 
-*Does the system deliver what it claims?* When a protocol claims a property the implementation does not deliver, the baseline cannot take the claim at face value. Layer 4 findings reduce the baseline so it reflects delivered behavior, not documented intent.
+**Liveness**
 
-### Score Formula
+| # | Sub-property | 0 | 1 | 2 | 3 |
+|---|---|---|---|---|---|
+| L1 | Consensus / service continuity | A single operator can halt the service | A small set (<10) can halt it | BFT threshold but concentrated (thin >1/3 margin) | Robust BFT margin / high Nakamoto coefficient |
+| L2 | Write path resilience | Single-component failure stops writes | Single primary, no automatic failover | Redundancy with manual/slow failover | No single point of write failure |
+| L3 | Read path resilience | Single-component failure stops reads | Single primary, manual fallback | Redundancy with degraded fallback | No single point of read failure |
 
-```
-Displayed Axis Score = Design Baseline (Layer 1, corrected by Layer 4)
-                       − Σ Threat Deductions (Layer 3)
+**Decentralization**
 
-Threat Deduction = Impact Weight × Likelihood Factor
+| # | Sub-property | 0 | 1 | 2 | 3 |
+|---|---|---|---|---|---|
+| D1 | Operator / validator distribution | Single or duopoly | Few entities, or top-3 hold >33% | Moderate set with some concentration | Large set, no entity/group >33%, high Nakamoto coefficient |
+| D2 | Governance concentration | A single EOA can upgrade | Small multisig, no timelock | Multisig with timelock or role separation | Decentralized governance with robust timelock and separation |
+| D3 | Software & infra diversity | Single client and single host | Single client, multiple hosts | Multiple clients but one dominant, or concentrated hosting (single ASN/cloud) | Multiple independent clients and diverse hosting |
 
-Operational Indicators (Layer 2) = shown alongside, never in the number
-```
+**Cost Efficiency**
 
----
-
-## Impact and Likelihood
-
-CVSS measures **impact assuming the attack succeeds**. It does not measure how *likely* the attack is to happen in the first place — its specification states the Base score is "not a measure of risk." A high-impact finding that is realistically improbable should not collapse an axis the way a routinely exploitable one does. So each deduction multiplies an impact weight by a likelihood factor.
-
-### Impact Weight
-
-Derived from the CVSS 3.1 severity band of the Vulnerability.
-
-| CVSS band | Impact weight |
-|-----------|---------------|
-| High / Critical | −1.0 |
-| Medium | −0.5 |
-| Low | −0.2 |
-
-### Likelihood Factor
-
-A separate judgment of how realistically the exploit occurs, scored on the NIST SP 800-30 Rev.1 ordinal scale and informed by the FAIR frequency lens. It is assigned from the exploit's structural preconditions, not from its impact.
-
-| Likelihood | Factor | Typical profile |
-|------------|--------|-----------------|
-| Very High | 1.0 | Unauthenticated, network-reachable, live, reproducible on demand |
-| High | 0.8 | Reachable with minor preconditions; no privileged access required |
-| Moderate | 0.6 | Requires a specific code path, transaction shape, or timing window |
-| Low | 0.4 | Requires rare conditions or a misconfiguration the operator controls |
-| Very Low | 0.2 | Build-time supply-chain, privileged-key, or governance-only trigger |
-
-A consequence by design: an unauthenticated compute-exhaustion bug that any client can fire (Very High) deducts its full impact weight, while a bug reachable only through a compromised signing key or a build-time supply-chain step (Very Low) deducts a fifth of it. The same CVSS score can therefore produce very different axis deductions — which is the point.
-
-The total deduction on any single axis is capped at −3.0 so that one heavily studied layer is not driven to zero by deduction stacking.
-
-### Why likelihood is not folded into CVSS
-
-CVSS 3.1's Exploitability sub-metrics (Attack Vector, Attack Complexity, Privileges Required, User Interaction) measure how *easy* an attack is once attempted, not how *often* it will realistically be attempted. Improbable-but-severe events — a signing-key compromise, a cloud-region outage, a regulatory censorship order — score high on CVSS impact yet rarely occur. Those events are captured as Governance Observations and Operational Risks, which never produce Layer 3 deductions; the likelihood factor handles the same realism concern for the Vulnerabilities that do deduct.
-
-```mermaid
-flowchart LR
-    CVSS["CVSS 3.1 band<br/>(impact)"] --> IW["Impact Weight<br/>−1.0 / −0.5 / −0.2"]
-    Pre["Exploit preconditions<br/>(NIST / FAIR)"] --> LF["Likelihood Factor<br/>1.0 → 0.2"]
-    IW --> D["Threat Deduction<br/>= Impact × Likelihood"]
-    LF --> D
-    Base["Design Baseline<br/>(L1, corrected by L4)"] --> Score["Displayed Axis Score"]
-    D --> Score
-
-    style CVSS fill:#ffe3e3,color:#1a1a1a,stroke:#c92a2a
-    style Pre fill:#fff3bf,color:#1a1a1a,stroke:#e67700
-    style Base fill:#d3f9d8,color:#1a1a1a,stroke:#2b8a3e
-    style D fill:#ffe3e3,color:#1a1a1a,stroke:#c92a2a
-    style Score fill:#e8e8e8,color:#1a1a1a,stroke:#999
-```
+| # | Sub-property | 0 | 1 | 2 | 3 |
+|---|---|---|---|---|---|
+| C1 | Fee predictability | Unbounded / highly volatile | Volatile under load | Bounded with occasional spikes | Predictable, bounded fee market |
+| C2 | Blockspace manipulation resistance | Trivial to monopolize | Cheap to monopolize | Costly but feasible for a funded actor | Economically infeasible to monopolize |
+| C3 | Throughput capacity | Too low to be usable by rollups | Low, with high integration overhead | Moderate throughput | High throughput, low integration overhead |
 
 ---
 
-## Sub-Property Rubrics
+## Classification and the baseline
 
-Each axis baseline is the sum of three sub-properties. Each sub-property is scored on an integer 0–3 scale:
+A finding's tier (see [Threat Classification](classification.md)) determines where it acts. An axis baseline is built from its three sub-property levels, and those levels come from two of the four tiers:
 
-- **0** — Property absent or fundamentally broken.
-- **1** — Property exists but with significant structural limitations.
-- **2** — Property implemented with minor gaps.
-- **3** — Property fully implemented and production-verified.
+| Tier | Sets the baseline | Where it acts |
+|------|:---:|---|
+| **Design Note** | Yes | Fixes a sub-property level from a structural or spec fact. A property delivered below what is claimed is recorded at the delivered level. |
+| **Governance Observation** | Yes | Sets the governance- and trust-related sub-properties — chiefly D2 (governance concentration) and V3 (dishonesty deterrent) — and records a delivered-level credit where a stated property is partial. |
+| **Operational Risk** | — | Presented beside the axes as a live signal. |
+| **Vulnerability** | — | Listed on [Vulnerability Burden](../comparison/vulnerability-burden.md), annotated with the axis it pressures and scored with CVSS. |
 
-The raw sum (0–9) is rescaled to a 0.0–10.0 baseline: `baseline = (raw_sum / 9) × 10`.
+The baseline is therefore a function of structural facts (Design Notes) and trust-and-governance facts (Governance Observations); Operational Risks and Vulnerabilities are presented alongside the axes.
 
-### Retrievability
+**Worked example — Avail, Verifiability.** The three sub-properties score V1 = 2, V2 = 2, V3 = 1, summing to 5 → band **Moderate**. V3 = 1 records that slashing infrastructure is present and credits the deterrent at its delivered level. The bridge-proof finding AVL-01 is a Vulnerability: it appears in the Verifiability burden list and stays separate from the baseline, so the band reads Moderate while AVL-01 is open and while it is patched; patching updates the burden list.
 
-| # | Sub-property | Question |
-|---|--------------|----------|
-| R1 | Data redundancy | Is data erasure-coded, and can it be reconstructed from a subset? |
-| R2 | Retrieval path independence | How many independent paths exist to retrieve data? |
-| R3 | Sampling vs. full-download | Can availability be verified without downloading the full blob? |
-
-### Verifiability
-
-| # | Sub-property | Question |
-|---|--------------|----------|
-| V1 | Independent verification mechanism | Can a third party verify DA without trusting operators? |
-| V2 | Bridge / settlement verification | How is DA attestation verified on the settlement layer? |
-| V3 | Dishonesty deterrent | Is there an economic penalty for operators who lie about storing data? |
-
-### Liveness
-
-| # | Sub-property | Question |
-|---|--------------|----------|
-| L1 | Consensus / service continuity | What is the economic cost to halt the DA service? |
-| L2 | Write path resilience | Can data still be submitted if a single component fails? |
-| L3 | Read path resilience | Can data still be retrieved if a single component fails? |
-
-### Decentralization
-
-| # | Sub-property | Question |
-|---|--------------|----------|
-| D1 | Operator / validator distribution | How many independent entities participate, and how is power distributed? |
-| D2 | Governance concentration | Can a small group unilaterally upgrade or control the system? |
-| D3 | Software & infrastructure diversity | Are there multiple independent implementations and hosting providers? |
-
-### Cost Efficiency
-
-| # | Sub-property | Question |
-|---|--------------|----------|
-| C1 | Fee predictability | Can users budget for DA costs, or are fees volatile? |
-| C2 | Blockspace manipulation resistance | How expensive is it to monopolize DA blockspace? |
-| C3 | Throughput capacity | How much data can the layer process, and at what integration overhead? |
-
-Each sub-property has its own 0–3 scoring guide. The dashboard records the assigned level and the primary-source evidence behind it for every DA layer.
+Classification precedes scoring: each finding is reflected according to its tier, so the same protocol fact lands as a baseline level or as a burden-list entry by classification. EigenDA's data-availability-sampling design fixes R3 and V1 as a Design Note; a Disperser compute-exhaustion finding sits in the Liveness burden list as a Vulnerability and leaves the list once patched.
 
 ---
 
-## The Classification Bridge
+## Vulnerability descriptors: severity and likelihood
 
-The four tiers from [Threat Classification](classification.md) are not just labels — each tier enters the model at a specific layer. This is the reason classification comes before scoring.
+A Vulnerability carries two descriptors that characterize the finding itself and appear on its page and in the burden view.
 
-| Tier | Enters at | Effect on the score |
-|------|-----------|---------------------|
-| **Design Note** | Layer 1 | Sets the Design Baseline. An acknowledged choice fixes where a sub-property starts. |
-| **Governance Observation** | Layer 1 input + Layer 4 | Informs the Decentralization baseline; corrects any baseline where a claimed property is not delivered. |
-| **Operational Risk** | Layer 2 | Displayed as an operational indicator alongside the pentagon, never folded into the number. |
-| **Vulnerability** | Layer 3 | Produces a deduction from the relevant axis baseline while unpatched. |
+- **Severity** — the CVSS 3.1 Base score and band (see [CVSS 3.1 Scoring](cvss.md)): impact assuming the exploit succeeds.
+- **Likelihood** — how realistically the exploit occurs, on a five-band ordinal scale (NIST SP 800-30), read from the exploit's structural preconditions. The band is fixed by the first matching condition, top to bottom, so two reviewers reach the same band:
 
-A worked consequence: EigenDA's absence of data availability sampling is classified as a **Design Note**, so it sets the Retrievability and Verifiability baselines low — it is not double-counted as a vulnerability deduction. By contrast, a Disperser compute-exhaustion bug is a **Vulnerability**, so it produces a Liveness deduction that disappears once patched. The same protocol fact would distort the score if it were filed under the wrong tier; the bridge is what keeps the model coherent.
+| Likelihood | Condition |
+|------------|-----------|
+| **Very High** | Unauthenticated and network-reachable, reproduced on demand |
+| **High** | No privileged access, but depends on a minor precondition (peer selection, a specific input) |
+| **Moderate** | Requires a specific code path, transaction shape, or timing window the attacker must engineer |
+| **Low** | Requires a rare condition or an operator-controlled misconfiguration |
+| **Very Low** | Triggerable only at build time, with a privileged key, or through governance |
+
+Likelihood is presented as interpretive context: a high-severity finding reachable only through a privileged key reads differently from one any client can fire.
 
 ---
 
-## How the Model Handles Uneven Threat Counts
+## How results are presented
 
-Threat counts differ across DA layers because research depth differs, not because one layer is inherently safer. A model that mapped threat count to score would punish the most-studied layer. The layered architecture avoids this in three ways:
+BONDA presents structural design, exploitable defects, and live operation as three distinct results.
 
-1. **Baselines are architectural, not count-based.** A sub-property is scored from design facts — number of client implementations, presence of slashing, retrieval topology — regardless of how many threat pages were written.
-2. **Only Vulnerabilities deduct.** Governance Observations and Design Notes shape the baseline; they do not create separate penalties. A well-documented design omission is reflected once, in the baseline.
-3. **Operational measurements are separated.** Live metrics inform the alert panel, not the structural score.
+- **Evidence type** — the three answer different questions and refresh on different timescales, so each keeps its own form: a band, a list, and a live indicator.
+- **Traceability** — every band resolves to a sub-property level with cited evidence, and every defect to a CVSS-scored finding.
+- **Interpretation** — a Strong structural band that carries open defects and a Limited band with none are distinct situations; presenting the results side by side keeps that distinction visible.
 
-The result is a comparison that reflects each protocol's architecture rather than the accident of where analysis effort was concentrated.
+---
+
+## What the baseline reflects
+
+The baseline is determined from architecture:
+
+1. **Architectural facts.** A sub-property is scored from design facts — client implementations, slashing, retrieval topology — independent of the number of threat pages.
+2. **Evidence-level inputs.** A documented design choice is recorded once, through its sub-property level.
+3. **Separated operations.** Live metrics are served from the dashboard.
+
+The resulting comparison reflects each protocol's architecture.
