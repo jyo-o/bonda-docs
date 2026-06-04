@@ -1,7 +1,7 @@
 # CEL-04: Pre-gas Commitment Computation with Unlimited Blob Count in CheckTx
 
-{% hint style="info" %}
-**Severity**: Medium (5.3/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: verified
+{% hint style="warning" %}
+**Severity**: High (7.5/10) · **Likelihood**: Moderate · **Category**: Vulnerability · **Status**: poc_verified
 {% endhint %}
 
 ## Summary
@@ -73,20 +73,37 @@ The attack flow is:
 
 The attack is especially cheap because rejected transactions still trigger the full commitment computation at zero cost.
 
+The single global `CheckTx` mutex turns this into a head-of-line-blocking attack rather than a pure CPU drain: every `CheckTx` is serialized behind the one holding the lock, so a single many-blob transaction stalls all other mempool admission until its commitment computation finishes.
+
+```go
+// celestia-app/app/check_tx.go — CheckTx
+// @audit a single global mutex serializes every CheckTx; the lock is held through commitment computation
+// https://github.com/celestiaorg/celestia-app/blob/main/app/check_tx.go
+func (app *App) CheckTx(req *abci.RequestCheckTx) (*abci.ResponseCheckTx, error) {
+    app.checkStateMu.Lock()
+    defer app.checkStateMu.Unlock() // held through ValidateBlobTx / CreateParallelCommitments
+    // ...
+}
+```
+
 ## Proof of Concept
 
-No exploit reproduction was conducted. This finding is based on source code analysis of the celestia-app CheckTx handler and ante chain execution order. See [Verification Evidence](../evidence.md#gas-and-blockspace-parameters-cel-05-cel-04) for gas parameter data.
+A live single-attacker reproduction on an 8 vCPU victim confirmed the head-of-line-blocking DoS. See [Verification Evidence](../evidence.md#cel-04-blobtx-pre-ante-cpu-exhaustion-poc_verified) for the full setup and measurements.
+
+- **Single free attacker**: a zero-fee BlobTx with thousands of 1-byte blobs forced full commitment computation before ante rejection, returning RPC `-32603 invalid commitment for share`.
+- **Legitimate CheckTx latency rose 127x**: a concurrent normal 1-blob probe went from 1.15 ms to 146 ms p50 while node CPU rose from ~2% to 534% (5.34 cores), at zero attacker cost.
+- **Core scaling does not help**: the global CheckTx mutex caps parallelism near ~700%, and legitimate latency stays degraded (340x at 16 cores under a scaled attack), confirming the serialized lock, not raw CPU, is the bottleneck.
 
 ## Impact
 
-Validator CPU exhaustion leading to mempool processing delays and reduced consensus throughput. The attack requires no on-chain cost when using the rejected transaction path (invalid signature or zero fee). An attacker with RPC or P2P access can repeatedly submit crafted transactions to consume significant validator CPU resources.
+A single free attacker holds the global `CheckTx` lock while the node computes NMT commitments, head-of-line-blocking all other mempool admission. The measured effect on an 8 vCPU victim was a 127x rise in legitimate CheckTx latency (1.15 ms to 146 ms p50) and node CPU from ~2% to 534%, at zero attacker cost. A public RPC or bridge node becomes a direct denial of service to its users; a validator cannot fill its mempool and proposes near-empty blocks while transaction propagation stalls, reducing network throughput and validator fee income. The node recovers immediately once the attack stops, so the impact is a sustained denial while the attack is active rather than a crash.
 
 Affects the **Liveness** axis, where it produces a Layer 3 deduction while unpatched.
 
 ### CVSS 3.1
 
-**Score**: 5.3/10 (Medium)
-**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L`
+**Score**: 7.5/10 (High)
+**Vector**: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`
 
 | Metric | Value | Rationale |
 |--------|-------|-----------|
@@ -97,7 +114,7 @@ Affects the **Liveness** axis, where it produces a Layer 3 deduction while unpat
 | S (Scope) | U (Unchanged) | Impact is confined to the targeted validator node's CPU |
 | C (Confidentiality) | N (None) | No confidentiality impact |
 | I (Integrity) | N (None) | No integrity impact; the attack targets availability only |
-| A (Availability) | L (Low) | A single oversized transaction causes temporary processing degradation but does not crash the node; the system recovers after the affected block is processed |
+| A (Availability) | H (High) | A single free attacker sustains a 127x CheckTx latency increase and head-of-line-blocks all mempool admission for the duration of the attack; the node recovers when the attack stops |
 
 ## Recommendation
 
