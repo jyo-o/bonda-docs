@@ -88,4 +88,6 @@
 
 * [Overview](comparison/README.md)
 * [Scoring Comparison](comparison/scoring.md)
+* [Structural Baselines](comparison/baselines.md)
+* [Vulnerability Burden](comparison/vulnerability-burden.md)
 * [Common Patterns](comparison/common-patterns.md)
