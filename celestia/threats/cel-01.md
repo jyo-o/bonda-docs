@@ -55,18 +55,18 @@ func (c *TxCache) getTxKey(tx []byte) string {
 
 The `TxCache` is implemented as a `sync.Map` with no capacity limit, no TTL, and no separate cleanup mechanism. The only recovery is a node restart.
 
-The problem is worsened by the rejected transaction path: `txCache.Set()` executes before `BaseApp.CheckTx()` in the `CheckTx` handler. Transactions with valid blob structure but invalid nonce, fee, or gas are rejected by `BaseApp` but still persist in the cache. An attacker can exploit this at zero cost since no fees are charged for rejected transactions.
+Two independent leak vectors compound. The key mismatch above leaks transactions that **do** reach a block: `FinalizeBlock` iterates them but deletes under the wrong key. A second vector leaks transactions that **never** reach a block: `txCache.Set()` runs before `BaseApp.CheckTx()`, so a transaction with valid blob structure but invalid nonce, fee, or gas is cached and then rejected by the ante chain. Because it is never included in a block, `FinalizeBlock`'s `req.Txs` loop never even sees it. A live flood of such rejected transactions showed `SET_NEW` growing while `DEL_HIT` stayed at zero. Either vector grows the cache without bound, and the attacker pays no fee for rejected transactions.
 
 Note: `process_proposal.go:251` correctly queries using the inner tx key via `Exists`, confirming the intended key type is the inner SDK tx.
 
 ## Proof of Concept
 
-End-to-end reproduction confirmed the key mismatch. See [Verification Evidence](../evidence.md#cel-01-txcache-key-mismatch-poc_verified) for full test results.
+A unit test confirmed the key mismatch and a live-node flood confirmed the rejected-tx leak. See [Verification Evidence](../evidence.md#cel-01-txcache-key-mismatch-poc_verified) for full test results.
 
 - **TestTxCacheLeakProductionPath**: `CheckTx` followed by `FinalizeBlock(wrappedTx)` confirmed `fromCache` still returns `true`. Cache entry was not deleted.
 - **Rejected transaction persistence verified**: future sequence blob tx and zero-fee blob tx both leave permanent cache entries.
-- **Per-entry memory**: approximately 204 bytes.
-- **Projected leak rate**: approximately 1 GB per 160 seconds at 100 Mbps rejected transaction rate.
+- **Live-node flood**: a 60 s rejected-tx flood from a fabricated never-funded account grew `txCache` from 0 to 250,492 entries (~4,138 tx/s), with process RSS rising 243 MB to 392 MB and zero cache deletions (`DEL_HIT=0`); entries remained after the attack stopped.
+- **Per-entry memory**: approximately 204 to 625 bytes; projected leak roughly 1 GB per 160 seconds (unit estimate) to 9 GB per hour (live flood).
 - **Existing test suite gap**: existing tests do not reproduce the production path because they pass `blobTx.Tx` directly to `FinalizeBlock` instead of the wrapped `BlobTx`.
 
 ## Impact

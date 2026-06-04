@@ -2,8 +2,8 @@
 
 This page summarizes the on-chain verification and parameter measurement evidence collected for Celestia threat findings. On-chain bridge results use `cast` (Foundry) against Ethereum mainnet. Chain-level parameters use Celestia's REST API. Every conclusion traces to a raw response or measured data point.
 
-**Verification date**: 2026-05-20 to 2026-05-26
-**Tools**: cast (Foundry), curl (Celestia REST API)
+**Verification date**: 2026-05-20 to 2026-06-03
+**Tools**: cast (Foundry), curl (Celestia REST API), Go load harness (BlobTx flood), pidstat / mpstat
 **RPC endpoints**: `https://ethereum-rpc.publicnode.com` (Ethereum), `https://celestia-rest.publicnode.com` (Celestia)
 
 ---
@@ -151,6 +151,100 @@ At mainnet prices as of 2026-05-26:
 | **Projected leak rate** | ~1 GB per 160 seconds at 100 Mbps rejected tx rate |
 | **Existing test gap** | Production tests pass `blobTx.Tx` directly to `FinalizeBlock` instead of wrapped `BlobTx`, masking the key mismatch |
 
-### CEL-03: blacklistedHashes Growth (poc_verified)
+#### Live-node flood (rejected-tx path)
 
-Local unit PoC confirmed: N unique fake hashes injected via shrexsub, after `cleanUp` the `blacklistedHashes` map length increases by N while pools are correctly deleted. The cleanup function is the only write path that sets `blacklistedHashes[h]=true`, and no deletion path exists anywhere in the codebase.
+The unit test above covers the key-mismatch vector for block-included txs. A live flood covers the second vector: rejected txs that never reach `FinalizeBlock`. A fabricated, never-funded account sent valid-structure blob txs that the ante chain rejects for insufficient fee, each with a unique memo:
+
+| Scenario | tx rps | txCache size | process RSS |
+|---|---|---|---|
+| baseline | — | 0 | 243 MB |
+| 60 s attack | 4,138 | 0 to 250,492 | 243 to 392 MB |
+| after stop | — | 250,492 (unchanged) | unchanged |
+
+Node counters over a 3 s probe were `SET_NEW=2213, DEL_HIT=0, DEL_MISS=0`, confirming entries are written before the ante rejection and never deleted. At roughly 625 B per entry the leak projects to about 9 GB per hour; TTL and eviction are absent, so the cache stays full until process restart.
+
+### CEL-03: ShrEx Unvalidated Pool and Blacklist Exhaustion (poc_verified)
+
+A live isolated-network reproduction drove a memory-capped light node to a kernel OOM kill from a single attacker peer broadcasting random 32-byte DataHashes. Two memory paths were measured: immediate `m.pools` growth and permanent `blacklistedHashes` accumulation.
+
+#### Test Setup
+
+| Item | Value |
+|---|---|
+| Victim | GCP n2-standard-8 (8 vCPU, 31 GB), Ubuntu 22.04.5, memory cgroup-capped to mirror the ~500 MB light-node hardware recommendation |
+| Attacker | GCP e2-standard-4 (4 vCPU, 16 GB), Ubuntu 22.04 |
+| celestia-node | `1016cc36` (v0.29.3-arabica-107) plus a read-only length log, no behavior change |
+| celestia-app | go.mod commit `b2c8d9c29491` (module v9) |
+| Params | PoolValidationTimeout=2m, GcInterval=30s, EnableBlackListing=false, PeerCooldown=3s |
+| Topology | single-validator devnet + 1 bridge + 1 light (victim), ~1 s blocks |
+
+The attacker uses the production `shrexsub` package to broadcast unique random 32-byte DataHashes; each reaches the victim's `getOrCreatePool`.
+
+#### Path 1 — m.pools growth (fast OOM)
+
+| Scenario | Load | m.pools peak | OOM | Victim memory | CPU |
+|---|---|---|---|---|---|
+| S1 (model check) | 1,000/s, 300 s, uncapped | 145,532 | none | 145 to 427 MB | 66.9 CPU-s |
+| S2-net | 5,000/s, cap 600 MB | 388,116 | **t ≈ 79 s** | RSS ~597 MB (≈cap) | 75.8 CPU-s / 2.12x10^11 cyc |
+
+#### Path 2 — blacklistedHashes growth (permanent, not reclaimed)
+
+| Scenario | Load | blacklist peak | OOM | Victim memory | CPU |
+|---|---|---|---|---|---|
+| V2-net | 5,000/s, 240 s, uncapped | 1,146,154 | none | idle 171 MB to 1.49 GB; **~1.18 GB still resident after stop** | 237 CPU-s / 6.6x10^11 cyc |
+| V2-net-OOM | 4,000/s, cap 1.4 GB | 2,594,020 | **t ≈ 865 s** | anon-rss ~1.36 GB (≈cap) | 673 CPU-s / 1.89x10^12 cyc |
+
+#### Kernel OOM-kill (raw)
+
+```text
+oom-kill:constraint=CONSTRAINT_MEMCG, oom_memcg=/t13victim, task=celestia, pid=51127
+Memory cgroup out of memory: Killed process 51127 (celestia)
+  total-vm:5914504kB, anon-rss:1429392kB(~1.36GB), file-rss:95872kB ... UID:1001
+```
+
+The pool path reaches OOM fastest (79 s); the blacklist path accumulates permanently and is never reclaimed without a restart. The attacker pays only hash generation and broadcast bandwidth.
+
+### CEL-04: BlobTx Pre-Ante CPU Exhaustion (poc_verified)
+
+A live single-attacker reproduction confirmed that an unauthenticated, zero-fee BlobTx packed with many 1-byte blobs forces full NMT commitment computation under the global `CheckTx` lock, head-of-line-blocking all other CheckTx processing. The attacker needs no valid account, funds, or signature.
+
+#### Test Setup
+
+| Item | Value |
+|---|---|
+| Victim | GCP c2-standard-8 (8 vCPU, 32 GB, 80 GB SSD), Debian 12 |
+| Attacker | GCP e2-standard-8 (8 vCPU, 32 GB, 40 GB SSD), Debian 12 |
+| celestia-app | commit `cfb01626` |
+| go-square | v4.0.0-rc4 |
+| celestia-core | v0.40.2 |
+| Probe | normal 1-blob PFB every 300 ms, measuring legitimate CheckTx latency |
+
+#### Single Run (raw)
+
+```text
+# invalid commitment, no key, 3000 blobs/tx, 1 worker, 3 s
+$ ./poca -node http://<victim>:26657 -blobs 3000 -workers 1 -dur 3s
+duration_s=3.0 sent=91 rejected=0 rps=30.3 blobs_per_tx=3000 wire_bytes=306129
+  [90x] RPC error -32603 - Internal error: invalid commitment for share
+```
+
+The node runs `CreateParallelCommitments` for all 3,000 blobs before the ante chain rejects the invalid commitment, so the CPU cost is already paid at rejection time.
+
+#### Load Results (8 vCPU victim, 1-byte blobs x 5,000, 8 workers, 60 s)
+
+| Scenario | tx rps | proc CPU avg | probe p50 | probe p90 / max |
+|---|---|---|---|---|
+| baseline (probe only) | ~3 | ~5% | 1.15 ms | 1.39 / 5.1 ms |
+| Case #1 attack | 39.9 | 534% (5.34 cores) | 146 ms (127x) | 291 / 387 ms |
+
+A free, keyless flood raised legitimate CheckTx latency 127x (1.15 ms to 146 ms) and node CPU from ~2% to 534%, at zero attacker cost. Per rejected tx: ~0.125 CPU-seconds (~3.9x10^8 cycles); per 1-byte blob commitment: ~2.5x10^4 cycles.
+
+#### Core Scaling (the serialized lock, not raw CPU, is the bottleneck)
+
+| Metric | 8 cores (ceiling 800%) | 16 cores, same attack (1600%) | 16 cores, scaled attack |
+|---|---|---|---|
+| Attack params | 8w x 5,000 | 8w x 5,000 | 16w x 10,000 |
+| proc CPU avg | 534% | 699% | 703% |
+| probe p50 during attack | 146 ms (127x) | 82 ms (71x) | 390 ms (340x) |
+
+`CheckTx` processes one tx's commitment at a time under a single global mutex, so parallel efficiency caps near ~700% (7 cores). Adding cores does not relieve the serialized lock, and legitimate latency stays degraded (340x at 16 cores under a scaled attack). The defect is the serial lock delay, not CPU exhaustion alone.
