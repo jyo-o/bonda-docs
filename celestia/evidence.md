@@ -151,6 +151,18 @@ At mainnet prices as of 2026-05-26:
 | **Projected leak rate** | ~1 GB per 160 seconds at 100 Mbps rejected tx rate |
 | **Existing test gap** | Production tests pass `blobTx.Tx` directly to `FinalizeBlock` instead of wrapped `BlobTx`, masking the key mismatch |
 
+#### Live-node flood (rejected-tx path)
+
+The unit test above covers the key-mismatch vector for block-included txs. A live flood covers the second vector: rejected txs that never reach `FinalizeBlock`. A fabricated, never-funded account sent valid-structure blob txs that the ante chain rejects for insufficient fee, each with a unique memo:
+
+| Scenario | tx rps | txCache size | process RSS |
+|---|---|---|---|
+| baseline | — | 0 | 243 MB |
+| 60 s attack | 4,138 | 0 to 250,492 | 243 to 392 MB |
+| after stop | — | 250,492 (unchanged) | unchanged |
+
+Node counters over a 3 s probe were `SET_NEW=2213, DEL_HIT=0, DEL_MISS=0`, confirming entries are written before the ante rejection and never deleted. At roughly 625 B per entry the leak projects to about 9 GB per hour; TTL and eviction are absent, so the cache stays full until process restart.
+
 ### CEL-03: blacklistedHashes Growth (poc_verified)
 
 Local unit PoC confirmed: N unique fake hashes injected via shrexsub, after `cleanUp` the `blacklistedHashes` map length increases by N while pools are correctly deleted. The cleanup function is the only write path that sets `blacklistedHashes[h]=true`, and no deletion path exists anywhere in the codebase.
