@@ -135,11 +135,11 @@
 
   <!-- Arrow: DA Checker → KZG (verify) -->
   <line x1="675" y1="210" x2="708" y2="150" stroke="#e67700" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
-  <text x="700" y="188" font-size="7" fill="#e67700">verify_proof</text>
+  <text x="635" y="180" font-size="7" fill="#e67700">verify_proof</text>
 
   <!-- Arrow: Reconstruction → KZG -->
-  <line x1="610" y1="305" x2="730" y2="165" stroke="#e67700" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-orange)"/>
-  <text x="685" y="240" font-size="7" fill="#e67700">recover_cells</text>
+  <path d="M610,318 L700,318 L700,172 L714,166" fill="none" stroke="#e67700" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-orange)"/>
+  <text x="648" y="332" font-size="7" fill="#e67700">recover_cells</text>
 
   <!-- Arrow: CL Block Builder → KZG (verify commitment) -->
   <line x1="550" y1="115" x2="708" y2="120" stroke="#e67700" stroke-width="1.2" marker-end="url(#arrow-orange)"/>
@@ -201,8 +201,8 @@
   <text x="95" y="470" text-anchor="middle" font-size="8" fill="#888">gossip subnet</text>
 
   <!-- Arrow: P2P Peers → PeerDAS Gossip -->
-  <path d="M130,420 L130,380 Q130,370 200,370 Q350,370 440,260" fill="none" stroke="#2f9e44" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
-  <text x="230" y="365" font-size="7" fill="#2f9e44">gossip subscribe</text>
+  <path d="M130,420 L130,376 Q130,368 142,368 L420,368 Q432,368 432,356 L432,258" fill="none" stroke="#2f9e44" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+  <text x="250" y="384" font-size="7" fill="#2f9e44">gossip subscribe</text>
 
   <!-- Custody assignment info box -->
   <rect x="710" y="195" width="175" height="46" rx="6" fill="#ebfbee" stroke="#2f9e44" stroke-width="1"/>
