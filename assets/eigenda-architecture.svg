@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600">
   <defs>
     <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#555" stroke-width="1.2"/>
+      <path d="M0,0 L10,3.5 L0,7 Z" fill="#555" stroke="none"/>
     </marker>
     <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#4263eb" stroke-width="1.2"/>
+      <path d="M0,0 L10,3.5 L0,7 Z" fill="#4263eb" stroke="none"/>
     </marker>
     <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#2f9e44" stroke-width="1.2"/>
+      <path d="M0,0 L10,3.5 L0,7 Z" fill="#2f9e44" stroke="none"/>
     </marker>
     <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#e67700" stroke-width="1.2"/>
+      <path d="M0,0 L10,3.5 L0,7 Z" fill="#e67700" stroke="none"/>
     </marker>
     <marker id="arr-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <path d="M0,0 L10,3.5 L0,7" fill="none" stroke="#7048e8" stroke-width="1.2"/>
+      <path d="M0,0 L10,3.5 L0,7 Z" fill="#7048e8" stroke="none"/>
     </marker>
   </defs>
 
@@ -115,7 +115,7 @@
 
   <!-- Controller → Encoder -->
   <path d="M320,256 C340,245 350,220 355,210" fill="none" stroke="#4263eb" stroke-width="1.5" marker-end="url(#arr-blue)"/>
-  <text x="348" y="240" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#4263eb">encode</text>
+  <text x="348" y="247" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#4263eb">encode</text>
 
   <!-- Encoder → DA Nodes -->
   <path d="M460,195 C475,190 490,188 503,187" fill="none" stroke="#4263eb" stroke-width="1.5" marker-end="url(#arr-blue)"/>
@@ -123,7 +123,7 @@
 
   <!-- DA Nodes → Controller (BLS sigs return) -->
   <path d="M505,205 C430,240 360,270 322,270" fill="none" stroke="#2f9e44" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#arr-green)"/>
-  <text x="420" y="252" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#2f9e44">BLS sigs</text>
+  <text x="442" y="261" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#2f9e44">BLS sigs</text>
 
   <!-- Controller → CertVerifier (on-chain submission) -->
   <path d="M260,298 C260,370 270,430 270,463" fill="none" stroke="#7048e8" stroke-width="1.5" marker-end="url(#arr-purple)"/>
@@ -142,16 +142,16 @@
   <text x="600" y="248" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#e67700">pull</text>
 
   <!-- Proxy → Relay (alternative read) -->
-  <path d="M148,230 C180,310 400,295 508,290" fill="none" stroke="#e67700" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
-  <text x="330" y="305" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#e67700">alt read</text>
+  <path d="M120,230 C116,290 135,314 185,314 L300,314 C410,314 466,300 508,290" fill="none" stroke="#e67700" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+  <text x="288" y="326" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#e67700">alt read</text>
 
   <!-- ════════════════════════════════════════════════════ -->
   <!-- ON-CHAIN ARROWS                                     -->
   <!-- ════════════════════════════════════════════════════ -->
 
   <!-- Registries → DA Nodes (operator state) -->
-  <path d="M607,465 C607,400 595,350 590,322" fill="none" stroke="#7048e8" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arr-purple)"/>
-  <text x="620" y="390" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#7048e8">operator state</text>
+  <path d="M610,463 C652,438 658,400 658,355 L658,238 C658,230 652,224 648,224" fill="none" stroke="#7048e8" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arr-purple)"/>
+  <text x="598" y="405" text-anchor="middle" font-family="Virgil, Segoe UI Emoji, Noto Color Emoji" font-size="8" fill="#7048e8">operator state</text>
 
   <!-- CertVerifier ↔ Registries (verification) -->
   <line x1="355" y1="490" x2="528" y2="490" stroke="#7048e8" stroke-width="1.2" stroke-dasharray="4,3"/>
