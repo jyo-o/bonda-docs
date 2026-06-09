@@ -91,9 +91,9 @@
   <text x="513" y="228" text-anchor="middle" font-size="8" fill="#37b24d">shrex / bitswap</text>
 
   <!-- Callout: Light nodes cannot peer with each other -->
-  <rect x="582" y="278" width="158" height="30" rx="6" fill="#fff3bf" stroke="#fab005" stroke-width="1" opacity="0.9"/>
-  <text x="590" y="292" font-size="8.5" fill="#e67700" font-weight="600">Light nodes cannot peer</text>
-  <text x="590" y="302" font-size="8.5" fill="#e67700" font-weight="600">with each other</text>
+  <rect x="551" y="278" width="158" height="30" rx="6" fill="#fff3bf" stroke="#fab005" stroke-width="1" opacity="0.9"/>
+  <text x="559" y="292" font-size="8.5" fill="#e67700" font-weight="600">Light nodes cannot peer</text>
+  <text x="559" y="302" font-size="8.5" fill="#e67700" font-weight="600">with each other</text>
 
   <!-- =========================================== -->
   <!-- BLOBSTREAM FLOW (bottom, into Ethereum)     -->
@@ -116,10 +116,10 @@
   <text x="660" y="524" text-anchor="middle" font-size="9" fill="#7950f2">Ethereum L1</text>
 
   <!-- Arrow: Consensus -> Relayer -->
-  <path d="M300,172 L300,180 Q300,188 292,188 L162,188 Q145,188 145,200 L145,348"
+  <path d="M232,172 L232,330 Q232,340 222,340 L155,340 Q145,340 145,348"
         fill="none" stroke="#e67700" stroke-width="1.5" marker-end="url(#arr-org)"/>
-  <text x="155" y="276" font-size="8" fill="#e67700">validator</text>
-  <text x="155" y="286" font-size="8" fill="#e67700">commitments</text>
+  <text x="240" y="285" font-size="8" fill="#e67700">validator</text>
+  <text x="240" y="297" font-size="8" fill="#e67700">commitments</text>
 
   <!-- Arrow: Relayer -> SP1 Prover -->
   <line x1="240" y1="377" x2="298" y2="377" stroke="#e67700" stroke-width="1.5" marker-end="url(#arr-org)"/>
@@ -127,7 +127,7 @@
   <!-- Arrow: SP1 Prover -> SP1 Verifier -->
   <path d="M480,377 L520,377 Q540,377 540,400 L540,490 L548,490"
         fill="none" stroke="#7048e8" stroke-width="1.6" marker-end="url(#arr-pur)"/>
-  <text x="505" y="440" font-size="8" fill="#7048e8">PLONK proof</text>
+  <text x="468" y="418" font-size="8" fill="#7048e8">PLONK proof</text>
 
   <!-- =========================================== -->
   <!-- CALLOUT: 0 verifyAttestation calls          -->
